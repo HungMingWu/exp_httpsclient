@@ -16,7 +16,6 @@
 #include <boost/beast/websocket/teardown.hpp>
 #include <boost/asio/coroutine.hpp>
 #include <boost/assert.hpp>
-#include <boost/make_shared.hpp>
 #include <boost/core/exchange.hpp>
 #include <cstdlib>
 #include <type_traits>
@@ -78,7 +77,7 @@ on_timer(Executor2 const& ex2)
 
     struct handler : boost::empty_value<Executor2>
     {
-        boost::weak_ptr<impl_type> wp;
+        std::weak_ptr<impl_type> wp;
 
         using executor_type = Executor2;
 
@@ -168,7 +167,7 @@ struct basic_stream<Protocol, Executor, RatePolicy>::
     using executor_type = Executor2;
 
     op_state& state;
-    boost::weak_ptr<impl_type> wp;
+    std::weak_ptr<impl_type> wp;
     tick_type tick;
     executor_type ex;
 
@@ -730,7 +729,7 @@ template<class Protocol, class Executor, class RatePolicy>
 template<class Arg0, class... Args, class>
 basic_stream<Protocol, Executor, RatePolicy>::
 basic_stream(Arg0&& arg0, Args&&... args)
-    : impl_(boost::make_shared<impl_type>(
+    : impl_(std::make_shared<impl_type>(
         std::false_type{},
         std::forward<Arg0>(arg0),
         std::forward<Args>(args)...))
@@ -742,7 +741,7 @@ template<class RatePolicy_, class Arg0, class... Args, class>
 basic_stream<Protocol, Executor, RatePolicy>::
 basic_stream(
     RatePolicy_&& policy, Arg0&& arg0, Args&&... args)
-    : impl_(boost::make_shared<impl_type>(
+    : impl_(std::make_shared<impl_type>(
         std::true_type{},
         std::forward<RatePolicy_>(policy),
         std::forward<Arg0>(arg0),
@@ -753,7 +752,7 @@ basic_stream(
 template<class Protocol, class Executor, class RatePolicy>
 basic_stream<Protocol, Executor, RatePolicy>::
 basic_stream(basic_stream&& other)
-    : impl_(boost::make_shared<impl_type>(
+    : impl_(std::make_shared<impl_type>(
         std::move(*other.impl_)))
 {
     // Explainer: Asio's sockets provide the guarantee that a moved-from socket

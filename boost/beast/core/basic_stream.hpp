@@ -300,7 +300,7 @@ private:
     // outlive the destruction of the stream_socket object,
     // in the case where there is no outstanding read or write
     // but the implementation is still waiting on a timer.
-    boost::shared_ptr<impl_type> impl_;
+    std::shared_ptr<impl_type> impl_;
 
     template<class Executor2>
     struct timeout_handler;
