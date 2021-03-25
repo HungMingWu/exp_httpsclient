@@ -17,10 +17,10 @@
 #include <boost/beast/http/verb.hpp>
 #include <boost/beast/http/detail/basic_parser.hpp>
 #include <boost/asio/buffer.hpp>
-#include <boost/optional.hpp>
 #include <boost/assert.hpp>
 #include <limits>
 #include <memory>
+#include <optional>
 #include <type_traits>
 #include <utility>
 
@@ -69,9 +69,9 @@ template<bool isRequest>
 class basic_parser
     : private detail::basic_parser_base
 {
-    boost::optional<std::uint64_t>
+    std::optional<std::uint64_t>
         body_limit_ =
-            boost::optional<std::uint64_t>(
+            std::optional<std::uint64_t>(
                 default_body_limit(is_request{}));   // max payload body
     std::uint64_t len_ = 0;                 // size of chunk or body
     std::uint64_t len0_ = 0;                // content length if known
@@ -233,7 +233,7 @@ public:
         @note The return value is undefined unless
         @ref is_header_done would return `true`.
     */
-    boost::optional<std::uint64_t>
+    std::optional<std::uint64_t>
     content_length() const;
 
     /** Returns the remaining content length if known
@@ -245,7 +245,7 @@ public:
         @note The return value is undefined unless
               @ref is_header_done would return `true`.
     */
-    boost::optional<std::uint64_t>
+    std::optional<std::uint64_t>
     content_length_remaining() const;
 
     /** Returns `true` if the message semantics require an end of file.
@@ -295,7 +295,7 @@ public:
         If this is equal to `boost::none`, then the body limit is disabled.
     */
     void
-    body_limit(boost::optional<std::uint64_t> v)
+    body_limit(std::optional<std::uint64_t> v)
     {
         body_limit_ = v;
     }
@@ -542,7 +542,7 @@ protected:
     virtual
     void
     on_body_init_impl(
-        boost::optional<std::uint64_t> const& content_length,
+        std::optional<std::uint64_t> const& content_length,
         error_code& ec) = 0;
 
     /** Called each time additional data is received representing the content body.
@@ -628,7 +628,7 @@ protected:
 
 private:
 
-    boost::optional<std::uint64_t>
+    std::optional<std::uint64_t>
     content_length_unchecked() const;
 
     template<class ConstBufferSequence>

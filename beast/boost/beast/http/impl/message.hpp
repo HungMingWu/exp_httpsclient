@@ -320,14 +320,14 @@ template<bool isRequest, class Body, class Fields>
 void
 message<isRequest, Body, Fields>::
 content_length(
-    boost::optional<std::uint64_t> const& value)
+    std::optional<std::uint64_t> const& value)
 {
     this->set_content_length_impl(value);
     this->set_chunked_impl(false);
 }
 
 template<bool isRequest, class Body, class Fields>
-boost::optional<std::uint64_t>
+std::optional<std::uint64_t>
 message<isRequest, Body, Fields>::
 payload_size() const
 {

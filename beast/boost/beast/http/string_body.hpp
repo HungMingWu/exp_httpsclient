@@ -17,7 +17,7 @@
 #include <boost/beast/core/buffers_range.hpp>
 #include <boost/beast/core/detail/clamp.hpp>
 #include <boost/asio/buffer.hpp>
-#include <boost/optional.hpp>
+#include <optional>
 #include <cstdint>
 #include <limits>
 #include <memory>
@@ -89,7 +89,7 @@ public:
         }
 
         void
-        init(boost::optional<
+        init(std::optional<
             std::uint64_t> const& length, error_code& ec)
         {
             if(length)
@@ -165,7 +165,7 @@ public:
             ec = {};
         }
 
-        boost::optional<std::pair<const_buffers_type, bool>>
+        std::optional<std::pair<const_buffers_type, bool>>
         get(error_code& ec)
         {
             ec = {};

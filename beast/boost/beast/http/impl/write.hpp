@@ -20,7 +20,6 @@
 #include <boost/asio/coroutine.hpp>
 #include <boost/asio/post.hpp>
 #include <boost/asio/write.hpp>
-#include <boost/optional.hpp>
 #include <boost/throw_exception.hpp>
 #include <ostream>
 #include <sstream>

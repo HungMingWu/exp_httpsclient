@@ -18,7 +18,7 @@
 #include <boost/core/empty_value.hpp>
 #include <boost/intrusive/list.hpp>
 #include <boost/intrusive/set.hpp>
-#include <boost/optional.hpp>
+#include <optional>
 #include <algorithm>
 #include <cctype>
 #include <cstring>
@@ -713,7 +713,7 @@ protected:
     */
     void
     set_content_length_impl(
-        boost::optional<std::uint64_t> const& value);
+        std::optional<std::uint64_t> const& value);
 
     /** Adjusts the Connection field
     */

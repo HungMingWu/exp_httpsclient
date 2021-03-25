@@ -15,7 +15,7 @@
 #include <boost/beast/core/file_base.hpp>
 #include <boost/beast/http/message.hpp>
 #include <boost/assert.hpp>
-#include <boost/optional.hpp>
+#include <optional>
 #include <algorithm>
 #include <cstdio>
 #include <cstdint>
@@ -284,7 +284,7 @@ public:
     // the contained pair will have the next buffer
     // to serialize, and a `bool` indicating whether
     // or not there may be additional buffers.
-    boost::optional<std::pair<const_buffers_type, bool>>
+    std::optional<std::pair<const_buffers_type, bool>>
     get(error_code& ec);
 };
 
@@ -337,7 +337,7 @@ auto
 basic_file_body<File>::
 writer::
 get(error_code& ec) ->
-    boost::optional<std::pair<const_buffers_type, bool>>
+    std::optional<std::pair<const_buffers_type, bool>>
 {
     // Calculate the smaller of our buffer size,
     // or the amount of unread data in the file.
@@ -355,18 +355,18 @@ get(error_code& ec) ->
         //      that saves us a possibly expensive atomic operation.
         //
         ec = {};
-        return boost::none;
+        return std::nullopt;
     }
 
     // Now read the next buffer
     auto const nread = body_.file_.read(buf_, amount, ec);
     if(ec)
-        return boost::none;
+        return std::nullopt;
 
     if (nread == 0)
     {
         ec = error::short_read;
-        return boost::none;
+        return std::nullopt;
     }
 
     // Make sure there is forward progress
@@ -426,7 +426,7 @@ public:
     // optionally use for optimization.
     //
     void
-    init(boost::optional<std::uint64_t> const&, error_code& ec);
+    init(std::optional<std::uint64_t> const&, error_code& ec);
 
     // This function is called one or more times to store
     // buffer sequences corresponding to the incoming body.
@@ -469,7 +469,7 @@ void
 basic_file_body<File>::
 reader::
 init(
-    boost::optional<std::uint64_t> const& content_length,
+    std::optional<std::uint64_t> const& content_length,
     error_code& ec)
 {
     // The file must already be open for writing

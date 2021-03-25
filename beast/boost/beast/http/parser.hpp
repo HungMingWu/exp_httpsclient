@@ -14,7 +14,7 @@
 #include <boost/beast/http/basic_parser.hpp>
 #include <boost/beast/http/message.hpp>
 #include <boost/beast/http/type_traits.hpp>
-#include <boost/optional.hpp>
+#include <optional>
 #include <boost/throw_exception.hpp>
 #include <functional>
 #include <memory>
@@ -442,7 +442,7 @@ private:
 
     void
     on_body_init_impl(
-        boost::optional<std::uint64_t> const& content_length,
+        std::optional<std::uint64_t> const& content_length,
         error_code& ec) override
     {
         rd_.init(content_length, ec);

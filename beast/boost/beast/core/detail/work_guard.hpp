@@ -3,7 +3,7 @@
 
 #include <boost/asio/executor_work_guard.hpp>
 #include <boost/asio/execution.hpp>
-#include <boost/optional.hpp>
+#include <optional>
 
 namespace boost {
 namespace beast {
@@ -58,7 +58,7 @@ struct execution_work_guard
 
 private:
 
-    boost::optional<executor_type> ex_;
+    std::optional<executor_type> ex_;
 };
 
 template<class Executor>

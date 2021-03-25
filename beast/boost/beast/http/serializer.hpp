@@ -19,7 +19,7 @@
 #include <boost/beast/http/message.hpp>
 #include <boost/beast/http/chunk_encode.hpp>
 #include <boost/asio/buffer.hpp>
-#include <boost/optional.hpp>
+#include <optional>
 
 namespace boost {
 namespace beast {
@@ -174,7 +174,7 @@ private:
 
     value_type& m_;
     writer wr_;
-    boost::optional<typename Fields::writer> fwr_;
+    std::optional<typename Fields::writer> fwr_;
     beast::detail::variant<
         cb1_t, cb2_t, cb3_t, cb4_t,
         cb5_t ,cb6_t, cb7_t, cb8_t> v_;

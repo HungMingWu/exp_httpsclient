@@ -147,7 +147,7 @@ public:
         chunk_crlf>;
 
     basic_fields const& f_;
-    boost::optional<view_type> view_;
+    std::optional<view_type> view_;
     char buf_[13];
 
 public:
@@ -927,7 +927,7 @@ template<class Allocator>
 void
 basic_fields<Allocator>::
 set_content_length_impl(
-    boost::optional<std::uint64_t> const& value)
+    std::optional<std::uint64_t> const& value)
 {
     if(! value)
         erase(field::content_length);

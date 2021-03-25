@@ -13,7 +13,7 @@
 #include <boost/beast/core/detail/config.hpp>
 #include <boost/beast/http/error.hpp>
 #include <boost/beast/http/message.hpp>
-#include <boost/optional.hpp>
+#include <optional>
 
 namespace boost {
 namespace beast {
@@ -68,7 +68,7 @@ struct empty_body
         }
 
         void
-        init(boost::optional<std::uint64_t> const&, error_code& ec)
+        init(std::optional<std::uint64_t> const&, error_code& ec)
         {
             ec = {};
         }
@@ -114,11 +114,11 @@ struct empty_body
             ec = {};
         }
 
-        boost::optional<std::pair<const_buffers_type, bool>>
+        std::optional<std::pair<const_buffers_type, bool>>
         get(error_code& ec)
         {
             ec = {};
-            return boost::none;
+            return std::nullopt;
         }
     };
 #endif

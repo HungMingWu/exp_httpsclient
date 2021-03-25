@@ -146,7 +146,7 @@ struct basic_file_body<file_win32>
             ec.clear();
         }
 
-        boost::optional<std::pair<const_buffers_type, bool>>
+        std::optional<std::pair<const_buffers_type, bool>>
         get(error_code& ec)
         {
             std::size_t const n = (std::min)(sizeof(buf_),
@@ -154,15 +154,15 @@ struct basic_file_body<file_win32>
             if(n == 0)
             {
                 ec = {};
-                return boost::none;
+                return std::nullopt;
             }
             auto const nread = body_.file_.read(buf_, n, ec);
             if(ec)
-                return boost::none;
+                return std::nullopt;
             if (nread == 0)
             {
                 ec = error::short_read;
-                return boost::none;
+                return std::nullopt;
             }
             BOOST_ASSERT(nread != 0);
             pos_ += nread;
@@ -188,7 +188,7 @@ struct basic_file_body<file_win32>
         }
 
         void
-        init(boost::optional<
+        init(std::optional<
             std::uint64_t> const& content_length,
                 error_code& ec)
         {

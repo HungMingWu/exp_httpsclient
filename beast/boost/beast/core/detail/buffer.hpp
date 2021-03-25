@@ -12,7 +12,7 @@
 
 #include <boost/beast/core/error.hpp>
 #include <boost/asio/buffer.hpp>
-#include <boost/optional.hpp>
+#include <optional>
 #include <stdexcept>
 
 namespace boost {
@@ -28,16 +28,16 @@ dynamic_buffer_prepare_noexcept(
     std::size_t size,
     error_code& ec,
     ErrorValue ev) ->
-        boost::optional<typename
+        std::optional<typename
         DynamicBuffer::mutable_buffers_type>
 {
     if(buffer.max_size() - buffer.size() < size)
     {
         // length error
         ec = ev;
-        return boost::none;
+        return std::nullopt;
     }
-    boost::optional<typename
+    std::optional<typename
         DynamicBuffer::mutable_buffers_type> result;
     result.emplace(buffer.prepare(size));
     ec = {};
@@ -53,13 +53,13 @@ dynamic_buffer_prepare(
     std::size_t size,
     error_code& ec,
     ErrorValue ev) ->
-        boost::optional<typename
+        std::optional<typename
         DynamicBuffer::mutable_buffers_type>
 {
 #ifndef BOOST_NO_EXCEPTIONS
     try
     {
-        boost::optional<typename
+        std::optional<typename
             DynamicBuffer::mutable_buffers_type> result;
         result.emplace(buffer.prepare(size));
         ec = {};
@@ -69,7 +69,7 @@ dynamic_buffer_prepare(
     {
         ec = ev;
     }
-    return boost::none;
+    return std::nullopt;
 
 #else
     return dynamic_buffer_prepare_noexcept(

@@ -15,7 +15,7 @@
 #include <boost/beast/core/string.hpp>
 #include <boost/beast/http/detail/type_traits.hpp>
 #include <boost/asio/buffer.hpp>
-#include <boost/optional.hpp>
+#include <optional>
 #include <type_traits>
 #include <utility>
 
@@ -83,7 +83,7 @@ struct is_body_writer<T, beast::detail::void_t<
     typename T::writer::const_buffers_type,
         decltype(
     std::declval<typename T::writer&>().init(std::declval<error_code&>()),
-    std::declval<boost::optional<std::pair<
+    std::declval<std::optional<std::pair<
             typename T::writer::const_buffers_type, bool>>&>() =
             std::declval<typename T::writer>().get(std::declval<error_code&>())
         )>> : std::integral_constant<bool,
@@ -122,7 +122,7 @@ struct is_mutable_body_writer<T, beast::detail::void_t<
     typename T::writer::const_buffers_type,
         decltype(
     std::declval<typename T::writer&>().init(std::declval<error_code&>()),
-    std::declval<boost::optional<std::pair<
+    std::declval<std::optional<std::pair<
             typename T::writer::const_buffers_type, bool>>&>() =
             std::declval<typename T::writer>().get(std::declval<error_code&>())
         )>> : std::integral_constant<bool,
@@ -174,7 +174,7 @@ struct is_body_reader : std::false_type {};
 template<class T>
 struct is_body_reader<T, beast::detail::void_t<decltype(
     std::declval<typename T::reader&>().init(
-        boost::optional<std::uint64_t>(),
+        std::optional<std::uint64_t>(),
         std::declval<error_code&>()),
     std::declval<std::size_t&>() =
         std::declval<typename T::reader&>().put(

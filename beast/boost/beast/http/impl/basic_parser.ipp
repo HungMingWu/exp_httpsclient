@@ -45,7 +45,7 @@ keep_alive() const
 }
 
 template<bool isRequest>
-boost::optional<std::uint64_t>
+std::optional<std::uint64_t>
 basic_parser<isRequest>::
 content_length() const
 {
@@ -54,13 +54,13 @@ content_length() const
 }
 
 template<bool isRequest>
-boost::optional<std::uint64_t>
+std::optional<std::uint64_t>
 basic_parser<isRequest>::
 content_length_remaining() const
 {
     BOOST_ASSERT(is_header_done());
     if(! (f_ & flagContentLength))
-        return boost::none;
+        return std::nullopt;
     return len_;
 }
 

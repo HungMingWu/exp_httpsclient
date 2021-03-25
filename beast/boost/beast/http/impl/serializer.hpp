@@ -310,7 +310,7 @@ consume(std::size_t n)
         v_.template get<1>().consume(n);
         if(buffer_bytes(v_.template get<1>()) > 0)
             break;
-        fwr_ = boost::none;
+        fwr_ = std::nullopt;
         header_done_ = true;
         if(! split_)
             goto go_complete;
@@ -354,7 +354,7 @@ consume(std::size_t n)
         v_.template get<1>().consume(n);
         if(buffer_bytes(v_.template get<1>()) > 0)
             break;
-        fwr_ = boost::none;
+        fwr_ = std::nullopt;
         header_done_ = true;
         if(! split_)
         {
