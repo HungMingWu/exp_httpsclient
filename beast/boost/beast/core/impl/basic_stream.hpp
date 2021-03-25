@@ -89,7 +89,7 @@ on_timer(Executor2 const& ex2)
 
         handler(
             Executor2 const& ex2,
-            boost::shared_ptr<impl_type> const& sp)
+            std::shared_ptr<impl_type> const& sp)
             : boost::empty_value<Executor2>(
                 boost::empty_init_t{}, ex2)
             , wp(sp)
@@ -213,7 +213,7 @@ class transfer_op
     : public async_base<Handler, Executor>
     , public boost::asio::coroutine
 {
-    boost::shared_ptr<impl_type> impl_;
+    std::shared_ptr<impl_type> impl_;
     pending_guard pg_;
     Buffers b_;
 
@@ -429,7 +429,7 @@ template<class Handler>
 class connect_op
     : public async_base<Handler, Executor>
 {
-    boost::shared_ptr<impl_type> impl_;
+    std::shared_ptr<impl_type> impl_;
     pending_guard pg0_;
     pending_guard pg1_;
 
