@@ -1,3 +1,4 @@
+add_subdirectory(async)
 add_subdirectory(sync)
 if (OpenSSL_FOUND)
 add_subdirectory(sync-ssl)
