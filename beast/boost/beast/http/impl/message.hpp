@@ -313,7 +313,7 @@ message<isRequest, Body, Fields>::
 chunked(bool value)
 {
     this->set_chunked_impl(value);
-    this->set_content_length_impl(boost::none);
+    this->set_content_length_impl(std::nullopt);
 }
 
 template<bool isRequest, class Body, class Fields>

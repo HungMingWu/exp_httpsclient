@@ -12,7 +12,6 @@
 
 #include <boost/beast/core/detail/config.hpp>
 #include <boost/beast/core/buffer_traits.hpp>
-#include <boost/optional.hpp>
 #include <type_traits>
 
 namespace boost {

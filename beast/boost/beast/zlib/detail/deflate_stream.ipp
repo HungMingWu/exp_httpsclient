@@ -42,7 +42,6 @@
 #include <boost/assert.hpp>
 #include <boost/config.hpp>
 #include <boost/make_unique.hpp>
-#include <boost/optional.hpp>
 #include <boost/throw_exception.hpp>
 #include <cstdint>
 #include <cstdlib>
@@ -356,7 +355,7 @@ doParams(z_params& zs, int level, Strategy strategy, error_code& ec)
 //
 void
 deflate_stream::
-doWrite(z_params& zs, boost::optional<Flush> flush, error_code& ec)
+doWrite(z_params& zs, std::optional<Flush> flush, error_code& ec)
 {
     maybe_init();
 
@@ -376,9 +375,7 @@ doWrite(z_params& zs, boost::optional<Flush> flush, error_code& ec)
     }
 
     // value of flush param for previous deflate call
-    auto old_flush = boost::make_optional<Flush>(
-        last_flush_.is_initialized(),
-        last_flush_ ? *last_flush_ : Flush::none);
+    std::optional<Flush> old_flush = last_flush_ ? last_flush_ : std::nullopt;
 
     last_flush_ = flush;
 
@@ -394,7 +391,7 @@ doWrite(z_params& zs, boost::optional<Flush> flush, error_code& ec)
              * but this is not an error situation so make sure we
              * return OK instead of BUF_ERROR at next call of deflate:
              */
-            last_flush_ = boost::none;
+            last_flush_ = std::nullopt;
             return;
         }
     }
@@ -427,14 +424,14 @@ doWrite(z_params& zs, boost::optional<Flush> flush, error_code& ec)
         switch(strategy_)
         {
         case Strategy::huffman:
-            bstate = deflate_huff(zs, flush.get());
+            bstate = deflate_huff(zs, *flush);
             break;
         case Strategy::rle:
-            bstate = deflate_rle(zs, flush.get());
+            bstate = deflate_rle(zs, *flush);
             break;
         default:
         {
-            bstate = (this->*(get_config(level_).func))(zs, flush.get());
+            bstate = (this->*(get_config(level_).func))(zs, *flush);
             break;
         }
         }
@@ -447,7 +444,7 @@ doWrite(z_params& zs, boost::optional<Flush> flush, error_code& ec)
         {
             if(zs.avail_out == 0)
             {
-                last_flush_ = boost::none; /* avoid BUF_ERROR next call, see above */
+                last_flush_ = std::nullopt; /* avoid BUF_ERROR next call, see above */
             }
             return;
             /*  If flush != Flush::none && avail_out == 0, the next call
@@ -485,7 +482,7 @@ doWrite(z_params& zs, boost::optional<Flush> flush, error_code& ec)
             flush_pending(zs);
             if(zs.avail_out == 0)
             {
-                last_flush_ = boost::none; /* avoid BUF_ERROR at next call, see above */
+                last_flush_ = std::nullopt; /* avoid BUF_ERROR at next call, see above */
                 return;
             }
         }

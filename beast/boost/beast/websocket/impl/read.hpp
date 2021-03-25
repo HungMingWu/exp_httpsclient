@@ -29,7 +29,6 @@
 #include <boost/asio/post.hpp>
 #include <boost/assert.hpp>
 #include <boost/config.hpp>
-#include <boost/optional.hpp>
 #include <boost/throw_exception.hpp>
 #include <algorithm>
 #include <limits>

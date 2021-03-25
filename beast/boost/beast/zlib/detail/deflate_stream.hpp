@@ -42,12 +42,12 @@
 #include <boost/beast/zlib/detail/ranges.hpp>
 #include <boost/assert.hpp>
 #include <boost/config.hpp>
-#include <boost/optional.hpp>
 #include <boost/throw_exception.hpp>
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
 #include <memory>
+#include <optional>
 #include <stdexcept>
 #include <type_traits>
 
@@ -259,7 +259,7 @@ protected:
         pending_buf_size_;          // size of pending_buf
     Byte* pending_out_;             // next pending byte to output to the stream
     uInt pending_;                  // nb of bytes in the pending buffer
-    boost::optional<Flush>
+    std::optional<Flush>
         last_flush_;                // value of flush param for previous deflate call
 
     uInt w_size_;                   // LZ77 window size (32K by default)
@@ -621,7 +621,7 @@ protected:
     BOOST_BEAST_DECL std::size_t doUpperBound (std::size_t sourceLen) const;
     BOOST_BEAST_DECL void doTune              (int good_length, int max_lazy, int nice_length, int max_chain);
     BOOST_BEAST_DECL void doParams            (z_params& zs, int level, Strategy strategy, error_code& ec);
-    BOOST_BEAST_DECL void doWrite             (z_params& zs, boost::optional<Flush> flush, error_code& ec);
+    BOOST_BEAST_DECL void doWrite             (z_params& zs, std::optional<Flush> flush, error_code& ec);
     BOOST_BEAST_DECL void doDictionary        (Byte const* dict, uInt dictLength, error_code& ec);
     BOOST_BEAST_DECL void doPrime             (int bits, int value, error_code& ec);
     BOOST_BEAST_DECL void doPending           (unsigned* value, int* bits);

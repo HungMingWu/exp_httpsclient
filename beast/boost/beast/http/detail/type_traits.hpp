@@ -11,7 +11,6 @@
 #define BOOST_BEAST_HTTP_DETAIL_TYPE_TRAITS_HPP
 
 #include <boost/beast/core/detail/type_traits.hpp>
-#include <boost/optional.hpp>
 #include <cstdint>
 
 namespace boost {

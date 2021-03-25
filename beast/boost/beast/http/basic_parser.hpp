@@ -292,7 +292,7 @@ public:
         The default limit is 1MB for requests and 8MB for responses.
 
         @param v An optional integral value representing the body limit.
-        If this is equal to `boost::none`, then the body limit is disabled.
+        If this is equal to `std::nullopt`, then the body limit is disabled.
     */
     void
     body_limit(std::optional<std::uint64_t> v)
@@ -534,7 +534,7 @@ protected:
 
         @param content_length A value representing the content length in
         bytes if the length is known (this can include a zero length).
-        Otherwise, the value will be `boost::none`.
+        Otherwise, the value will be `std::nullopt`.
 
         @param ec An output parameter which the function may set to indicate
         an error. The error will be clear before this function is invoked.

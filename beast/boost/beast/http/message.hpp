@@ -829,7 +829,7 @@ public:
         This function invokes the <em>Body</em> algorithm to measure
         the number of octets in the serialized body container. If
         there is no body, this will return zero. Otherwise, if the
-        body exists but is not known ahead of time, `boost::none`
+        body exists but is not known ahead of time, `std::nullopt`
         is returned (usually indicating that a chunked Transfer-Encoding
         will be used).
 

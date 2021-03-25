@@ -13,7 +13,6 @@
 #include <boost/beast/core/file.hpp>
 #include <boost/beast/http/basic_file_body.hpp>
 #include <boost/assert.hpp>
-#include <boost/optional.hpp>
 #include <algorithm>
 #include <cstdio>
 #include <cstdint>

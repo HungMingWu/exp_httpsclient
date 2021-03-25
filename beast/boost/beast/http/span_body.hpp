@@ -15,7 +15,6 @@
 #include <boost/beast/core/span.hpp>
 #include <boost/beast/http/error.hpp>
 #include <boost/beast/http/message.hpp>
-#include <boost/optional.hpp>
 
 namespace boost {
 namespace beast {

@@ -279,7 +279,7 @@ public:
     init(error_code& ec);
 
     // This function is called zero or more times to
-    // retrieve buffers. A return value of `boost::none`
+    // retrieve buffers. A return value of `std::nullopt`
     // means there are no more buffers. Otherwise,
     // the contained pair will have the next buffer
     // to serialize, and a `bool` indicating whether
