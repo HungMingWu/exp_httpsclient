@@ -1613,7 +1613,7 @@
 // Boost limits header.
 #if !defined(BOOST_ASIO_HAS_BOOST_LIMITS)
 # if !defined(BOOST_ASIO_DISABLE_BOOST_LIMITS)
-#  define BOOST_ASIO_HAS_BOOST_LIMITS 1
+// #  define BOOST_ASIO_HAS_BOOST_LIMITS 1
 # endif // !defined(BOOST_ASIO_DISABLE_BOOST_LIMITS)
 #endif // !defined(BOOST_ASIO_HAS_BOOST_LIMITS)
 
