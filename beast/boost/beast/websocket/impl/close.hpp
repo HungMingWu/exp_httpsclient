@@ -40,7 +40,7 @@ class stream<NextLayer, deflateSupported>::close_op
         Handler, beast::executor_type<stream>>
     , public asio::coroutine
 {
-    boost::weak_ptr<impl_type> wp_;
+    std::weak_ptr<impl_type> wp_;
     error_code ev_;
     detail::frame_buffer& fb_;
 
@@ -50,7 +50,7 @@ public:
     template<class Handler_>
     close_op(
         Handler_&& h,
-        boost::shared_ptr<impl_type> const& sp,
+        std::shared_ptr<impl_type> const& sp,
         close_reason const& cr)
         : stable_async_base<Handler,
             beast::executor_type<stream>>(
@@ -288,7 +288,7 @@ struct stream<NextLayer, deflateSupported>::
     void
     operator()(
         CloseHandler&& h,
-        boost::shared_ptr<impl_type> const& sp,
+        std::shared_ptr<impl_type> const& sp,
         close_reason const& cr)
     {
         // If you get an error on the following line it means

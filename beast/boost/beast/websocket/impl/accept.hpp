@@ -168,7 +168,7 @@ class stream<NextLayer, deflateSupported>::response_op
         Handler, beast::executor_type<stream>>
     , public asio::coroutine
 {
-    boost::weak_ptr<impl_type> wp_;
+    std::weak_ptr<impl_type> wp_;
     error_code result_; // must come before res_
     response_type& res_;
 
@@ -179,7 +179,7 @@ public:
         class Decorator>
     response_op(
         Handler_&& h,
-        boost::shared_ptr<impl_type> const& sp,
+        std::shared_ptr<impl_type> const& sp,
         http::request<Body,
             http::basic_fields<Allocator>> const& req,
         Decorator const& decorator,
@@ -249,7 +249,7 @@ class stream<NextLayer, deflateSupported>::accept_op
         Handler, beast::executor_type<stream>>
     , public asio::coroutine
 {
-    boost::weak_ptr<impl_type> wp_;
+    std::weak_ptr<impl_type> wp_;
     http::request_parser<http::empty_body>& p_;
     Decorator d_;
 
@@ -257,7 +257,7 @@ public:
     template<class Handler_, class Buffers>
     accept_op(
         Handler_&& h,
-        boost::shared_ptr<impl_type> const& sp,
+        std::shared_ptr<impl_type> const& sp,
         Decorator const& decorator,
         Buffers const& buffers)
         : stable_async_base<Handler,
@@ -346,7 +346,7 @@ struct stream<NextLayer, deflateSupported>::
     void
     operator()(
         AcceptHandler&& h,
-        boost::shared_ptr<impl_type> const& sp,
+        std::shared_ptr<impl_type> const& sp,
         http::request<Body,
             http::basic_fields<Allocator>> const* m,
         Decorator const& d)
@@ -377,7 +377,7 @@ struct stream<NextLayer, deflateSupported>::
     void
     operator()(
         AcceptHandler&& h,
-        boost::shared_ptr<impl_type> const& sp,
+        std::shared_ptr<impl_type> const& sp,
         Decorator const& d,
         Buffers const& b)
     {

@@ -753,7 +753,7 @@
 // Boost support for the DateTime library.
 #if !defined(BOOST_ASIO_HAS_BOOST_DATE_TIME)
 # if !defined(BOOST_ASIO_DISABLE_BOOST_DATE_TIME)
-#  define BOOST_ASIO_HAS_BOOST_DATE_TIME 1
+// #  define BOOST_ASIO_HAS_BOOST_DATE_TIME 1
 # endif // !defined(BOOST_ASIO_DISABLE_BOOST_DATE_TIME)
 #endif // !defined(BOOST_ASIO_HAS_BOOST_DATE_TIME)
 

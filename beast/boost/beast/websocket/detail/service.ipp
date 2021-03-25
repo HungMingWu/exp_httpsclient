@@ -45,7 +45,7 @@ void
 service::
 shutdown()
 {
-    std::vector<boost::weak_ptr<impl_type>> v;
+    std::vector<std::weak_ptr<impl_type>> v;
     {
         std::lock_guard<std::mutex> g(m_);
         v.reserve(v_.size());

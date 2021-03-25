@@ -37,7 +37,7 @@ class stream<NextLayer, deflateSupported>::ping_op
         Handler, beast::executor_type<stream>>
     , public asio::coroutine
 {
-    boost::weak_ptr<impl_type> wp_;
+    std::weak_ptr<impl_type> wp_;
     detail::frame_buffer& fb_;
 
 public:
@@ -46,7 +46,7 @@ public:
     template<class Handler_>
     ping_op(
         Handler_&& h,
-        boost::shared_ptr<impl_type> const& sp,
+        std::shared_ptr<impl_type> const& sp,
         detail::opcode op,
         ping_data const& payload)
         : stable_async_base<Handler,
@@ -136,7 +136,7 @@ class stream<NextLayer, deflateSupported>::idle_ping_op
     : public asio::coroutine
     , public boost::empty_value<Executor>
 {
-    boost::weak_ptr<impl_type> wp_;
+    std::weak_ptr<impl_type> wp_;
     std::unique_ptr<detail::frame_buffer> fb_;
 
 public:
@@ -151,7 +151,7 @@ public:
     }
 
     idle_ping_op(
-        boost::shared_ptr<impl_type> const& sp,
+        std::shared_ptr<impl_type> const& sp,
         Executor const& ex)
         : boost::empty_value<Executor>(
             boost::empty_init_t{}, ex)
@@ -246,7 +246,7 @@ struct stream<NextLayer, deflateSupported>::
     void
     operator()(
         WriteHandler&& h,
-        boost::shared_ptr<impl_type> const& sp,
+        std::shared_ptr<impl_type> const& sp,
         detail::opcode op,
         ping_data const& p)
     {

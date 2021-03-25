@@ -50,7 +50,7 @@ class stream<NextLayer, deflateSupported>::read_some_op
         Handler, beast::executor_type<stream>>
     , public asio::coroutine
 {
-    boost::weak_ptr<impl_type> wp_;
+    std::weak_ptr<impl_type> wp_;
     MutableBufferSequence bs_;
     buffers_suffix<MutableBufferSequence> cb_;
     std::size_t bytes_written_ = 0;
@@ -64,7 +64,7 @@ public:
     template<class Handler_>
     read_some_op(
         Handler_&& h,
-        boost::shared_ptr<impl_type> const& sp,
+        std::shared_ptr<impl_type> const& sp,
         MutableBufferSequence const& bs)
         : async_base<
             Handler, beast::executor_type<stream>>(
@@ -718,7 +718,7 @@ class stream<NextLayer, deflateSupported>::read_op
         Handler, beast::executor_type<stream>>
     , public asio::coroutine
 {
-    boost::weak_ptr<impl_type> wp_;
+    std::weak_ptr<impl_type> wp_;
     DynamicBuffer& b_;
     std::size_t limit_;
     std::size_t bytes_written_ = 0;
@@ -728,7 +728,7 @@ public:
     template<class Handler_>
     read_op(
         Handler_&& h,
-        boost::shared_ptr<impl_type> const& sp,
+        std::shared_ptr<impl_type> const& sp,
         DynamicBuffer& b,
         std::size_t limit,
         bool some)
@@ -805,7 +805,7 @@ struct stream<NextLayer, deflateSupported>::
     void
     operator()(
         ReadHandler&& h,
-        boost::shared_ptr<impl_type> const& sp,
+        std::shared_ptr<impl_type> const& sp,
         MutableBufferSequence const& b)
     {
         // If you get an error on the following line it means
@@ -836,7 +836,7 @@ struct stream<NextLayer, deflateSupported>::
     void
     operator()(
         ReadHandler&& h,
-        boost::shared_ptr<impl_type> const& sp,
+        std::shared_ptr<impl_type> const& sp,
         DynamicBuffer* b,
         std::size_t limit,
         bool some)

@@ -56,7 +56,7 @@ class stream<NextLayer, deflateSupported>::handshake_op
         }
     };
 
-    boost::weak_ptr<impl_type> wp_;
+    std::weak_ptr<impl_type> wp_;
     detail::sec_ws_key_type key_;
     response_type* res_p_;
     data& d_;
@@ -65,7 +65,7 @@ public:
     template<class Handler_>
     handshake_op(
         Handler_&& h,
-        boost::shared_ptr<impl_type> const& sp,
+        std::shared_ptr<impl_type> const& sp,
         request_type&& req,
         detail::sec_ws_key_type key,
         response_type* res_p)
@@ -191,7 +191,7 @@ struct stream<NextLayer, deflateSupported>::
     template<class HandshakeHandler>
     void operator()(
         HandshakeHandler&& h,
-        boost::shared_ptr<impl_type> const& sp,
+        std::shared_ptr<impl_type> const& sp,
         request_type&& req,
         detail::sec_ws_key_type key,
         response_type* res_p)

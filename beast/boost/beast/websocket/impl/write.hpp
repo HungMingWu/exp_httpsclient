@@ -52,7 +52,7 @@ class stream<NextLayer, deflateSupported>::write_some_op
         do_deflate
     };
 
-    boost::weak_ptr<impl_type> wp_;
+    std::weak_ptr<impl_type> wp_;
     buffers_suffix<Buffers> cb_;
     detail::frame_header fh_;
     detail::prepared_key key_;
@@ -70,7 +70,7 @@ public:
     template<class Handler_>
     write_some_op(
         Handler_&& h,
-        boost::shared_ptr<impl_type> const& sp,
+        std::shared_ptr<impl_type> const& sp,
         bool fin,
         Buffers const& bs)
         : beast::async_base<Handler,
@@ -515,7 +515,7 @@ struct stream<NextLayer, deflateSupported>::
     void
     operator()(
         WriteHandler&& h,
-        boost::shared_ptr<impl_type> const& sp,
+        std::shared_ptr<impl_type> const& sp,
         bool fin,
         ConstBufferSequence const& b)
     {

@@ -32,8 +32,6 @@
 #include <boost/beast/core/detail/clamp.hpp>
 #include <boost/asio/steady_timer.hpp>
 #include <boost/core/empty_value.hpp>
-#include <boost/enable_shared_from_this.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/optional.hpp>
 
 namespace boost {
@@ -53,18 +51,18 @@ struct stream<NextLayer, deflateSupported>::impl_type
             NextLayer>::get();
     }
 
-    boost::weak_ptr<impl_type>
+    std::weak_ptr<impl_type>
     weak_from_this()
     {
-        return boost::static_pointer_cast<
+        return std::static_pointer_cast<
             impl_type>(this->detail::service::
                 impl_type::shared_from_this());
     }
 
-    boost::shared_ptr<impl_type>
+    std::shared_ptr<impl_type>
     shared_this()
     {
-        return boost::static_pointer_cast<
+        return std::static_pointer_cast<
             impl_type>(this->detail::service::
                 impl_type::shared_from_this());
     }
@@ -521,12 +519,12 @@ private:
     class timeout_handler
         : boost::empty_value<Executor>
     {
-        boost::weak_ptr<impl_type> wp_;
+        std::weak_ptr<impl_type> wp_;
 
     public:
         timeout_handler(
             Executor const& ex,
-            boost::weak_ptr<impl_type>&& wp)
+            std::weak_ptr<impl_type>&& wp)
             : boost::empty_value<Executor>(
                 boost::empty_init_t{}, ex)
             , wp_(std::move(wp))

@@ -12,7 +12,6 @@
 
 #include <boost/beast/core/detail/service_base.hpp>
 #include <boost/asio/execution_context.hpp>
-#include <boost/enable_shared_from_this.hpp>
 #include <mutex>
 #include <vector>
 
@@ -26,7 +25,7 @@ class service
 {
 public:
     class impl_type
-        : public boost::enable_shared_from_this<impl_type>
+        : public std::enable_shared_from_this<impl_type>
     {
         service& svc_;
         std::size_t index_;
