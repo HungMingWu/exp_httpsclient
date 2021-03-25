@@ -10,3 +10,6 @@ PRIVATE
 	OpenSSL::SSL OpenSSL::Crypto
 	beast
 )
+IF (MSVC)
+target_compile_options(${PROJECT_NAME} PRIVATE "/bigobj")
+ENDIF()

@@ -24,7 +24,6 @@
 #include <boost/asio/basic_stream_socket.hpp>
 #include <boost/asio/windows/overlapped_ptr.hpp>
 #include <boost/make_unique.hpp>
-#include <boost/smart_ptr/make_shared_array.hpp>
 #include <boost/winapi/basic_types.hpp>
 #include <boost/winapi/error_codes.hpp>
 #include <boost/winapi/get_last_error.hpp>
