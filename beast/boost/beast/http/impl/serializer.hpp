@@ -26,18 +26,14 @@ template<
     bool isRequest, class Body, class Fields>
 void
 serializer<isRequest, Body, Fields>::
-fwrinit(std::true_type)
+fwrinit()
 {
-    fwr_.emplace(m_, m_.version(), m_.method());
-}
-
-template<
-    bool isRequest, class Body, class Fields>
-void
-serializer<isRequest, Body, Fields>::
-fwrinit(std::false_type)
-{
-    fwr_.emplace(m_, m_.version(), m_.result_int());
+    if constexpr (isRequest) {
+        fwr_.emplace(m_, m_.version(), m_.method());
+    }
+    else {
+        fwr_.emplace(m_, m_.version(), m_.result_int());
+    }
 }
 
 template<
@@ -75,8 +71,7 @@ next(error_code& ec, Visit&& visit)
     {
     case do_construct:
     {
-        fwrinit(std::integral_constant<bool,
-            isRequest>{});
+        fwrinit();
         if(m_.chunked())
             goto go_init_c;
         s_ = do_init;
@@ -99,7 +94,7 @@ next(error_code& ec, Visit&& visit)
             goto go_header_only;
         more_ = result->second;
         v_.template emplace<2>(
-            boost::in_place_init,
+            in_place_init,
             fwr_->get(),
             result->first);
         s_ = do_header;
@@ -163,7 +158,7 @@ next(error_code& ec, Visit&& visit)
         {
             // do it all in one buffer
             v_.template emplace<7>(
-                boost::in_place_init,
+                in_place_init,
                 fwr_->get(),
                 buffer_bytes(result->first),
                 net::const_buffer{nullptr, 0},
@@ -176,7 +171,7 @@ next(error_code& ec, Visit&& visit)
             goto go_all_c;
         }
         v_.template emplace<4>(
-            boost::in_place_init,
+            in_place_init,
             fwr_->get(),
             buffer_bytes(result->first),
             net::const_buffer{nullptr, 0},
@@ -216,7 +211,7 @@ next(error_code& ec, Visit&& visit)
         {
             // do it all in one buffer
             v_.template emplace<6>(
-                boost::in_place_init,
+                in_place_init,
                 buffer_bytes(result->first),
                 net::const_buffer{nullptr, 0},
                 chunk_crlf{},
@@ -228,7 +223,7 @@ next(error_code& ec, Visit&& visit)
             goto go_body_final_c;
         }
         v_.template emplace<5>(
-            boost::in_place_init,
+            in_place_init,
             buffer_bytes(result->first),
             net::const_buffer{nullptr, 0},
             chunk_crlf{},
@@ -259,7 +254,7 @@ next(error_code& ec, Visit&& visit)
     go_final_c:
     case do_final_c:
         v_.template emplace<8>(
-            boost::in_place_init,
+            in_place_init,
             detail::chunk_last(),
             net::const_buffer{nullptr, 0},
             chunk_crlf{});

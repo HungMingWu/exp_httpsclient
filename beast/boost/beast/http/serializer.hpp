@@ -104,8 +104,7 @@ private:
         do_complete         = 120
     };
 
-    void fwrinit(std::true_type);
-    void fwrinit(std::false_type);
+    void fwrinit();
 
     template<std::size_t, class Visit>
     void

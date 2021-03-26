@@ -114,7 +114,7 @@ public:
     */
     template<class... Args>
     explicit
-    buffers_suffix(boost::in_place_init_t, Args&&... args);
+    buffers_suffix(buffers_init_t, Args&&... args);
 
     /// Copy Assignment
     buffers_suffix& operator=(buffers_suffix const&);

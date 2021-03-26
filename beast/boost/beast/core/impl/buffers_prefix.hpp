@@ -221,7 +221,7 @@ template<class... Args>
 buffers_prefix_view<Buffers>::
 buffers_prefix_view(
     std::size_t size,
-    boost::in_place_init_t,
+    buffers_init_t,
     Args&&... args)
     : bs_(std::forward<Args>(args)...)
 {
@@ -275,7 +275,7 @@ public:
     template<class... Args>
     buffers_prefix_view(
         std::size_t size,
-        boost::in_place_init_t,
+        buffers_init_t,
         Args&&... args)
         : buffers_prefix_view(size,
             net::const_buffer(
@@ -311,7 +311,7 @@ public:
     template<class... Args>
     buffers_prefix_view(
         std::size_t size,
-        boost::in_place_init_t,
+        buffers_init_t,
         Args&&... args)
         : buffers_prefix_view(size,
             net::mutable_buffer(

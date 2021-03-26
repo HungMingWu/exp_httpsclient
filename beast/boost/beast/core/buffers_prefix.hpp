@@ -12,7 +12,6 @@
 
 #include <boost/beast/core/detail/config.hpp>
 #include <boost/beast/core/buffer_traits.hpp>
-#include <boost/optional/optional.hpp> // for in_place_init_t
 #include <algorithm>
 #include <cstdint>
 #include <type_traits>
@@ -23,6 +22,14 @@
 
 namespace boost {
 namespace beast {
+
+// a tag for in-place initialization of contained value
+struct buffers_init_t
+{
+    struct init_tag {};
+    explicit buffers_init_t(init_tag) {}
+};
+const buffers_init_t in_place_init((buffers_init_t::init_tag()));
 
 /** A buffer sequence adaptor that shortens the sequence size.
 
@@ -116,7 +123,7 @@ public:
     template<class... Args>
     buffers_prefix_view(
         std::size_t size,
-        boost::in_place_init_t,
+        buffers_init_t,
         Args&&... args);
 
     /// Returns an iterator to the first buffer in the sequence

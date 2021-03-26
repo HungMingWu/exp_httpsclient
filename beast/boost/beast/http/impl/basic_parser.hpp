@@ -12,7 +12,6 @@
 
 #include <boost/beast/core/buffer_traits.hpp>
 #include <boost/asio/buffer.hpp>
-#include <boost/make_unique.hpp>
 
 namespace boost {
 namespace beast {
@@ -46,7 +45,7 @@ put(ConstBufferSequence const& buffers,
     if(size > buf_len_)
     {
         // reallocate
-        buf_ = boost::make_unique_noinit<char[]>(size);
+        buf_ = std::make_unique<char[]>(size);
         buf_len_ = size;
     }
     // flatten

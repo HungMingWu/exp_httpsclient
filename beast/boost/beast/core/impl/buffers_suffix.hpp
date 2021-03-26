@@ -152,7 +152,7 @@ buffers_suffix(Buffers const& bs)
 template<class Buffers>
 template<class... Args>
 buffers_suffix<Buffers>::
-buffers_suffix(boost::in_place_init_t, Args&&... args)
+buffers_suffix(buffers_init_t, Args&&... args)
     : bs_(std::forward<Args>(args)...)
     , begin_(net::buffer_sequence_begin(bs_))
 {

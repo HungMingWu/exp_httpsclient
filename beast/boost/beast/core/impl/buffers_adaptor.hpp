@@ -225,7 +225,7 @@ template<class MutableBufferSequence>
 template<class... Args>
 buffers_adaptor<MutableBufferSequence>::
 buffers_adaptor(
-    boost::in_place_init_t, Args&&... args)
+    buffers_init_t, Args&&... args)
     : bs_{std::forward<Args>(args)...}
     , begin_(net::buffer_sequence_begin(bs_))
     , out_  (net::buffer_sequence_begin(bs_))

@@ -84,7 +84,7 @@ public:
     */
     template<class... Args>
     explicit
-    buffers_adaptor(boost::in_place_init_t, Args&&... args);
+    buffers_adaptor(buffers_init_t, Args&&... args);
 
     /// Copy Constructor
     buffers_adaptor(buffers_adaptor const& other);

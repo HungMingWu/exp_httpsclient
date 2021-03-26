@@ -232,8 +232,7 @@ struct stream<NextLayer, deflateSupported>::impl_type
                 wr_buf_size != wr_buf_opt)
             {
                 wr_buf_size = wr_buf_opt;
-                wr_buf = boost::make_unique_noinit<
-                    std::uint8_t[]>(wr_buf_size);
+                wr_buf = std::make_unique<std::uint8_t[]>(wr_buf_size);
             }
         }
         else

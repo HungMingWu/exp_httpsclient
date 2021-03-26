@@ -38,7 +38,6 @@
 #define BOOST_BEAST_ZLIB_DETAIL_WINDOW_HPP
 
 #include <boost/assert.hpp>
-#include <boost/make_unique.hpp>
 #include <cstdint>
 #include <cstring>
 #include <memory>
@@ -113,8 +112,7 @@ public:
     write(std::uint8_t const* in, std::size_t n)
     {
         if(! p_)
-            p_ = boost::make_unique<
-                std::uint8_t[]>(capacity_);
+            p_ = std::make_unique<std::uint8_t[]>(capacity_);
         if(n >= capacity_)
         {
             i_ = 0;
