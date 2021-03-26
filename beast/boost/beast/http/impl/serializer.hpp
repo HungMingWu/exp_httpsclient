@@ -44,9 +44,9 @@ void
 serializer<isRequest, Body, Fields>::
 do_visit(error_code& ec, Visit& visit)
 {
-    pv_.template emplace<I>(limit_, v_.template get<I>());
+    pv_.template emplace<I>(limit_, std::get<I>(v_));
     visit(ec, beast::detail::make_buffers_ref(
-        pv_.template get<I>()));
+        std::get<I>(pv_)));
 }
 
 //------------------------------------------------------------------------------
@@ -288,12 +288,12 @@ consume(std::size_t n)
     {
     case do_header:
         BOOST_ASSERT(
-            n <= buffer_bytes(v_.template get<2>()));
-        v_.template get<2>().consume(n);
-        if(buffer_bytes(v_.template get<2>()) > 0)
+            n <= buffer_bytes(std::get<2>(v_)));
+        std::get<2>(v_).consume(n);
+        if(buffer_bytes(std::get<2>(v_)) > 0)
             break;
         header_done_ = true;
-        v_.reset();
+        v_ = std::monostate{};
         if(! more_)
             goto go_complete;
         s_ = do_body + 1;
@@ -301,9 +301,9 @@ consume(std::size_t n)
 
     case do_header_only:
         BOOST_ASSERT(
-            n <= buffer_bytes(v_.template get<1>()));
-        v_.template get<1>().consume(n);
-        if(buffer_bytes(v_.template get<1>()) > 0)
+            n <= buffer_bytes(std::get<1>(v_)));
+        std::get<1>(v_).consume(n);
+        if(buffer_bytes(std::get<1>(v_)) > 0)
             break;
         fwr_ = std::nullopt;
         header_done_ = true;
@@ -315,11 +315,11 @@ consume(std::size_t n)
     case do_body + 2:
     {
         BOOST_ASSERT(
-            n <= buffer_bytes(v_.template get<3>()));
-        v_.template get<3>().consume(n);
-        if(buffer_bytes(v_.template get<3>()) > 0)
+            n <= buffer_bytes(std::get<3>(v_)));
+        std::get<3>(v_).consume(n);
+        if(buffer_bytes(std::get<3>(v_)) > 0)
             break;
-        v_.reset();
+        v_ = std::monostate{};
         if(! more_)
             goto go_complete;
         s_ = do_body + 1;
@@ -330,12 +330,12 @@ consume(std::size_t n)
 
     case do_header_c:
         BOOST_ASSERT(
-            n <= buffer_bytes(v_.template get<4>()));
-        v_.template get<4>().consume(n);
-        if(buffer_bytes(v_.template get<4>()) > 0)
+            n <= buffer_bytes(std::get<4>(v_)));
+        std::get<4>(v_).consume(n);
+        if(buffer_bytes(std::get<4>(v_)) > 0)
             break;
         header_done_ = true;
-        v_.reset();
+        v_ = std::monostate{};
         if(more_)
             s_ = do_body_c + 1;
         else
@@ -345,9 +345,9 @@ consume(std::size_t n)
     case do_header_only_c:
     {
         BOOST_ASSERT(
-            n <= buffer_bytes(v_.template get<1>()));
-        v_.template get<1>().consume(n);
-        if(buffer_bytes(v_.template get<1>()) > 0)
+            n <= buffer_bytes(std::get<1>(v_)));
+        std::get<1>(v_).consume(n);
+        if(buffer_bytes(std::get<1>(v_)) > 0)
             break;
         fwr_ = std::nullopt;
         header_done_ = true;
@@ -362,11 +362,11 @@ consume(std::size_t n)
 
     case do_body_c + 2:
         BOOST_ASSERT(
-            n <= buffer_bytes(v_.template get<5>()));
-        v_.template get<5>().consume(n);
-        if(buffer_bytes(v_.template get<5>()) > 0)
+            n <= buffer_bytes(std::get<5>(v_)));
+        std::get<5>(v_).consume(n);
+        if(buffer_bytes(std::get<5>(v_)) > 0)
             break;
-        v_.reset();
+        v_ = std::monostate{};
         if(more_)
             s_ = do_body_c + 1;
         else
@@ -376,11 +376,11 @@ consume(std::size_t n)
     case do_body_final_c:
     {
         BOOST_ASSERT(
-            n <= buffer_bytes(v_.template get<6>()));
-        v_.template get<6>().consume(n);
-        if(buffer_bytes(v_.template get<6>()) > 0)
+            n <= buffer_bytes(std::get<6>(v_)));
+        std::get<6>(v_).consume(n);
+        if(buffer_bytes(std::get<6>(v_)) > 0)
             break;
-        v_.reset();
+        v_ = std::monostate{};
         s_ = do_complete;
         break;
     }
@@ -388,22 +388,22 @@ consume(std::size_t n)
     case do_all_c:
     {
         BOOST_ASSERT(
-            n <= buffer_bytes(v_.template get<7>()));
-        v_.template get<7>().consume(n);
-        if(buffer_bytes(v_.template get<7>()) > 0)
+            n <= buffer_bytes(std::get<7>(v_)));
+        std::get<7>(v_).consume(n);
+        if(buffer_bytes(std::get<7>(v_)) > 0)
             break;
         header_done_ = true;
-        v_.reset();
+        v_ = std::monostate{};
         s_ = do_complete;
         break;
     }
 
     case do_final_c + 1:
-        BOOST_ASSERT(buffer_bytes(v_.template get<8>()));
-        v_.template get<8>().consume(n);
-        if(buffer_bytes(v_.template get<8>()) > 0)
+        BOOST_ASSERT(buffer_bytes(std::get<8>(v_)));
+        std::get<8>(v_).consume(n);
+        if(buffer_bytes(std::get<8>(v_)) > 0)
             break;
-        v_.reset();
+        v_ = std::monostate{};
         goto go_complete;
 
     //----------------------------------------------------------------------

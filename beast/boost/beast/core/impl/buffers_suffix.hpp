@@ -122,13 +122,6 @@ private:
 
 template<class Buffers>
 buffers_suffix<Buffers>::
-buffers_suffix()
-    : begin_(net::buffer_sequence_begin(bs_))
-{
-}
-
-template<class Buffers>
-buffers_suffix<Buffers>::
 buffers_suffix(buffers_suffix const& other)
     : buffers_suffix(other,
         std::distance<iter_type>(

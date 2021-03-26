@@ -10,13 +10,13 @@
 #ifndef BOOST_BEAST_IMPL_BUFFERS_CAT_HPP
 #define BOOST_BEAST_IMPL_BUFFERS_CAT_HPP
 
-#include <boost/beast/core/detail/tuple.hpp>
 #include <boost/beast/core/detail/variant.hpp>
 #include <boost/asio/buffer.hpp>
 #include <cstdint>
 #include <iterator>
 #include <new>
 #include <stdexcept>
+#include <tuple>
 #include <utility>
 
 namespace boost {
@@ -122,7 +122,7 @@ class buffers_cat_view<Bn...>::const_iterator
     static_assert(sizeof...(Bn) >= 2,
         "A minimum of two sequences are required");
 
-    detail::tuple<Bn...> const* bn_ = nullptr;
+    std::tuple<Bn...> const* bn_ = nullptr;
     detail::variant<
         buffers_iterator_type<Bn>..., past_end> it_{};
 
@@ -174,11 +174,11 @@ public:
 
 private:
     const_iterator(
-        detail::tuple<Bn...> const& bn,
+        std::tuple<Bn...> const& bn,
         std::true_type);
 
     const_iterator(
-        detail::tuple<Bn...> const& bn,
+        std::tuple<Bn...> const& bn,
         std::false_type);
 
     struct dereference
@@ -215,27 +215,32 @@ private:
         operator()(mp11::mp_size_t<I>)
         {
             ++self.it_.template get<I>();
-            next(mp11::mp_size_t<I>{});
+            next<I>();
         }
 
         template<std::size_t I>
-        void
-        next(mp11::mp_size_t<I>)
+        void next()
         {
             auto& it = self.it_.template get<I>();
-            for(;;)
+            for (;;)
             {
                 if (it == net::buffer_sequence_end(
-                        detail::get<I-1>(*self.bn_)))
+                    std::get<I - 1>(*self.bn_)))
                     break;
-                if(net::const_buffer(*it).size() > 0)
+                if (net::const_buffer(*it).size() > 0)
                     return;
                 ++it;
             }
-            self.it_.template emplace<I+1>(
-                net::buffer_sequence_begin(
-                    detail::get<I>(*self.bn_)));
-            next(mp11::mp_size_t<I+1>{});
+
+            if constexpr (I < sizeof...(Bn)) {
+                self.it_.template emplace<I + 1>(
+                    net::buffer_sequence_begin(
+                        std::get<I>(*self.bn_)));
+                next<I + 1>();
+            }
+            else {
+                self.it_.template emplace<I + 1>();
+            }
         }
 
         void
@@ -243,25 +248,7 @@ private:
         {
             auto constexpr I = sizeof...(Bn);
             ++self.it_.template get<I>();
-            next(mp11::mp_size_t<I>{});
-        }
-
-        void
-        next(mp11::mp_size_t<sizeof...(Bn)>)
-        {
-            auto constexpr I = sizeof...(Bn);
-            auto& it = self.it_.template get<I>();
-            for(;;)
-            {
-                if (it == net::buffer_sequence_end(
-                        detail::get<I-1>(*self.bn_)))
-                    break;
-                if(net::const_buffer(*it).size() > 0)
-                    return;
-                ++it;
-            }
-            // end
-            self.it_.template emplace<I+1>();
+            next<I>();
         }
 
         void
@@ -292,7 +279,7 @@ private:
             for(;;)
             {
                 if(it == net::buffer_sequence_begin(
-                    detail::get<I-1>(*self.bn_)))
+                    std::get<I-1>(*self.bn_)))
                 {
                     BOOST_BEAST_LOGIC_ERROR(
                         "Decrementing an iterator to the beginning");
@@ -311,7 +298,7 @@ private:
             for(;;)
             {
                 if(it == net::buffer_sequence_begin(
-                        detail::get<I-1>(*self.bn_)))
+                        std::get<I-1>(*self.bn_)))
                     break;
                 --it;
                 if(net::const_buffer(*it).size() > 0)
@@ -319,7 +306,7 @@ private:
             }
             self.it_.template emplace<I-1>(
                 net::buffer_sequence_end(
-                    detail::get<I-2>(*self.bn_)));
+                    std::get<I-2>(*self.bn_)));
             (*this)(mp11::mp_size_t<I-1>{});
         }
 
@@ -329,7 +316,7 @@ private:
             auto constexpr I = sizeof...(Bn)+1;
             self.it_.template emplace<I-1>(
                 net::buffer_sequence_end(
-                    detail::get<I-2>(*self.bn_)));
+                    std::get<I-2>(*self.bn_)));
             (*this)(mp11::mp_size_t<I-1>{});
         }
     };
@@ -341,7 +328,7 @@ template<class... Bn>
 buffers_cat_view<Bn...>::
 const_iterator::
 const_iterator(
-    detail::tuple<Bn...> const& bn,
+    std::tuple<Bn...> const& bn,
     std::true_type)
     : bn_(&bn)
 {
@@ -353,15 +340,14 @@ template<class... Bn>
 buffers_cat_view<Bn...>::
 const_iterator::
 const_iterator(
-    detail::tuple<Bn...> const& bn,
+    std::tuple<Bn...> const& bn,
     std::false_type)
     : bn_(&bn)
 {
     it_.template emplace<1>(
         net::buffer_sequence_begin(
-            detail::get<0>(*bn_)));
-    increment{*this}.next(
-        mp11::mp_size_t<1>{});
+            std::get<0>(*bn_)));
+    increment{*this}.next<1>();
 }
 
 template<class... Bn>

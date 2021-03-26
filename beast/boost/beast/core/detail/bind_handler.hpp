@@ -11,17 +11,15 @@
 #define BOOST_BEAST_DETAIL_BIND_HANDLER_HPP
 
 #include <boost/beast/core/error.hpp>
-#include <boost/beast/core/detail/tuple.hpp>
 #include <boost/asio/associated_allocator.hpp>
 #include <boost/asio/associated_executor.hpp>
 #include <boost/asio/handler_alloc_hook.hpp>
 #include <boost/asio/handler_continuation_hook.hpp>
 #include <boost/asio/handler_invoke_hook.hpp>
 #include <boost/core/ignore_unused.hpp>
-#include <boost/mp11/integer_sequence.hpp>
-#include <boost/is_placeholder.hpp>
 #include <functional>
 #include <type_traits>
+#include <tuple>
 #include <utility>
 
 namespace boost {
@@ -37,7 +35,7 @@ namespace detail {
 template<class Handler, class... Args>
 class bind_wrapper
 {
-    using args_type = detail::tuple<Args...>;
+    using args_type = std::tuple<Args...>;
 
     Handler h_;
     args_type args_;
@@ -48,61 +46,17 @@ class bind_wrapper
     template<class T, class Allocator>
     friend struct net::associated_allocator;
 
-    template<class Arg, class Vals>
-    static
-    typename std::enable_if<
-        std::is_placeholder<typename
-            std::decay<Arg>::type>::value == 0 &&
-        boost::is_placeholder<typename
-            std::decay<Arg>::type>::value == 0,
-        Arg&&>::type
-    extract(Arg&& arg, Vals&& vals)
-    {
-        boost::ignore_unused(vals);
-        return std::forward<Arg>(arg);
-    }
-
-    template<class Arg, class Vals>
-    static
-    typename std::enable_if<
-        std::is_placeholder<typename
-            std::decay<Arg>::type>::value != 0,
-        tuple_element<std::is_placeholder<
-            typename std::decay<Arg>::type>::value - 1,
-        Vals>>::type&&
-    extract(Arg&&, Vals&& vals)
-    {
-        return detail::get<std::is_placeholder<
-            typename std::decay<Arg>::type>::value - 1>(
-                std::forward<Vals>(vals));
-    }
-
-    template<class Arg, class Vals>
-    static
-    typename std::enable_if<
-        boost::is_placeholder<typename
-            std::decay<Arg>::type>::value != 0,
-        tuple_element<boost::is_placeholder<
-            typename std::decay<Arg>::type>::value - 1,
-        Vals>>::type&&
-    extract(Arg&&, Vals&& vals)
-    {
-        return detail::get<boost::is_placeholder<
-            typename std::decay<Arg>::type>::value - 1>(
-                std::forward<Vals>(vals));
-    }
-
     template<class ArgsTuple, std::size_t... S>
     static
     void
     invoke(
         Handler& h,
         ArgsTuple& args,
-        tuple<>&&,
-        mp11::index_sequence<S...>)
+        std::tuple<>&&,
+        std::index_sequence<S...>)
     {
         boost::ignore_unused(args);
-        h(detail::get<S>(std::move(args))...);
+        h(std::get<S>(std::move(args))...);
     }
 
     template<
@@ -115,11 +69,11 @@ class bind_wrapper
         Handler& h,
         ArgsTuple& args,
         ValsTuple&& vals,
-        mp11::index_sequence<S...>)
+        std::index_sequence<S...>)
     {
         boost::ignore_unused(args);
         boost::ignore_unused(vals);
-        h(extract(detail::get<S>(std::move(args)),
+        h(extract(std::get<S>(std::move(args)),
             std::forward<ValsTuple>(vals))...);
     }
 
@@ -146,9 +100,9 @@ public:
     operator()(Values&&... values)
     {
         invoke(h_, args_,
-            tuple<Values&&...>(
+            std::forward_as_tuple(
                 std::forward<Values>(values)...),
-            mp11::index_sequence_for<Args...>());
+            std::index_sequence_for<Args...>());
     }
 
     //
@@ -209,7 +163,7 @@ template<class Handler, class... Args>
 class bind_front_wrapper
 {
     Handler h_;
-    detail::tuple<Args...> args_;
+    std::tuple<Args...> args_;
 
     template<class T, class Executor>
     friend struct net::associated_executor;
@@ -217,27 +171,23 @@ class bind_front_wrapper
     template<class T, class Allocator>
     friend struct net::associated_allocator;
 
-    template<std::size_t... I, class... Ts>
-    void
-    invoke(
-        std::false_type,
-        mp11::index_sequence<I...>,
-        Ts&&... ts)
-    {
-        h_( detail::get<I>(std::move(args_))...,
-            std::forward<Ts>(ts)...);
-    }
 
     template<std::size_t... I, class... Ts>
     void
     invoke(
-        std::true_type,
-        mp11::index_sequence<I...>,
+        std::index_sequence<I...>,
         Ts&&... ts)
     {
-        std::mem_fn(h_)(
-            detail::get<I>(std::move(args_))...,
-            std::forward<Ts>(ts)...);
+        if constexpr (std::is_member_function_pointer_v<Handler>) {
+            std::mem_fn(h_)(
+                std::get<I>(std::move(args_))...,
+                std::forward<Ts>(ts)...);
+        }
+        else {
+            h_(std::get<I>(std::move(args_))...,
+                std::forward<Ts>(ts)...);
+        }
+
     }
 
 public:
@@ -258,9 +208,7 @@ public:
     template<class... Ts>
     void operator()(Ts&&... ts)
     {
-        invoke(
-            std::is_member_function_pointer<Handler>{},
-            mp11::index_sequence_for<Args...>{},
+        invoke(std::index_sequence_for<Args...>{},
             std::forward<Ts>(ts)...);
     }
 
