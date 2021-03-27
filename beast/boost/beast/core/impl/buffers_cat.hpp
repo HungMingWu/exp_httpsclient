@@ -10,14 +10,15 @@
 #ifndef BOOST_BEAST_IMPL_BUFFERS_CAT_HPP
 #define BOOST_BEAST_IMPL_BUFFERS_CAT_HPP
 
-#include <boost/beast/core/detail/variant.hpp>
 #include <boost/asio/buffer.hpp>
+#include <boost/mp11/detail/mp_with_index.hpp>
 #include <cstdint>
 #include <iterator>
 #include <new>
 #include <stdexcept>
 #include <tuple>
 #include <utility>
+#include <variant>
 
 namespace boost {
 namespace beast {
@@ -95,8 +96,6 @@ struct buffers_cat_view_iterator_base
 {
     struct past_end
     {
-        char unused = 0; // make g++8 happy
-
         net::mutable_buffer
         operator*() const
         {
@@ -123,7 +122,7 @@ class buffers_cat_view<Bn...>::const_iterator
         "A minimum of two sequences are required");
 
     std::tuple<Bn...> const* bn_ = nullptr;
-    detail::variant<
+    std::variant<
         buffers_iterator_type<Bn>..., past_end> it_{};
 
     friend class buffers_cat_view<Bn...>;
@@ -195,7 +194,7 @@ private:
         template<class I>
         reference operator()(I)
         {
-            return *self.it_.template get<I::value>();
+            return *std::get<I::value - 1>(self.it_);
         }
     };
 
@@ -214,14 +213,14 @@ private:
         void
         operator()(mp11::mp_size_t<I>)
         {
-            ++self.it_.template get<I>();
+            ++std::get<I - 1>(self.it_);
             next<I>();
         }
 
         template<std::size_t I>
         void next()
         {
-            auto& it = self.it_.template get<I>();
+            auto& it = std::get<I - 1>(self.it_);
             for (;;)
             {
                 if (it == net::buffer_sequence_end(
@@ -233,13 +232,13 @@ private:
             }
 
             if constexpr (I < sizeof...(Bn)) {
-                self.it_.template emplace<I + 1>(
+                self.it_.template emplace<I>(
                     net::buffer_sequence_begin(
                         std::get<I>(*self.bn_)));
                 next<I + 1>();
             }
             else {
-                self.it_.template emplace<I + 1>();
+                self.it_.template emplace<past_end>();
             }
         }
 
@@ -247,7 +246,7 @@ private:
         operator()(mp11::mp_size_t<sizeof...(Bn)>)
         {
             auto constexpr I = sizeof...(Bn);
-            ++self.it_.template get<I>();
+            ++std::get<I - 1>(self.it_);
             next<I>();
         }
 
@@ -275,7 +274,7 @@ private:
         {
             auto constexpr I = 1;
 
-            auto& it = self.it_.template get<I>();
+            auto& it = std::get<I - 1>(self.it_);
             for(;;)
             {
                 if(it == net::buffer_sequence_begin(
@@ -294,7 +293,7 @@ private:
         void
         operator()(mp11::mp_size_t<I>)
         {
-            auto& it = self.it_.template get<I>();
+            auto& it = std::get<I - 1>(self.it_);
             for(;;)
             {
                 if(it == net::buffer_sequence_begin(
@@ -304,7 +303,7 @@ private:
                 if(net::const_buffer(*it).size() > 0)
                     return;
             }
-            self.it_.template emplace<I-1>(
+            self.it_.template emplace<I-2>(
                 net::buffer_sequence_end(
                     std::get<I-2>(*self.bn_)));
             (*this)(mp11::mp_size_t<I-1>{});
@@ -314,7 +313,7 @@ private:
         operator()(mp11::mp_size_t<sizeof...(Bn)+1>)
         {
             auto constexpr I = sizeof...(Bn)+1;
-            self.it_.template emplace<I-1>(
+            self.it_.template emplace<I-2>(
                 net::buffer_sequence_end(
                     std::get<I-2>(*self.bn_)));
             (*this)(mp11::mp_size_t<I-1>{});
@@ -333,7 +332,7 @@ const_iterator(
     : bn_(&bn)
 {
     // one past the end
-    it_.template emplace<sizeof...(Bn)+1>();
+    it_.template emplace<past_end>();
 }
 
 template<class... Bn>
@@ -344,10 +343,10 @@ const_iterator(
     std::false_type)
     : bn_(&bn)
 {
-    it_.template emplace<1>(
+    it_.template emplace<0>(
         net::buffer_sequence_begin(
             std::get<0>(*bn_)));
-    increment{*this}.next<1>();
+    increment{*this}.template next<1>();
 }
 
 template<class... Bn>
