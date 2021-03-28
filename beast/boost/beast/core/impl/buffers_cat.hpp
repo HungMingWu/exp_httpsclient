@@ -12,6 +12,7 @@
 
 #include <boost/asio/buffer.hpp>
 #include <boost/mp11/detail/mp_with_index.hpp>
+#include <boost/assert.hpp>
 #include <cstdint>
 #include <iterator>
 #include <new>
@@ -22,6 +23,17 @@
 
 namespace boost {
 namespace beast {
+
+template <typename ...Args, std::size_t ...Idx, typename Func>
+void var_visit(std::variant<Args...>& var, Func&& func, std::index_sequence<Idx...>)
+{
+    ((var.index() == Idx && (func(std::integral_constant<std::size_t, Idx>{}, std::get<Idx>(var)), false)), ...);
+}
+template <typename ...Args, typename Func>
+void var_visit(std::variant<Args...>& var, Func&& func)
+{
+    var_visit(var, std::forward<Func>(func), std::make_index_sequence<sizeof...(Args)>());
+}
 
 template<class Buffer>
 class buffers_cat_view<Buffer>
@@ -123,7 +135,7 @@ class buffers_cat_view<Bn...>::const_iterator
 
     std::tuple<Bn...> const* bn_ = nullptr;
     std::variant<
-        buffers_iterator_type<Bn>..., past_end> it_{};
+        buffers_iterator_type<Bn>..., past_end, std::monostate> it_ = std::monostate{};
 
     friend class buffers_cat_view<Bn...>;
 
@@ -179,24 +191,6 @@ private:
     const_iterator(
         std::tuple<Bn...> const& bn,
         std::false_type);
-
-    struct dereference
-    {
-        const_iterator const& self;
-
-        reference
-        operator()(mp11::mp_size_t<0>)
-        {
-            BOOST_BEAST_LOGIC_ERROR_RETURN({},
-                "Dereferencing a default-constructed iterator");
-        }
-
-        template<class I>
-        reference operator()(I)
-        {
-            return *std::get<I::value - 1>(self.it_);
-        }
-    };
 
     struct increment
     {
@@ -256,6 +250,64 @@ private:
             BOOST_BEAST_LOGIC_ERROR(
                 "Incrementing a one-past-the-end iterator");
         }
+    };
+
+    struct increment1
+    {
+        const_iterator& self;
+
+        template <std::size_t I, typename T>
+        void
+        operator()(std::integral_constant<std::size_t, I>, T& arg)
+        {
+            if constexpr (std::is_same_v<T, std::monostate>) {
+                BOOST_BEAST_LOGIC_ERROR(
+                    "Incrementing a default-constructed iterator");
+            }
+            else if constexpr (std::is_same_v<T, past_end>) {
+                BOOST_BEAST_LOGIC_ERROR(
+                    "Incrementing a one-past-the-end iterator");
+            }
+            else {
+                printf("size = %d\n", I);
+                ++arg;
+                next<I>();
+            }
+        }
+
+        template<std::size_t I>
+        void next()
+        {
+            auto& it = std::get<I>(self.it_);
+            for (;;)
+            {
+                if (it == net::buffer_sequence_end(
+                    std::get<I>(*self.bn_)))
+                    break;
+                if (net::const_buffer(*it).size() > 0)
+                    return;
+                ++it;
+            }
+
+            if constexpr (I < sizeof...(Bn) - 1) {
+                self.it_.template emplace<I + 1>(
+                    net::buffer_sequence_begin(
+                        std::get<I + 1>(*self.bn_)));
+                next<I + 1>();
+            }
+            else {
+                self.it_.template emplace<past_end>();
+            }
+        }
+
+        void
+            operator()(mp11::mp_size_t<sizeof...(Bn)>)
+        {
+            auto constexpr I = sizeof...(Bn);
+            ++std::get<I - 1>(self.it_);
+            next<I>();
+        }
+
     };
 
     struct decrement
@@ -346,7 +398,7 @@ const_iterator(
     it_.template emplace<0>(
         net::buffer_sequence_begin(
             std::get<0>(*bn_)));
-    increment{*this}.template next<1>();
+    increment1{*this}.template next<0>();
 }
 
 template<class... Bn>
@@ -365,10 +417,16 @@ const_iterator::
 operator*() const ->
     reference
 {
-    return mp11::mp_with_index<
-        sizeof...(Bn) + 2>(
-            it_.index(),
-            dereference{*this});
+    return std::visit([](auto&& arg) -> reference {
+        using T = std::decay_t<decltype(arg)>;
+        if constexpr (std::is_same_v<T, std::monostate>) {
+            BOOST_BEAST_LOGIC_ERROR_RETURN({},
+                "Dereferencing a default-constructed iterator");
+        }
+        else {
+            return *arg;
+        }
+    }, it_);
 }
 
 template<class... Bn>
@@ -378,10 +436,7 @@ const_iterator::
 operator++() ->
     const_iterator&
 {
-    mp11::mp_with_index<
-        sizeof...(Bn) + 2>(
-            it_.index(),
-            increment{*this});
+    var_visit(it_, increment1{ *this });
     return *this;
 }
 
