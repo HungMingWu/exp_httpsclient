@@ -6,7 +6,7 @@ PRIVATE
 
 target_include_directories(tests
 PRIVATE
-	catch2/
+	inc/
 )
 
 target_compile_definitions(tests

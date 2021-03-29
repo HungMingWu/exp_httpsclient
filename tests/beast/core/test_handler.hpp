@@ -137,29 +137,29 @@ namespace boost {
                         {
                             lambda_invoked = true;
                         }, &h);
-                    BEAST_EXPECT(hook_invoked);
-                    BEAST_EXPECT(lambda_invoked);
+                    REQUIRE(hook_invoked);
+                    REQUIRE(lambda_invoked);
                 }
                 {
                     bool hook_invoked = false;
                     auto h = f(legacy_handler{ hook_invoked });
                     using net::asio_handler_allocate;
                     asio_handler_allocate(0, &h);
-                    BEAST_EXPECT(hook_invoked);
+                    REQUIRE(hook_invoked);
                 }
                 {
                     bool hook_invoked = false;
                     auto h = f(legacy_handler{ hook_invoked });
                     using net::asio_handler_deallocate;
                     asio_handler_deallocate(nullptr, 0, &h);
-                    BEAST_EXPECT(hook_invoked);
+                    REQUIRE(hook_invoked);
                 }
                 {
                     bool hook_invoked = false;
                     auto h = f(legacy_handler{ hook_invoked });
                     using net::asio_handler_is_continuation;
                     asio_handler_is_continuation(&h);
-                    BEAST_EXPECT(hook_invoked);
+                    REQUIRE(hook_invoked);
                 }
 #endif // !defined(BOOST_ASIO_NO_DEPRECATED)
             }
