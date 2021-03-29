@@ -1,4 +1,4 @@
-add_executable(tests main.cpp "core/test_buffer.hpp")
+add_executable(tests main.cpp)
 target_link_libraries(tests
 PRIVATE
 	beast

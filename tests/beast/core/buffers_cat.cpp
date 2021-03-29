@@ -13,7 +13,7 @@
 #include "test_buffer.hpp"
 
 #if 0
-TEST_CASE("buffer_cat", "DefaultIterators") {
+TEST_CASE("DefaultIterators", "buffer_cat") {
     // default ctor is one past the end
     char c[2] = {};
     auto bs = boost::beast::buffers_cat(
@@ -53,7 +53,7 @@ TEST_CASE("buffer_cat", "DefaultIterators") {
 
 #endif
 
-TEST_CASE("buffer_cat", "BufferSequence") {
+TEST_CASE("BufferSequence", "buffer_cat") {
     std::string_view s = "Hello, world!";
     boost::asio::const_buffer b1(s.data(), 6);
     boost::asio::const_buffer b2(

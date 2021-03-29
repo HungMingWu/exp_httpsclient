@@ -1,4 +1,11 @@
 target_sources(tests 
 PRIVATE
-	buffers_cat.cpp
+	async_base.cpp
+	#buffers_cat.cpp
+	detail_base64.cpp
+	detail_buffer.cpp
+	detail_clamp.cpp
+	detail_get_io_context.cpp
+	detail_sha1.cpp
+	detail_varint.cpp
 )
