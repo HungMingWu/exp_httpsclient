@@ -1,6 +1,7 @@
 target_sources(tests 
 PRIVATE
 	async_base.cpp
+	basic_stream.cpp
 	#buffers_cat.cpp
 	detail_base64.cpp
 	detail_buffer.cpp
