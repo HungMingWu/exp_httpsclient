@@ -3,6 +3,7 @@ PRIVATE
 	async_base.cpp
 	basic_stream.cpp
 	bind_handler.cpp
+	buffer_traits.cpp
 	#buffers_cat.cpp
 	detail_base64.cpp
 	detail_buffer.cpp
