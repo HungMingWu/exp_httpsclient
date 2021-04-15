@@ -46,35 +46,34 @@ class bind_wrapper
     template<class T, class Allocator>
     friend struct net::associated_allocator;
 
-    template<class ArgsTuple, std::size_t... S>
-    static
-    void
-    invoke(
-        Handler& h,
-        ArgsTuple& args,
-        std::tuple<>&&,
-        std::index_sequence<S...>)
+    template<class Arg, class Vals>
+    static decltype(auto) extract(Arg&& arg, Vals&& vals)
     {
-        boost::ignore_unused(args);
-        h(std::get<S>(std::move(args))...);
+        using decay_arg_t = std::decay_t<Arg>;
+        if constexpr (!std::is_placeholder_v<decay_arg_t>) {
+            boost::ignore_unused(vals);
+            return std::forward<Arg>(arg);
+        }
+        else {
+            return std::get<std::is_placeholder_v<
+                decay_arg_t> - 1>(std::forward<Vals>(vals));
+        }
     }
 
-    template<
-        class ArgsTuple,
-        class ValsTuple,
-        std::size_t... S>
-    static
-    void
-    invoke(
+    template<class ArgsTuple, class ValsTuple, std::size_t... S>
+    static void invoke(
         Handler& h,
         ArgsTuple& args,
         ValsTuple&& vals,
         std::index_sequence<S...>)
     {
-        boost::ignore_unused(args);
-        boost::ignore_unused(vals);
-        h(extract(std::get<S>(std::move(args)),
-            std::forward<ValsTuple>(vals))...);
+        if constexpr (sizeof...(S) == 0) {
+            h(std::get<S>(std::move(args))...);
+        }
+        else {
+            h(extract(std::get<S>(std::move(args)),
+                std::forward<ValsTuple>(vals))...);
+        }
     }
 
 public:
