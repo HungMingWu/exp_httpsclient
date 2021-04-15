@@ -1,11 +1,14 @@
 #include "catch.hpp"
 #include <iostream>
+#include <optional>
+#include <string_view>
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/strand.hpp>
 #include <boost/asio/ip/tcp.hpp>
 #include <boost/asio/write.hpp>
 #include <boost/beast/core/basic_stream.hpp>
 #include <boost/beast/core/tcp_stream.hpp>
+#include <boost/beast/core/role.hpp>
 #include "stream_tests.hpp"
 
 using tcp = boost::asio::ip::tcp;
@@ -89,12 +92,18 @@ TEST_CASE("testSpecialMembers rate policies 3", "basic_stream") {
     boost::asio::io_context ioc;
     boost::beast::basic_stream<tcp,
         executor,
+        boost::beast::unlimited_rate_policy> s(ioc);
+}
+
+TEST_CASE("testSpecialMembers rate policies 4", "basic_stream") {
+    boost::asio::io_context ioc;
+    boost::beast::basic_stream<tcp,
+        boost::asio::io_context::executor_type,
         boost::beast::unlimited_rate_policy> s(
             boost::beast::unlimited_rate_policy{}, ioc);
 }
 
 using stream_type = boost::beast::basic_stream<tcp, executor>;
-
 TEST_CASE("testRead read_some", "basic_stream") {
     boost::asio::io_context ioc;
     boost::system::error_code ec;
@@ -105,29 +114,6 @@ TEST_CASE("testRead read_some", "basic_stream") {
 }
 
 namespace {
-    struct test_acceptor
-    {
-        boost::asio::io_context ioc;
-        boost::asio::ip::tcp::acceptor a;
-        boost::asio::ip::tcp::endpoint ep;
-
-        test_acceptor()
-            : a(ioc)
-            , ep(boost::asio::ip::make_address_v4("127.0.0.1"), 0)
-        {
-            a.open(ep.protocol());
-            a.set_option(
-                boost::asio::socket_base::reuse_address(true));
-            a.bind(ep);
-            a.listen(boost::asio::socket_base::max_listen_connections);
-            ep = a.local_endpoint();
-            a.async_accept(
-                [](boost::system::error_code, boost::asio::ip::tcp::socket)
-                {
-                });
-        }
-    };
-
     class test_server
     {
         std::string_view s_;
@@ -140,7 +126,7 @@ namespace {
             fail(boost::system::error_code const& ec, std::string_view what)
         {
             if (ec != boost::asio::error::operation_aborted)
-                std::cout << what << ": " << ec.message() << "\n";
+                std::cerr << what << ": " << ec.message() << "\n";
         }
 
     public:
@@ -272,75 +258,79 @@ namespace {
                 });
         }
     };
+    class handler
+    {
+        std::optional<boost::system::error_code> ec_;
+        std::size_t n_;
+
+    public:
+        handler(boost::system::error_code ec, std::size_t n)
+            : ec_(ec)
+            , n_(n)
+        {
+        }
+
+        handler(handler&& other)
+            : ec_(other.ec_)
+            , n_(std::exchange(other.n_,
+                (std::numeric_limits<std::size_t>::max)()))
+        {
+        }
+
+        ~handler()
+        {
+            REQUIRE(
+                n_ == (std::numeric_limits<std::size_t>::max)());
+        }
+
+        void
+            operator()(boost::system::error_code const& ec, std::size_t n)
+        {
+            REQUIRE(ec == ec_);
+            REQUIRE(n == n_);
+            n_ = (std::numeric_limits<std::size_t>::max)();
+        }
+    };
 }
 auto const ep = boost::asio::ip::tcp::endpoint(boost::asio::ip::make_address("127.0.0.1"), 0);
 
-
-class handler
-{
-    std::optional<boost::system::error_code> ec_;
-    std::size_t n_;
-
-public:
-    handler(boost::system::error_code ec, std::size_t n)
-        : ec_(ec)
-        , n_(n)
-    {
-    }
-
-    handler(handler&& other)
-        : ec_(other.ec_)
-        , n_(std::exchange(other.n_,
-            (std::numeric_limits<std::size_t>::max)()))
-    {
-    }
-
-    ~handler()
-    {
-        REQUIRE(
-            n_ == (std::numeric_limits<std::size_t>::max)());
-    }
-
-    void
-        operator()(boost::system::error_code const& ec, std::size_t n)
-    {
-        REQUIRE(ec == ec_);
-        REQUIRE(n == n_);
-        n_ = (std::numeric_limits<std::size_t>::max)();
-    }
-};
-
 TEST_CASE("testRead async_read_some success", "basic_stream") {
-    test_server srv("*", ep);
     boost::asio::io_context ioc;
-    stream_type s(ioc);
-    s.socket().connect(srv.local_endpoint());
-    s.expires_never();
     char buf[4];
     std::memset(buf, 0, sizeof(buf));
     boost::asio::mutable_buffer mb(buf, sizeof(buf));
+    auto const ep = boost::asio::ip::tcp::endpoint(
+        boost::asio::ip::make_address("127.0.0.1"), 0);
+    test_server srv("*", ep);
+    stream_type s(ioc);
+    s.socket().connect(srv.local_endpoint());
+    s.expires_never();
     s.async_read_some(mb, handler({}, 1));
     ioc.run();
     ioc.restart();
 }
 
 TEST_CASE("testRead async_read_some success, with timeout", "basic_stream") {
-    test_server srv("*", ep);
     boost::asio::io_context ioc;
-    stream_type s(ioc);
-    s.socket().connect(srv.local_endpoint());
-    s.expires_after(std::chrono::seconds(30));
     char buf[4];
     std::memset(buf, 0, sizeof(buf));
     boost::asio::mutable_buffer mb(buf, sizeof(buf));
+    auto const ep = boost::asio::ip::tcp::endpoint(
+        boost::asio::ip::make_address("127.0.0.1"), 0);
+    test_server srv("*", ep);
+    stream_type s(ioc);
+    s.socket().connect(srv.local_endpoint());
+    s.expires_after(std::chrono::seconds(30));
     s.async_read_some(mb, handler({}, 1));
     ioc.run();
     ioc.restart();
 }
 
 TEST_CASE("testRead async_read_some empty buffer", "basic_stream") {
-    test_server srv("*", ep);
     boost::asio::io_context ioc;
+    auto const ep = boost::asio::ip::tcp::endpoint(
+        boost::asio::ip::make_address("127.0.0.1"), 0);
+    test_server srv("*", ep);
     stream_type s(ioc);
     s.socket().connect(srv.local_endpoint());
     s.expires_never();
@@ -351,8 +341,10 @@ TEST_CASE("testRead async_read_some empty buffer", "basic_stream") {
 }
 
 TEST_CASE("testRead async_read_some empty buffer, timeout", "basic_stream") {
-    test_server srv("*", ep);
     boost::asio::io_context ioc;
+    auto const ep = boost::asio::ip::tcp::endpoint(
+        boost::asio::ip::make_address("127.0.0.1"), 0);
+    test_server srv("*", ep);
     stream_type s(ioc);
     s.socket().connect(srv.local_endpoint());
     s.expires_after(std::chrono::seconds(0));
@@ -363,39 +355,45 @@ TEST_CASE("testRead async_read_some empty buffer, timeout", "basic_stream") {
 }
 
 TEST_CASE("testRead async_read_some expires_after", "basic_stream") {
-    test_server srv("", ep);
     boost::asio::io_context ioc;
-    stream_type s(ioc);
-    s.socket().connect(srv.local_endpoint());
-    s.expires_after(std::chrono::seconds(0));
     char buf[4];
     std::memset(buf, 0, sizeof(buf));
     boost::asio::mutable_buffer mb(buf, sizeof(buf));
+    auto const ep = boost::asio::ip::tcp::endpoint(
+        boost::asio::ip::make_address("127.0.0.1"), 0);
+    test_server srv("", ep);
+    stream_type s(ioc);
+    s.socket().connect(srv.local_endpoint());
+    s.expires_after(std::chrono::seconds(0));
     s.async_read_some(mb, handler(boost::beast::error::timeout, 0));
     ioc.run();
     ioc.restart();
 }
 
 TEST_CASE("testRead async_read_some expires_at", "basic_stream") {
-    test_server srv("", ep);
     boost::asio::io_context ioc;
-    stream_type s(ioc);
-    s.socket().connect(srv.local_endpoint());
-    s.expires_at(std::chrono::steady_clock::now());
     char buf[4];
     std::memset(buf, 0, sizeof(buf));
     boost::asio::mutable_buffer mb(buf, sizeof(buf));
+    auto const ep = boost::asio::ip::tcp::endpoint(
+        boost::asio::ip::make_address("127.0.0.1"), 0);
+    test_server srv("", ep);
+    stream_type s(ioc);
+    s.socket().connect(srv.local_endpoint());
+    s.expires_at(std::chrono::steady_clock::now());
     s.async_read_some(mb, handler(boost::beast::error::timeout, 0));
     ioc.run();
     ioc.restart();
 }
 
-TEST_CASE("testRead async_read_some stream destroyed", "basic_stream") {
-    test_server srv("", ep);
+TEST_CASE("testRead stream destroyed", "basic_stream") {
     boost::asio::io_context ioc;
     char buf[4];
     std::memset(buf, 0, sizeof(buf));
     boost::asio::mutable_buffer mb(buf, sizeof(buf));
+    auto const ep = boost::asio::ip::tcp::endpoint(
+        boost::asio::ip::make_address("127.0.0.1"), 0);
+    test_server srv("*", ep);
     {
         stream_type s(ioc);
         s.socket().connect(srv.local_endpoint());
@@ -409,13 +407,12 @@ TEST_CASE("testRead async_read_some stream destroyed", "basic_stream") {
     ioc.restart();
 }
 
-TEST_CASE("testRead async_read_some stale timer", "basic_stream") {
-    test_acceptor a;
+TEST_CASE("testRead stale timer", "basic_stream") {
     boost::asio::io_context ioc;
-    stream_type s(ioc);
     char buf[4];
     std::memset(buf, 0, sizeof(buf));
     boost::asio::mutable_buffer mb(buf, sizeof(buf));
+    stream_type s(ioc);
     s.expires_after(std::chrono::milliseconds(50));
     s.async_read_some(mb,
         [](boost::system::error_code, std::size_t)
@@ -427,20 +424,22 @@ TEST_CASE("testRead async_read_some stale timer", "basic_stream") {
     ioc.restart();
 }
 
-TEST_CASE("testRead async_read_some abandoned operation", "basic_stream") {
+
+TEST_CASE("testRead abandoned operation", "basic_stream") {
     boost::asio::io_context ioc;
     stream_type s(ioc);
+    bool checked = true;
     s.async_read_some(boost::asio::mutable_buffer{},
-        [](boost::system::error_code, std::size_t)
+        [&](boost::system::error_code, std::size_t)
         {
-            int a = 1;
-            //BEAST_FAIL();
+            checked = false;
         });
+    REQUIRE(checked);
 }
 
 TEST_CASE("testWrite write_some", "basic_stream") {
-    boost::system::error_code ec;
     boost::asio::io_context ioc;
+    boost::system::error_code ec;
     stream_type s(ioc, tcp::v4());
     REQUIRE(s.write_some(boost::asio::const_buffer{}) == 0);
     REQUIRE(s.write_some(boost::asio::const_buffer{}, ec) == 0);
@@ -448,12 +447,14 @@ TEST_CASE("testWrite write_some", "basic_stream") {
 }
 
 TEST_CASE("testWrite async_write_some success", "basic_stream") {
-    test_server srv("*", ep);
     boost::asio::io_context ioc;
-    stream_type s(ioc);
     char buf[4];
     std::memset(buf, 0, sizeof(buf));
     boost::asio::const_buffer cb(buf, sizeof(buf));
+    auto const ep = boost::asio::ip::tcp::endpoint(
+        boost::asio::ip::make_address("127.0.0.1"), 0);
+    test_server srv("*", ep);
+    stream_type s(ioc);
     s.socket().connect(srv.local_endpoint());
     s.expires_never();
     s.async_write_some(cb, handler({}, 4));
@@ -462,12 +463,14 @@ TEST_CASE("testWrite async_write_some success", "basic_stream") {
 }
 
 TEST_CASE("testWrite async_write_some success, with timeout", "basic_stream") {
-    test_server srv("*", ep);
     boost::asio::io_context ioc;
-    stream_type s(ioc);
     char buf[4];
     std::memset(buf, 0, sizeof(buf));
     boost::asio::const_buffer cb(buf, sizeof(buf));
+    auto const ep = boost::asio::ip::tcp::endpoint(
+        boost::asio::ip::make_address("127.0.0.1"), 0);
+    test_server srv("*", ep);
+    stream_type s(ioc);
     s.socket().connect(srv.local_endpoint());
     s.expires_after(std::chrono::seconds(30));
     s.async_write_some(cb, handler({}, 4));
@@ -476,8 +479,10 @@ TEST_CASE("testWrite async_write_some success, with timeout", "basic_stream") {
 }
 
 TEST_CASE("testWrite async_write_some empty buffer", "basic_stream") {
-    test_server srv("*", ep);
     boost::asio::io_context ioc;
+    auto const ep = boost::asio::ip::tcp::endpoint(
+        boost::asio::ip::make_address("127.0.0.1"), 0);
+    test_server srv("*", ep);
     stream_type s(ioc);
     s.socket().connect(srv.local_endpoint());
     s.expires_never();
@@ -488,8 +493,10 @@ TEST_CASE("testWrite async_write_some empty buffer", "basic_stream") {
 }
 
 TEST_CASE("testWrite async_write_some empty buffer, timeout", "basic_stream") {
-    test_server srv("*", ep);
     boost::asio::io_context ioc;
+    auto const ep = boost::asio::ip::tcp::endpoint(
+        boost::asio::ip::make_address("127.0.0.1"), 0);
+    test_server srv("*", ep);
     stream_type s(ioc);
     s.socket().connect(srv.local_endpoint());
     s.expires_after(std::chrono::seconds(0));
@@ -499,32 +506,41 @@ TEST_CASE("testWrite async_write_some empty buffer, timeout", "basic_stream") {
     ioc.restart();
 }
 
-TEST_CASE("testWrite async_write_some abandoned operation", "basic_stream") {
-    test_server srv("*", ep);
+TEST_CASE("testWrite abandoned operation", "basic_stream") {
     boost::asio::io_context ioc;
     stream_type s(ioc);
-    char buf[4];
-    std::memset(buf, 0, sizeof(buf));
-    boost::asio::const_buffer cb(buf, sizeof(buf));
-    s.async_write_some(cb,
-        [](boost::system::error_code, std::size_t)
+    bool checked = true;
+    s.async_write_some(boost::asio::mutable_buffer{},
+        [&](boost::system::error_code, std::size_t)
         {
-            //BEAST_FAIL();
+            checked = false;
         });
-}
-
-TEST_CASE("testConnect connect (member)", "basic_stream") {
-    test_acceptor a;
-    boost::asio::io_context ioc;
-    stream_type s(ioc);
-    boost::system::error_code ec;
-    s.connect(a.ep);
-    s.socket().close();
-    s.connect(a.ep, ec);
-    REQUIRE(!ec);
+    REQUIRE(checked);
 }
 
 namespace {
+    struct test_acceptor
+    {
+        boost::asio::io_context ioc;
+        boost::asio::ip::tcp::acceptor a;
+        boost::asio::ip::tcp::endpoint ep;
+
+        test_acceptor()
+            : a(ioc)
+            , ep(boost::asio::ip::make_address_v4("127.0.0.1"), 0)
+        {
+            a.open(ep.protocol());
+            a.set_option(
+                boost::asio::socket_base::reuse_address(true));
+            a.bind(ep);
+            a.listen(boost::asio::socket_base::max_listen_connections);
+            ep = a.local_endpoint();
+            a.async_accept(
+                [](boost::system::error_code, boost::asio::ip::tcp::socket)
+                {
+                });
+        }
+    };
 
     struct range
     {
@@ -557,63 +573,7 @@ namespace {
             return true;
         };
     };
-}
 
-TEST_CASE("testConnect connect 1", "basic_stream") {
-    test_acceptor a;
-    boost::asio::io_context ioc;
-    stream_type s(ioc);
-    boost::system::error_code ec;
-    range r;
-    r.ep = a.ep;
-    s.connect(r);
-    s.socket().close();
-    s.connect(r, ec);
-    REQUIRE(!ec);
-}
-
-TEST_CASE("testConnect connect 2", "basic_stream") {
-    test_acceptor a;
-    boost::asio::io_context ioc;
-    connect_condition cond;
-    stream_type s(ioc);
-    boost::system::error_code ec;
-    range r;
-    r.ep = a.ep;
-    s.connect(r, cond);
-    s.socket().close();
-    s.connect(r, cond, ec);
-    REQUIRE(!ec);
-}
-
-TEST_CASE("testConnect connect 3", "basic_stream") {
-    test_acceptor a;
-    boost::asio::io_context ioc;
-    stream_type s(ioc);
-    boost::system::error_code ec;
-    range r;
-    r.ep = a.ep;
-    s.connect(r.begin(), r.end());
-    s.socket().close();
-    s.connect(r.begin(), r.end(), ec);
-    REQUIRE(!ec);
-}
-
-TEST_CASE("testConnect connect 4", "basic_stream") {
-    test_acceptor a;
-    boost::asio::io_context ioc;
-    stream_type s(ioc);
-    connect_condition cond;
-    boost::system::error_code ec;
-    range r;
-    r.ep = a.ep;
-    s.connect(r.begin(), r.end(), cond);
-    s.socket().close();
-    s.connect(r.begin(), r.end(), cond, ec);
-    REQUIRE(!ec);
-}
-
-namespace {
     class connect_handler
     {
         bool pass_ = false;
@@ -626,7 +586,7 @@ namespace {
         }
 
         connect_handler()
-            : expected_(boost::system::error_code{})
+            : expected_({})
         {
         }
 
@@ -642,7 +602,7 @@ namespace {
         }
 
         connect_handler(connect_handler&& other)
-            : pass_(boost::exchange(other.pass_, true))
+            : pass_(std::exchange(other.pass_, true))
             , expected_(other.expected_)
         {
         }
@@ -662,7 +622,7 @@ namespace {
         range_handler() = default;
 
         range_handler(range_handler&& other)
-            : pass(boost::exchange(other.pass, true))
+            : pass(std::exchange(other.pass, true))
         {
         }
 
@@ -702,9 +662,74 @@ namespace {
     };
 }
 
-TEST_CASE("testConnect async_connect (member)", "basic_stream") {
-    test_acceptor a;
+TEST_CASE("testConnect connect (member)", "basic_stream") {
     boost::asio::io_context ioc;
+    test_acceptor a;
+    stream_type s(ioc);
+    boost::system::error_code ec;
+    s.connect(a.ep);
+    s.socket().close();
+    s.connect(a.ep, ec);
+    REQUIRE(!ec);
+}
+
+TEST_CASE("testConnect connect 1", "basic_stream") {
+    boost::asio::io_context ioc;
+    test_acceptor a;
+    stream_type s(ioc);
+    boost::system::error_code ec;
+    range r;
+    r.ep = a.ep;
+    s.connect(r);
+    s.socket().close();
+    s.connect(r, ec);
+    REQUIRE(!ec);
+}
+
+TEST_CASE("testConnect connect 2", "basic_stream") {
+    boost::asio::io_context ioc;
+    test_acceptor a;
+    stream_type s(ioc);
+    boost::system::error_code ec;
+    range r;
+    connect_condition cond;
+    r.ep = a.ep;
+    s.connect(r, cond);
+    s.socket().close();
+    s.connect(r, cond, ec);
+    REQUIRE(!ec);
+}
+
+TEST_CASE("testConnect connect 3", "basic_stream") {
+    boost::asio::io_context ioc;
+    test_acceptor a;
+    stream_type s(ioc);
+    boost::system::error_code ec;
+    range r;
+    r.ep = a.ep;
+    s.connect(r.begin(), r.end());
+    s.socket().close();
+    s.connect(r.begin(), r.end(), ec);
+    REQUIRE(!ec);
+}
+
+TEST_CASE("testConnect connect 4", "basic_stream") {
+    boost::asio::io_context ioc;
+    test_acceptor a;
+    stream_type s(ioc);
+    boost::system::error_code ec;
+    range r;
+    connect_condition cond;
+    r.ep = a.ep;
+    s.connect(r.begin(), r.end(), cond);
+    s.socket().close();
+    s.connect(r.begin(), r.end(), cond, ec);
+    REQUIRE(!ec);
+}
+
+TEST_CASE("testConnect async_connect (member)", "basic_stream") {
+    boost::asio::io_context ioc;
+    test_acceptor a;
     stream_type s(ioc);
     s.expires_never();
     s.async_connect(a.ep, connect_handler{});
@@ -718,8 +743,8 @@ TEST_CASE("testConnect async_connect (member)", "basic_stream") {
 }
 
 TEST_CASE("testConnect async_connect 1", "basic_stream") {
-    test_acceptor a;
     boost::asio::io_context ioc;
+    test_acceptor a;
     stream_type s(ioc);
     range r;
     r.ep = a.ep;
@@ -735,11 +760,11 @@ TEST_CASE("testConnect async_connect 1", "basic_stream") {
 }
 
 TEST_CASE("testConnect async_connect 2", "basic_stream") {
-    test_acceptor a;
     boost::asio::io_context ioc;
-    connect_condition cond;
+    test_acceptor a;
     stream_type s(ioc);
     range r;
+    connect_condition cond;
     r.ep = a.ep;
     s.expires_never();
     s.async_connect(r, cond, range_handler{});
@@ -753,8 +778,8 @@ TEST_CASE("testConnect async_connect 2", "basic_stream") {
 }
 
 TEST_CASE("testConnect async_connect 3", "basic_stream") {
-    test_acceptor a;
     boost::asio::io_context ioc;
+    test_acceptor a;
     stream_type s(ioc);
     range r;
     r.ep = a.ep;
@@ -772,11 +797,11 @@ TEST_CASE("testConnect async_connect 3", "basic_stream") {
 }
 
 TEST_CASE("testConnect async_connect 4", "basic_stream") {
-    test_acceptor a;
     boost::asio::io_context ioc;
-    connect_condition cond;
+    test_acceptor a;
     stream_type s(ioc);
     range r;
+    connect_condition cond;
     r.ep = a.ep;
     s.expires_never();
     s.async_connect(r.begin(), r.end(), cond,
@@ -791,10 +816,9 @@ TEST_CASE("testConnect async_connect 4", "basic_stream") {
     ioc.restart();
 }
 
-TEST_CASE("testConnect async_connect timeout 1", "basic_stream") {
-    // normal timeout
-    // Requires timeout happen before ECONNREFUSED 
+TEST_CASE("testConnect async_connect normal timeout", "basic_stream") {
     boost::asio::io_context ioc;
+    // Requires timeout happen before ECONNREFUSED 
     stream_type s(ioc);
     auto const ep = boost::asio::ip::tcp::endpoint(
 #if 1
@@ -810,9 +834,8 @@ TEST_CASE("testConnect async_connect timeout 1", "basic_stream") {
     ioc.restart();
 }
 
-TEST_CASE("testConnect async_connect timeout 2", "basic_stream") {
+TEST_CASE("testConnect async_connect stream destroyed", "basic_stream") {
     boost::asio::io_context ioc;
-    // stream destroyed
     {
         stream_type s(ioc);
         auto const ep = boost::asio::ip::tcp::endpoint(
@@ -824,9 +847,8 @@ TEST_CASE("testConnect async_connect timeout 2", "basic_stream") {
     ioc.restart();
 }
 
-TEST_CASE("testConnect async_connect timeout 3", "basic_stream") {
+TEST_CASE("testConnect async_connect stale timer", "basic_stream") {
     boost::asio::io_context ioc;
-    // stale timer
     test_acceptor a;
     stream_type s(ioc);
     s.expires_after(std::chrono::milliseconds(50));
@@ -837,43 +859,50 @@ TEST_CASE("testConnect async_connect timeout 3", "basic_stream") {
     ioc.restart();
 }
 
-TEST_CASE("testConnect async_connect  abandoned operation", "basic_stream") {
+TEST_CASE("testConnect async_connect abandoned operation", "basic_stream") {
     boost::asio::io_context ioc;
     stream_type s(ioc);
     boost::asio::ip::tcp::endpoint ep(
         boost::asio::ip::make_address_v4("127.0.0.1"), 1);
+    bool checked = true;
     s.async_connect(ep,
-        [](boost::system::error_code)
+        [&](boost::system::error_code)
         {
-            //BEAST_FAIL();
+            checked = false;
         });
+    REQUIRE(checked);
 }
 
-namespace member {
-    class handler
+namespace {
+    class member_handler
     {
         bool pass_ = false;
         std::optional<boost::system::error_code> expected_ = {};
 
     public:
-        ~handler()
+        ~member_handler()
         {
             REQUIRE(pass_);
         }
-     
+
+        member_handler()
+            : expected_({})
+        {
+        }
+
         explicit
-            handler(boost::system::error_code expected)
+            member_handler(boost::system::error_code expected)
             : expected_(expected)
         {
         }
 
         explicit
-            handler(std::nullopt_t)
+            member_handler(std::nullopt_t)
         {
         }
 
-        handler(handler&& other)
-            : pass_(std::exchange(other.pass_,  true))
+        member_handler(member_handler&& other)
+            : pass_(std::exchange(other.pass_, true))
             , expected_(other.expected_)
         {
         }
@@ -889,14 +918,16 @@ namespace member {
 
 TEST_CASE("testMembers cancel", "basic_stream") {
     boost::asio::io_context ioc;
+    char buf[4];
+    std::memset(buf, 0, sizeof(buf));
+    boost::asio::mutable_buffer mb(buf, sizeof(buf));
+    auto const ep = boost::asio::ip::tcp::endpoint(
+        boost::asio::ip::make_address("127.0.0.1"), 0);
     test_server srv("", ep);
     stream_type s(ioc);
     s.connect(srv.local_endpoint());
     s.expires_never();
-    char buf[4];
-    auto mb = boost::asio::buffer(buf);
-    std::memset(buf, 0, sizeof(buf));
-    s.socket().async_read_some(mb, member::handler(
+    s.socket().async_read_some(mb, member_handler(
         boost::asio::error::operation_aborted));
     s.cancel();
     ioc.run();
@@ -905,15 +936,17 @@ TEST_CASE("testMembers cancel", "basic_stream") {
 
 TEST_CASE("testMembers close", "basic_stream") {
     boost::asio::io_context ioc;
+    char buf[4];
+    std::memset(buf, 0, sizeof(buf));
+    boost::asio::mutable_buffer mb(buf, sizeof(buf));
+    auto const ep = boost::asio::ip::tcp::endpoint(
+        boost::asio::ip::make_address("127.0.0.1"), 0);
     test_server srv("", ep);
     stream_type s(ioc);
-    char buf[4];
-    auto mb = boost::asio::buffer(buf);
-    std::memset(buf, 0, sizeof(buf));
     s.connect(srv.local_endpoint());
     s.expires_never();
     s.socket().async_read_some(mb,
-        member::handler(std::nullopt));
+        member_handler(std::nullopt));
     s.close();
     ioc.run();
     ioc.restart();
@@ -924,13 +957,15 @@ TEST_CASE("testMembers destructor", "basic_stream") {
     char buf[4];
     auto mb = boost::asio::buffer(buf);
     std::memset(buf, 0, sizeof(buf));
+    auto const ep = boost::asio::ip::tcp::endpoint(
+        boost::asio::ip::make_address("127.0.0.1"), 0);
     test_server srv("", ep);
     {
         stream_type s(ioc);
         s.connect(srv.local_endpoint());
         s.expires_never();
         s.socket().async_read_some(mb,
-            member::handler(std::nullopt));
+            member_handler(std::nullopt));
     }
     ioc.run();
     ioc.restart();
@@ -949,7 +984,6 @@ TEST_CASE("testMembers customization points 2", "basic_stream") {
     boost::beast::teardown(boost::beast::role_type::client, s, ec);
 }
 
-
 TEST_CASE("testMembers customization points 3", "basic_stream") {
     boost::asio::io_context ioc;
     stream_type s(ioc);
@@ -957,4 +991,52 @@ TEST_CASE("testMembers customization points 3", "basic_stream") {
         [](boost::system::error_code)
         {
         });
+}
+
+TEST_CASE("testIssue1589", "basic_stream") {
+    boost::asio::io_context ioc;
+    // the timer needlessly used polymorphic executor
+    boost::beast::basic_stream<tcp, executor>{ioc};
+
+    // make sure strands work
+    boost::beast::basic_stream<
+        tcp,
+        boost::asio::strand<
+        executor>>{
+        boost::asio::make_strand(ioc)};
+
+    // address the problem in the issue
+    {
+        boost::asio::basic_stream_socket<tcp, strand> sock(boost::asio::make_strand(ioc));
+        boost::beast::basic_stream<
+            tcp,
+            strand,
+            boost::beast::unlimited_rate_policy> stream(std::move(sock));
+        BOOST_STATIC_ASSERT(
+            std::is_convertible<
+            decltype(sock)::executor_type,
+            decltype(stream)::executor_type>::value);
+    }
+}
+
+TEST_CASE("testIssue2065", "basic_stream") {
+    boost::asio::io_context ioc;
+    char buf[4];
+    std::memset(buf, 0, sizeof(buf));
+    boost::asio::mutable_buffer mb(buf, sizeof(buf));
+    auto const ep = boost::asio::ip::tcp::endpoint(
+        boost::asio::ip::make_address("127.0.0.1"), 0);
+
+    // async_read_some
+    {
+        // success
+        test_server srv("*", ep);
+        stream_type s(ioc);
+        s.socket().connect(srv.local_endpoint());
+        s.expires_never();
+        s.async_read_some(mb, handler({}, 1));
+        s.async_read_some(boost::asio::buffer(buf, 0), handler({}, 0));
+        ioc.run();
+        ioc.restart();
+    }
 }

@@ -10,10 +10,10 @@
 #ifndef BOOST_BEAST_STREAM_TESTS_HPP
 #define BOOST_BEAST_STREAM_TESTS_HPP
 
+#include "catch.hpp"
 #include <boost/beast/core/error.hpp>
 #include <boost/beast/core/stream_traits.hpp>
 #include <boost/asio/buffer.hpp>
-//#include <boost/asio/use_future.hpp>
 
 namespace boost {
 namespace beast {
