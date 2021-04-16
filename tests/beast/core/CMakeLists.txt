@@ -6,7 +6,7 @@ PRIVATE
 	#buffer_traits.cpp
 	#buffered_read_stream.cpp
 	#buffers_adaptor.cpp
-	#buffers_cat.cpp
+	buffers_cat.cpp
 	#buffers_prefix.cpp
 	#buffers_range.cpp
 	#detail_base64.cpp
@@ -14,6 +14,6 @@ PRIVATE
 	#detail_clamp.cpp
 	#detail_get_io_context.cpp
 	#detail_sha1.cpp
-	detail_tuple.cpp
+	#detail_tuple.cpp
 	#detail_varint.cpp
 )

@@ -12,8 +12,8 @@
 
 #include <boost/beast/core/detail/config.hpp>
 #include <boost/beast/core/buffer_traits.hpp>
+#include <boost/beast/core/detail/tuple.hpp>
 #include <boost/beast/core/detail/type_traits.hpp>
-#include <tuple>
 
 namespace boost {
 namespace beast {
@@ -24,7 +24,7 @@ namespace beast {
 template<class... Buffers>
 class buffers_cat_view
 {
-    std::tuple<Buffers...> bn_;
+    detail::tuple<Buffers...> bn_;
 
 public:
     /** The type of buffer returned when dereferencing an iterator.
