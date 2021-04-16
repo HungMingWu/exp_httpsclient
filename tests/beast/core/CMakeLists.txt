@@ -8,6 +8,7 @@ PRIVATE
 	buffers_adaptor.cpp
 	#buffers_cat.cpp
 	buffers_prefix.cpp
+	buffers_range.cpp
 	detail_base64.cpp
 	detail_buffer.cpp
 	detail_clamp.cpp
