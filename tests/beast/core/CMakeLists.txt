@@ -7,6 +7,7 @@ PRIVATE
 	buffered_read_stream.cpp
 	buffers_adaptor.cpp
 	#buffers_cat.cpp
+	buffers_prefix.cpp
 	detail_base64.cpp
 	detail_buffer.cpp
 	detail_clamp.cpp
