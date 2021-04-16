@@ -2,6 +2,7 @@
 #include <iostream>
 #include <optional>
 #include <string_view>
+#include <thread>
 #include <boost/asio/io_context.hpp>
 #include <boost/asio/strand.hpp>
 #include <boost/asio/ip/tcp.hpp>

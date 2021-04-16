@@ -241,7 +241,7 @@ namespace {
             {
                 // shouldn't be called since the enclosing
                 // networking wrapper only uses dispatch
-                BEAST_FAIL();
+                REQUIRE(false);
             }
         }
 #endif
@@ -284,7 +284,7 @@ namespace {
         {
             // shouldn't be called since the enclosing
             // networking wrapper only uses dispatch
-            BEAST_FAIL();
+            REQUIRE(false);;
         }
 
         template<class F, class Alloc>
@@ -293,7 +293,7 @@ namespace {
         {
             // shouldn't be called since the enclosing
             // networking wrapper only uses dispatch
-            BEAST_FAIL();
+            REQUIRE(false);
         }
 #endif // !defined(BOOST_ASIO_NO_TS_EXECUTORS)
     };
