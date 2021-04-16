@@ -120,7 +120,7 @@ namespace boost {
                     src = { src.data(), buffer_bytes(b) };
                 net::buffer_copy(b, net::const_buffer(
                     src.data(), src.size()));
-                BEAST_EXPECT(beast::buffers_to_string(b) == src);
+                REQUIRE(beast::buffers_to_string(b) == src);
             }
 
         } // detail
@@ -301,23 +301,23 @@ namespace boost {
                 {
                     MutableDynamicBuffer_v0 b(b0);
                     auto const mb = b.prepare(src.size());
-                    BEAST_EXPECT(buffer_bytes(mb) == src.size());
+                    REQUIRE(buffer_bytes(mb) == src.size());
                     buffers_fill(mb, '*');
                     b.commit(src.size());
-                    BEAST_EXPECT(b.size() == src.size());
-                    BEAST_EXPECT(
+                    REQUIRE(b.size() == src.size());
+                    REQUIRE(
                         beast::buffers_to_string(b.data()) ==
                         std::string(src.size(), '*'));
-                    BEAST_EXPECT(
+                    REQUIRE(
                         beast::buffers_to_string(b.cdata()) ==
                         std::string(src.size(), '*'));
                     auto const n = net::buffer_copy(
                         b.data(), net::const_buffer(
                             src.data(), src.size()));
-                    BEAST_EXPECT(n == src.size());
-                    BEAST_EXPECT(
+                    REQUIRE(n == src.size());
+                    REQUIRE(
                         beast::buffers_to_string(b.data()) == src);
-                    BEAST_EXPECT(
+                    REQUIRE(
                         beast::buffers_to_string(b.cdata()) == src);
                 }
 
@@ -331,9 +331,9 @@ namespace boost {
                     auto cb = static_cast<
                         MutableDynamicBuffer_v0 const&>(b).data();
                     auto cbc = b.cdata();
-                    BEAST_EXPECT(
+                    REQUIRE(
                         beast::buffers_to_string(b.data()) == src);
-                    BEAST_EXPECT(
+                    REQUIRE(
                         beast::buffers_to_string(b.cdata()) == src);
                     beast::test_buffer_sequence(cb);
                     beast::test_buffer_sequence(cbc);
@@ -375,8 +375,8 @@ namespace boost {
                 net::is_mutable_buffer_sequence<typename
                 DynamicBuffer_v0::mutable_buffers_type>::value);
 
-            BEAST_EXPECT(b0.size() == 0);
-            BEAST_EXPECT(buffer_bytes(b0.data()) == 0);
+            REQUIRE(b0.size() == 0);
+            REQUIRE(buffer_bytes(b0.data()) == 0);
 
             // members
             {
@@ -390,16 +390,16 @@ namespace boost {
                 // copy constructor
                 {
                     DynamicBuffer_v0 b2(b1);
-                    BEAST_EXPECT(b2.size() == b1.size());
-                    BEAST_EXPECT(
+                    REQUIRE(b2.size() == b1.size());
+                    REQUIRE(
                         buffers_to_string(b1.data()) ==
                         buffers_to_string(b2.data()));
 
                     // https://github.com/boostorg/beast/issues/1621
                     b2.consume(1);
                     DynamicBuffer_v0 b3(b2);
-                    BEAST_EXPECT(b3.size() == b2.size());
-                    BEAST_EXPECT(
+                    REQUIRE(b3.size() == b2.size());
+                    REQUIRE(
                         buffers_to_string(b2.data()) ==
                         buffers_to_string(b3.data()));
                 }
@@ -408,8 +408,8 @@ namespace boost {
                 {
                     DynamicBuffer_v0 b2(b1);
                     DynamicBuffer_v0 b3(std::move(b2));
-                    BEAST_EXPECT(b3.size() == b1.size());
-                    BEAST_EXPECT(
+                    REQUIRE(b3.size() == b1.size());
+                    REQUIRE(
                         buffers_to_string(b3.data()) ==
                         buffers_to_string(b1.data()));
                 }
@@ -418,23 +418,23 @@ namespace boost {
                 {
                     DynamicBuffer_v0 b2(b0);
                     b2 = b1;
-                    BEAST_EXPECT(b2.size() == b1.size());
-                    BEAST_EXPECT(
+                    REQUIRE(b2.size() == b1.size());
+                    REQUIRE(
                         buffers_to_string(b1.data()) ==
                         buffers_to_string(b2.data()));
 
                     // self assignment
                     b2 = *&b2;
-                    BEAST_EXPECT(b2.size() == b1.size());
-                    BEAST_EXPECT(
+                    REQUIRE(b2.size() == b1.size());
+                    REQUIRE(
                         buffers_to_string(b2.data()) ==
                         buffers_to_string(b1.data()));
 
                     // https://github.com/boostorg/beast/issues/1621
                     b2.consume(1);
                     DynamicBuffer_v0 b3(b2);
-                    BEAST_EXPECT(b3.size() == b2.size());
-                    BEAST_EXPECT(
+                    REQUIRE(b3.size() == b2.size());
+                    REQUIRE(
                         buffers_to_string(b2.data()) ==
                         buffers_to_string(b3.data()));
 
@@ -445,15 +445,15 @@ namespace boost {
                     DynamicBuffer_v0 b2(b1);
                     DynamicBuffer_v0 b3(b0);
                     b3 = std::move(b2);
-                    BEAST_EXPECT(b3.size() == b1.size());
-                    BEAST_EXPECT(
+                    REQUIRE(b3.size() == b1.size());
+                    REQUIRE(
                         buffers_to_string(b3.data()) ==
                         buffers_to_string(b1.data()));
 
                     // self move
                     b3 = std::move(b3);
-                    BEAST_EXPECT(b3.size() == b1.size());
-                    BEAST_EXPECT(
+                    REQUIRE(b3.size() == b1.size());
+                    REQUIRE(
                         buffers_to_string(b3.data()) ==
                         buffers_to_string(b1.data()));
                 }
@@ -462,13 +462,13 @@ namespace boost {
                 {
                     DynamicBuffer_v0 b2(b1);
                     DynamicBuffer_v0 b3(b0);
-                    BEAST_EXPECT(b2.size() == b1.size());
-                    BEAST_EXPECT(b3.size() == b0.size());
+                    REQUIRE(b2.size() == b1.size());
+                    REQUIRE(b3.size() == b0.size());
                     using std::swap;
                     swap(b2, b3);
-                    BEAST_EXPECT(b2.size() == b0.size());
-                    BEAST_EXPECT(b3.size() == b1.size());
-                    BEAST_EXPECT(
+                    REQUIRE(b2.size() == b0.size());
+                    REQUIRE(b3.size() == b1.size());
+                    REQUIRE(
                         buffers_to_string(b3.data()) ==
                         buffers_to_string(b1.data()));
                 }
@@ -478,42 +478,41 @@ namespace boost {
             {
                 DynamicBuffer_v0 b(b0);
                 b.commit(1);
-                BEAST_EXPECT(b.size() == 0);
-                BEAST_EXPECT(buffer_bytes(b.prepare(0)) == 0);
+                REQUIRE(b.size() == 0);
+                REQUIRE(buffer_bytes(b.prepare(0)) == 0);
                 b.commit(0);
-                BEAST_EXPECT(b.size() == 0);
+                REQUIRE(b.size() == 0);
                 b.commit(1);
-                BEAST_EXPECT(b.size() == 0);
+                REQUIRE(b.size() == 0);
                 b.commit(b.max_size() + 1);
-                BEAST_EXPECT(b.size() == 0);
+                REQUIRE(b.size() == 0);
                 b.consume(0);
-                BEAST_EXPECT(b.size() == 0);
+                REQUIRE(b.size() == 0);
                 b.consume(1);
-                BEAST_EXPECT(b.size() == 0);
+                REQUIRE(b.size() == 0);
                 b.consume(b.max_size() + 1);
-                BEAST_EXPECT(b.size() == 0);
+                REQUIRE(b.size() == 0);
             }
 
             // max_size
             {
                 DynamicBuffer_v0 b(b0);
-                if (BEAST_EXPECT(
-                    b.max_size() + 1 > b.max_size()))
+                bool checked = false;
+                if (b.max_size() + 1 > b.max_size())
                 {
                     try
                     {
                         b.prepare(b.max_size() + 1);
-                        BEAST_FAIL();
                     }
                     catch (std::length_error const&)
                     {
-                        BEAST_PASS();
+                        checked = true;
                     }
                     catch (...)
                     {
-                        BEAST_FAIL();
                     }
                 }
+                REQUIRE(checked);
             }
 
             // setup source buffer
@@ -522,9 +521,9 @@ namespace boost {
             string_view src(buf, sizeof(buf));
             if (src.size() > b0.max_size())
                 src = { src.data(), b0.max_size() };
-            BEAST_EXPECT(b0.max_size() >= src.size());
-            BEAST_EXPECT(b0.size() == 0);
-            BEAST_EXPECT(buffer_bytes(b0.data()) == 0);
+            REQUIRE(b0.max_size() >= src.size());
+            REQUIRE(b0.size() == 0);
+            REQUIRE(buffer_bytes(b0.data()) == 0);
             auto const make_new_src =
                 [&buf, &k0, &src]
             {
@@ -539,11 +538,11 @@ namespace boost {
                 DynamicBuffer_v0 b(b0);
                 auto const& bc(b);
                 auto const mb = b.prepare(src.size());
-                BEAST_EXPECT(buffer_bytes(mb) == src.size());
+                REQUIRE(buffer_bytes(mb) == src.size());
                 beast::test_buffer_sequence(mb);
                 b.commit(net::buffer_copy(mb,
                     net::const_buffer(src.data(), src.size())));
-                BEAST_EXPECT(
+                REQUIRE(
                     buffer_bytes(bc.data()) == src.size());
                 beast::test_buffer_sequence(bc.data());
             }
@@ -575,14 +574,14 @@ namespace boost {
                                     b.commit(n);
                                     cb += n;
                                 }
-                                BEAST_EXPECT(b.size() == in.size());
-                                BEAST_EXPECT(
+                                REQUIRE(b.size() == in.size());
+                                REQUIRE(
                                     buffer_bytes(bc.data()) == in.size());
-                                BEAST_EXPECT(beast::buffers_to_string(
+                                REQUIRE(beast::buffers_to_string(
                                     bc.data()) == in);
                                 while (b.size() > 0)
                                     b.consume(k);
-                                BEAST_EXPECT(buffer_bytes(bc.data()) == 0);
+                                REQUIRE(buffer_bytes(bc.data()) == 0);
                             }
                         }
                     }

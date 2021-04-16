@@ -23,14 +23,6 @@
 namespace boost {
 namespace beast {
 
-// a tag for in-place initialization of contained value
-struct buffers_init_t
-{
-    struct init_tag {};
-    explicit buffers_init_t(init_tag) {}
-};
-const buffers_init_t in_place_init((buffers_init_t::init_tag()));
-
 /** A buffer sequence adaptor that shortens the sequence size.
 
     The class adapts a buffer sequence to efficiently represent

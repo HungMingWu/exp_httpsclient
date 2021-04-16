@@ -21,6 +21,14 @@
 namespace boost {
 namespace beast {
 
+// a tag for in-place initialization of contained value
+struct buffers_init_t
+{
+    struct init_tag {};
+    explicit buffers_init_t(init_tag) {}
+};
+const buffers_init_t in_place_init((buffers_init_t::init_tag()));
+
 /** Determine if a list of types satisfy the <em>ConstBufferSequence</em> requirements.
 
     This metafunction is used to determine if all of the specified types

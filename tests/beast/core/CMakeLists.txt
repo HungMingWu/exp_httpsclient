@@ -5,6 +5,7 @@ PRIVATE
 	bind_handler.cpp
 	buffer_traits.cpp
 	buffered_read_stream.cpp
+	buffers_adaptor.cpp
 	#buffers_cat.cpp
 	detail_base64.cpp
 	detail_buffer.cpp
