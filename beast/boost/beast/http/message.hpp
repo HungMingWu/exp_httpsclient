@@ -17,7 +17,6 @@
 #include <boost/beast/http/type_traits.hpp>
 #include <boost/beast/core/string.hpp>
 #include <boost/core/empty_value.hpp>
-#include <boost/mp11/integer_sequence.hpp>
 #include <boost/assert.hpp>
 #include <boost/throw_exception.hpp>
 #include <memory>
@@ -906,7 +905,7 @@ private:
     message(
         std::piecewise_construct_t,
         std::tuple<BodyArgs...>& body_args,
-        mp11::index_sequence<IBodyArgs...>)
+        std::index_sequence<IBodyArgs...>)
         : boost::empty_value<
             typename Body::value_type>(boost::empty_init_t(),
                 std::forward<BodyArgs>(
@@ -924,8 +923,8 @@ private:
         std::piecewise_construct_t,
         std::tuple<BodyArgs...>& body_args,
         std::tuple<FieldsArgs...>& fields_args,
-        mp11::index_sequence<IBodyArgs...>,
-        mp11::index_sequence<IFieldsArgs...>)
+        std::index_sequence<IBodyArgs...>,
+        std::index_sequence<IFieldsArgs...>)
         : header_type(std::forward<FieldsArgs>(
             std::get<IFieldsArgs>(fields_args))...)
         , boost::empty_value<

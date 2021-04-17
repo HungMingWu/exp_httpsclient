@@ -15,7 +15,6 @@
 #include <boost/beast/core/detail/static_const.hpp>
 #include <boost/asio/buffer.hpp>
 #include <boost/config/workaround.hpp>
-#include <boost/mp11/function.hpp>
 #include <type_traits>
 
 namespace boost {
@@ -43,9 +42,9 @@ template<class... BufferSequence>
 #if BOOST_BEAST_DOXYGEN
 using is_const_buffer_sequence = __see_below__;
 #else
-using is_const_buffer_sequence = mp11::mp_all<
+using is_const_buffer_sequence = std::conjunction<
     net::is_const_buffer_sequence<
-        typename std::decay<BufferSequence>::type>...>;
+        std::decay_t<BufferSequence>>...>;
 #endif
 
 /** Determine if a list of types satisfy the <em>MutableBufferSequence</em> requirements.
@@ -62,9 +61,9 @@ template<class... BufferSequence>
 #if BOOST_BEAST_DOXYGEN
 using is_mutable_buffer_sequence = __see_below__;
 #else
-using is_mutable_buffer_sequence = mp11::mp_all<
+using is_mutable_buffer_sequence = std::conjunction<
     net::is_mutable_buffer_sequence<
-        typename std::decay<BufferSequence>::type>...>;
+        std::decay_t<BufferSequence>>...>;
 #endif
 
 /** Type alias for the underlying buffer type of a list of buffer sequence types.

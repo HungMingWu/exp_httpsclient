@@ -11,7 +11,6 @@
 #define BOOST_BEAST_IMPL_BUFFERS_CAT_HPP
 
 #include <boost/asio/buffer.hpp>
-#include <boost/mp11/detail/mp_with_index.hpp>
 #include <boost/assert.hpp>
 #include <cstdint>
 #include <iterator>
