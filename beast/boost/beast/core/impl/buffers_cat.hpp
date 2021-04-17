@@ -222,7 +222,7 @@ private:
             for (;;)
             {
                 if (it == net::buffer_sequence_end(
-                    self.bn_->get<I>()))
+                    self.bn_->template get<I>()))
                     break;
                 if (net::const_buffer(*it).size() > 0)
                     return;
@@ -232,7 +232,7 @@ private:
             if constexpr (I < sizeof...(Bn) - 1) {
                 self.it_.template emplace<I + 1>(
                     net::buffer_sequence_begin(
-                        self.bn_->get<I + 1>()));
+                        self.bn_->template get<I + 1>()));
                 next<I + 1>();
             }
             else {
@@ -256,7 +256,7 @@ private:
             else if constexpr (std::is_same_v<T, past_end>) {
                 self.it_.template emplace<I - 1>(
                     net::buffer_sequence_end(
-                        self.bn_->get<I - 1>()));
+                        self.bn_->template get<I - 1>()));
                 prev<I - 1>();
             }
             else {
@@ -271,7 +271,7 @@ private:
             for (;;)
             {
                 if (it == net::buffer_sequence_begin(
-                    self.bn_->get<I>()))
+                    self.bn_->template get<I>()))
                     break;
                 --it;
                 if (net::const_buffer(*it).size() > 0)
@@ -281,7 +281,7 @@ private:
             if constexpr (I > 0) {
                 self.it_.template emplace<I - 1>(
                     net::buffer_sequence_end(
-                        self.bn_->get<I - 1>()));
+                        self.bn_->template get<I - 1>()));
                 prev<I - 1>();
             } else if constexpr (I == 0) {
                 BOOST_BEAST_LOGIC_ERROR(
@@ -315,7 +315,7 @@ const_iterator(
 {
     it_.template emplace<0>(
         net::buffer_sequence_begin(
-            bn_->get<0>()));
+            bn_->template get<0>()));
     increment{*this}.template next<0>();
 }
 
