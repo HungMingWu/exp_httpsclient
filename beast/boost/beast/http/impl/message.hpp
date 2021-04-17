@@ -286,7 +286,7 @@ message(std::piecewise_construct_t,
         std::tuple<BodyArgs...> body_args)
     : message(std::piecewise_construct,
         body_args,
-        mp11::make_index_sequence<
+        std::make_index_sequence<
             sizeof...(BodyArgs)>{})
 {
 }
@@ -300,9 +300,9 @@ message(std::piecewise_construct_t,
     : message(std::piecewise_construct,
         body_args,
         fields_args,
-        mp11::make_index_sequence<
+        std::make_index_sequence<
             sizeof...(BodyArgs)>{},
-        mp11::make_index_sequence<
+        std::make_index_sequence<
             sizeof...(FieldsArgs)>{})
 {
 }
