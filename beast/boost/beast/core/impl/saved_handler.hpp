@@ -10,7 +10,6 @@
 #ifndef BOOST_BEAST_CORE_IMPL_SAVED_HANDLER_HPP
 #define BOOST_BEAST_CORE_IMPL_SAVED_HANDLER_HPP
 
-#include <boost/beast/core/detail/allocator.hpp>
 #include <boost/asio/associated_allocator.hpp>
 #include <boost/asio/associated_executor.hpp>
 #include <boost/asio/executor_work_guard.hpp>
@@ -41,11 +40,11 @@ template<class Handler, class Alloc>
 class saved_handler::impl final : public base
 {
     using alloc_type = typename
-        beast::detail::allocator_traits<
+        std::allocator_traits<
             Alloc>::template rebind_alloc<impl>;
 
     using alloc_traits =
-        beast::detail::allocator_traits<alloc_type>;
+        std::allocator_traits<alloc_type>;
 
     struct ebo_pair : boost::empty_value<alloc_type>
     {
@@ -117,11 +116,11 @@ emplace(Handler&& handler, Allocator const& alloc)
     using handler_type =
         typename std::decay<Handler>::type;
     using alloc_type = typename
-        detail::allocator_traits<Allocator>::
+        std::allocator_traits<Allocator>::
             template rebind_alloc<impl<
                 handler_type, Allocator>>;
     using alloc_traits =
-        beast::detail::allocator_traits<alloc_type>;
+        std::allocator_traits<alloc_type>;
     struct storage
     {
         alloc_type a;

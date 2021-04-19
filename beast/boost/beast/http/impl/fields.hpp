@@ -1034,7 +1034,7 @@ realloc_string(string_view& dest, string_view s)
 {
     if(dest.empty() && s.empty())
         return;
-    auto a = typename beast::detail::allocator_traits<
+    auto a = typename std::allocator_traits<
         Allocator>::template rebind_alloc<
             char>(this->get());
     char* p = nullptr;
@@ -1063,7 +1063,7 @@ realloc_target(
     // the writer class.
     if(dest.empty() && s.empty())
         return;
-    auto a = typename beast::detail::allocator_traits<
+    auto a = typename std::allocator_traits<
         Allocator>::template rebind_alloc<
             char>(this->get());
     char* p = nullptr;

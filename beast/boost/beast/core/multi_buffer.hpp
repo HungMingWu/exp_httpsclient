@@ -11,7 +11,6 @@
 #define BOOST_BEAST_MULTI_BUFFER_HPP
 
 #include <boost/beast/core/detail/config.hpp>
-#include <boost/beast/core/detail/allocator.hpp>
 #include <boost/asio/buffer.hpp>
 #include <boost/core/empty_value.hpp>
 #include <boost/intrusive/list.hpp>
@@ -83,7 +82,7 @@ class basic_multi_buffer
                 boost::intrusive::normal_link>>
     {
         using size_type = typename
-            detail::allocator_traits<Allocator>::size_type;
+            std::allocator_traits<Allocator>::size_type;
 
         size_type const size_;
 
@@ -114,17 +113,17 @@ class basic_multi_buffer
     class subrange;
 
     using size_type = typename
-        detail::allocator_traits<Allocator>::size_type;
+        std::allocator_traits<Allocator>::size_type;
 
     using align_type = typename
         boost::type_with_alignment<alignof(element)>::type;
 
     using rebind_type = typename
-        beast::detail::allocator_traits<Allocator>::
+        std::allocator_traits<Allocator>::
             template rebind_alloc<align_type>;
 
     using alloc_traits =
-        beast::detail::allocator_traits<rebind_type>;
+        std::allocator_traits<rebind_type>;
 
     using list_type = typename boost::intrusive::make_list<
         element, boost::intrusive::constant_time_size<true>>::type;

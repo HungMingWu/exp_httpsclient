@@ -12,7 +12,6 @@
 
 #include <boost/beast/core/detail/config.hpp>
 #include <boost/beast/core/bind_handler.hpp>
-#include <boost/beast/core/detail/allocator.hpp>
 #include <boost/beast/core/detail/async_base.hpp>
 #include <boost/beast/core/detail/work_guard.hpp>
 #include <boost/asio/associated_allocator.hpp>
@@ -24,6 +23,7 @@
 #include <boost/asio/post.hpp>
 #include <boost/core/exchange.hpp>
 #include <boost/core/empty_value.hpp>
+#include <memory>
 #include <utility>
 
 namespace boost {

@@ -37,7 +37,7 @@ struct allocate_stable_state final
 
     void destroy() override
     {
-        using A = typename allocator_traits<
+        using A = typename std::allocator_traits<
             Allocator>::template rebind_alloc<
                 allocate_stable_state>;
 
@@ -122,7 +122,7 @@ allocate_stable(
         Handler, Executor1, Allocator>::allocator_type;
     using state = detail::allocate_stable_state<
         State, allocator_type>;
-    using A = typename detail::allocator_traits<
+    using A = typename std::allocator_traits<
         allocator_type>::template rebind_alloc<state>;
 
     struct deleter

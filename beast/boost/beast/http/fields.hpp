@@ -12,7 +12,6 @@
 
 #include <boost/beast/core/detail/config.hpp>
 #include <boost/beast/core/string.hpp>
-#include <boost/beast/core/detail/allocator.hpp>
 #include <boost/beast/http/field.hpp>
 #include <boost/asio/buffer.hpp>
 #include <boost/core/empty_value.hpp>
@@ -194,14 +193,14 @@ private:
         boost::type_with_alignment<alignof(element)>::type;
 
     using rebind_type = typename
-        beast::detail::allocator_traits<Allocator>::
+        std::allocator_traits<Allocator>::
             template rebind_alloc<align_type>;
 
     using alloc_traits =
-        beast::detail::allocator_traits<rebind_type>;
+        std::allocator_traits<rebind_type>;
 
     using size_type = typename
-        beast::detail::allocator_traits<Allocator>::size_type;
+        std::allocator_traits<Allocator>::size_type;
 
 
 public:
