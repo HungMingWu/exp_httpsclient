@@ -11,7 +11,6 @@
 #define BOOST_BEAST_STREAM_TRAITS_HPP
 
 #include <boost/beast/core/detail/config.hpp>
-#include <boost/beast/core/detail/static_const.hpp>
 #include <boost/beast/core/detail/stream_traits.hpp>
 #include <boost/asio/basic_socket.hpp>
 
@@ -535,7 +534,7 @@ template<class Socket>
 void
 close_socket(Socket& sock);
 #else
-BOOST_BEAST_INLINE_VARIABLE(close_socket, detail::close_socket_impl)
+constexpr detail::close_socket_impl close_socket;
 #endif
 
 } // beast

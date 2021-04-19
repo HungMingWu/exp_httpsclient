@@ -12,7 +12,6 @@
 
 #include <boost/beast/core/detail/config.hpp>
 #include <boost/beast/core/detail/buffer_traits.hpp>
-#include <boost/beast/core/detail/static_const.hpp>
 #include <boost/asio/buffer.hpp>
 #include <boost/config/workaround.hpp>
 #include <type_traits>
@@ -162,7 +161,7 @@ template<class BufferSequence>
 std::size_t
 buffer_bytes(BufferSequence const& buffers);
 #else
-BOOST_BEAST_INLINE_VARIABLE(buffer_bytes, detail::buffer_bytes_impl)
+constexpr detail::buffer_bytes_impl buffer_bytes;
 #endif
 
 } // beast
