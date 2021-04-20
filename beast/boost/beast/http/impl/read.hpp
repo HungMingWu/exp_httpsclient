@@ -414,7 +414,7 @@ read_some(
     auto const bytes_transferred =
         http::read_some(stream, buffer, parser, ec);
     if(ec)
-        BOOST_THROW_EXCEPTION(system_error{ec});
+        throw system_error{ec};
     return bytes_transferred;
 }
 
@@ -483,7 +483,7 @@ read_header(
     auto const bytes_transferred =
         http::read_header(stream, buffer, parser, ec);
     if(ec)
-        BOOST_THROW_EXCEPTION(system_error{ec});
+        throw system_error{ec};
     return bytes_transferred;
 }
 
@@ -557,7 +557,7 @@ read(
     auto const bytes_transferred =
         http::read(stream, buffer, parser, ec);
     if(ec)
-        BOOST_THROW_EXCEPTION(system_error{ec});
+        throw system_error{ec};
     return bytes_transferred;
 }
 
@@ -641,7 +641,7 @@ read(
     auto const bytes_transferred =
         http::read(stream, buffer, msg, ec);
     if(ec)
-        BOOST_THROW_EXCEPTION(system_error{ec});
+        throw system_error{ec};
     return bytes_transferred;
 }
 

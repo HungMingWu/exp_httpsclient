@@ -28,7 +28,6 @@
 #include <boost/asio/coroutine.hpp>
 #include <boost/assert.hpp>
 #include <boost/config.hpp>
-#include <boost/throw_exception.hpp>
 #include <algorithm>
 #include <memory>
 
@@ -555,7 +554,7 @@ write_some(bool fin, ConstBufferSequence const& buffers)
     auto const bytes_transferred =
         write_some(fin, buffers, ec);
     if(ec)
-        BOOST_THROW_EXCEPTION(system_error{ec});
+        throw system_error{ec};
     return bytes_transferred;
 }
 
@@ -809,7 +808,7 @@ write(ConstBufferSequence const& buffers)
     error_code ec;
     auto const bytes_transferred = write(buffers, ec);
     if(ec)
-        BOOST_THROW_EXCEPTION(system_error{ec});
+        throw system_error{ec};
     return bytes_transferred;
 }
 

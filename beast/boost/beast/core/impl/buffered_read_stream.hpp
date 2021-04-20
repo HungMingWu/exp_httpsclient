@@ -17,7 +17,6 @@
 #include <boost/beast/core/stream_traits.hpp>
 #include <boost/beast/core/detail/is_invocable.hpp>
 #include <boost/asio/post.hpp>
-#include <boost/throw_exception.hpp>
 
 namespace boost {
 namespace beast {
@@ -175,7 +174,7 @@ read_some(
     error_code ec;
     auto n = read_some(buffers, ec);
     if(ec)
-        BOOST_THROW_EXCEPTION(system_error{ec});
+        throw system_error{ec};
     return n;
 }
 

@@ -76,13 +76,13 @@ public:
 
 #define BOOST_BEAST_LOGIC_ERROR(s) \
     do { \
-        BOOST_THROW_EXCEPTION(std::logic_error((s))); \
+        throw std::logic_error((s)); \
         BOOST_BEAST_UNREACHABLE(); \
     } while(false)
 
 #define BOOST_BEAST_LOGIC_ERROR_RETURN(v, s) \
     do { \
-        BOOST_THROW_EXCEPTION(std::logic_error(s)); \
+        throw std::logic_error(s); \
         BOOST_BEAST_UNREACHABLE_RETURN(v); \
     } while(false)
 

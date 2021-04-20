@@ -10,7 +10,6 @@
 #ifndef BOOST_BEAST_HTTP_IMPL_PARSER_HPP
 #define BOOST_BEAST_HTTP_IMPL_PARSER_HPP
 
-#include <boost/throw_exception.hpp>
 #include <stdexcept>
 
 namespace boost {
@@ -47,8 +46,7 @@ parser(
     , rd_(m_.base(), m_.body())
 {
     if(other.rd_inited_)
-        BOOST_THROW_EXCEPTION(std::invalid_argument{
-            "moved-from parser has a body"});
+        throw std::invalid_argument{"moved-from parser has a body"};
 }
 
 } // http

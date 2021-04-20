@@ -11,7 +11,6 @@
 #define BOOST_BEAST_HTTP_IMPL_VERB_IPP
 
 #include <boost/beast/http/verb.hpp>
-#include <boost/throw_exception.hpp>
 #include <stdexcept>
 
 namespace boost {
@@ -68,7 +67,7 @@ to_string(verb v)
         return "<unknown>"_sv;
     }
 
-    BOOST_THROW_EXCEPTION(std::invalid_argument{"unknown verb"});
+    throw std::invalid_argument{"unknown verb"};
 }
 
 verb

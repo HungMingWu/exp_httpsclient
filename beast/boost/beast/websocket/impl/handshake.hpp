@@ -21,7 +21,6 @@
 #include <boost/beast/core/stream_traits.hpp>
 #include <boost/asio/coroutine.hpp>
 #include <boost/assert.hpp>
-#include <boost/throw_exception.hpp>
 #include <memory>
 
 namespace boost {
@@ -348,7 +347,7 @@ handshake(string_view host,
     handshake(
         host, target, ec);
     if(ec)
-        BOOST_THROW_EXCEPTION(system_error{ec});
+        throw system_error{ec};
 }
 
 template<class NextLayer, bool deflateSupported>
@@ -363,7 +362,7 @@ handshake(response_type& res,
     error_code ec;
     handshake(res, host, target, ec);
     if(ec)
-        BOOST_THROW_EXCEPTION(system_error{ec});
+        throw system_error{ec};
 }
 
 template<class NextLayer, bool deflateSupported>

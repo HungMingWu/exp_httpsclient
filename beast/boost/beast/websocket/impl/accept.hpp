@@ -25,7 +25,6 @@
 #include <boost/asio/coroutine.hpp>
 #include <boost/asio/post.hpp>
 #include <boost/assert.hpp>
-#include <boost/throw_exception.hpp>
 #include <memory>
 #include <type_traits>
 
@@ -470,7 +469,7 @@ accept()
     error_code ec;
     accept(ec);
     if(ec)
-        BOOST_THROW_EXCEPTION(system_error{ec});
+        throw system_error{ec};
 }
 
 template<class NextLayer, bool deflateSupported>
@@ -500,7 +499,7 @@ accept(ConstBufferSequence const& buffers)
     error_code ec;
     accept(buffers, ec);
     if(ec)
-        BOOST_THROW_EXCEPTION(system_error{ec});
+        throw system_error{ec};
 }
 template<class NextLayer, bool deflateSupported>
 template<class ConstBufferSequence>
@@ -532,7 +531,7 @@ accept(
     error_code ec;
     accept(req, ec);
     if(ec)
-        BOOST_THROW_EXCEPTION(system_error{ec});
+        throw system_error{ec};
 }
 
 template<class NextLayer, bool deflateSupported>

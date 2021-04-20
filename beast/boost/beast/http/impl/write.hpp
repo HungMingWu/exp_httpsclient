@@ -20,7 +20,6 @@
 #include <boost/asio/coroutine.hpp>
 #include <boost/asio/post.hpp>
 #include <boost/asio/write.hpp>
-#include <boost/throw_exception.hpp>
 #include <ostream>
 #include <sstream>
 
@@ -529,7 +528,7 @@ write_some(
     auto const bytes_transferred =
         write_some(stream, sr, ec);
     if(ec)
-        BOOST_THROW_EXCEPTION(system_error{ec});
+        throw system_error{ec};
     return bytes_transferred;
 }
 
@@ -591,7 +590,7 @@ write_header(SyncWriteStream& stream,
     auto const bytes_transferred =
         write_header(stream, sr, ec);
     if(ec)
-        BOOST_THROW_EXCEPTION(system_error{ec});
+        throw system_error{ec};
     return bytes_transferred;
 }
 
@@ -677,7 +676,7 @@ write(
     auto const bytes_transferred =
         write(stream, sr, ec);
     if(ec)
-        BOOST_THROW_EXCEPTION(system_error{ec});
+        throw system_error{ec};
     return bytes_transferred;
 }
 
@@ -756,7 +755,7 @@ write(
     auto const bytes_transferred =
         write(stream, msg, ec);
     if(ec)
-        BOOST_THROW_EXCEPTION(system_error{ec});
+        throw system_error{ec};
     return bytes_transferred;
 }
 
@@ -780,7 +779,7 @@ write(
     auto const bytes_transferred =
         write(stream, msg, ec);
     if(ec)
-        BOOST_THROW_EXCEPTION(system_error{ec});
+        throw system_error{ec};
     return bytes_transferred;
 }
 

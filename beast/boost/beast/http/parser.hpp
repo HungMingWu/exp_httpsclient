@@ -15,7 +15,6 @@
 #include <boost/beast/http/message.hpp>
 #include <boost/beast/http/type_traits.hpp>
 #include <optional>
-#include <boost/throw_exception.hpp>
 #include <functional>
 #include <memory>
 #include <type_traits>

@@ -11,7 +11,6 @@
 #define BOOST_BEAST_IMPL_FLAT_STATIC_BUFFER_IPP
 
 #include <boost/beast/core/flat_static_buffer.hpp>
-#include <boost/throw_exception.hpp>
 #include <algorithm>
 #include <cstring>
 #include <iterator>
@@ -49,8 +48,7 @@ prepare(std::size_t n) ->
     }
     auto const len = size();
     if(n > capacity() - len)
-        BOOST_THROW_EXCEPTION(std::length_error{
-            "buffer overflow"});
+        throw std::length_error{"buffer overflow"};
     if(len > 0)
         std::memmove(begin_, in_, len);
     in_ = begin_;

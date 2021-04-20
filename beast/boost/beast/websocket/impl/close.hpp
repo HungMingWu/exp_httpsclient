@@ -19,7 +19,6 @@
 #include <boost/beast/core/detail/bind_continuation.hpp>
 #include <boost/asio/coroutine.hpp>
 #include <boost/asio/post.hpp>
-#include <boost/throw_exception.hpp>
 #include <memory>
 
 namespace boost {
@@ -320,7 +319,7 @@ close(close_reason const& cr)
     error_code ec;
     close(cr, ec);
     if(ec)
-        BOOST_THROW_EXCEPTION(system_error{ec});
+        throw system_error{ec};
 }
 
 template<class NextLayer, bool deflateSupported>

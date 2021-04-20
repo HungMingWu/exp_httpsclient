@@ -11,7 +11,6 @@
 #define BOOST_BEAST_HTTP_IMPL_STATUS_IPP
 
 #include <boost/beast/http/status.hpp>
-#include <boost/throw_exception.hpp>
 
 namespace boost {
 namespace beast {

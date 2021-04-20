@@ -41,7 +41,6 @@
 #include <boost/beast/zlib/detail/ranges.hpp>
 #include <boost/assert.hpp>
 #include <boost/config.hpp>
-#include <boost/throw_exception.hpp>
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
@@ -239,16 +238,13 @@ doReset(
         windowBits = 9;
 
     if(level < 0 || level > 9)
-        BOOST_THROW_EXCEPTION(std::invalid_argument{
-            "invalid level"});
+        throw std::invalid_argument{"invalid level"};
 
     if(windowBits < 8 || windowBits > 15)
-        BOOST_THROW_EXCEPTION(std::invalid_argument{
-            "invalid windowBits"});
+        throw std::invalid_argument{"invalid windowBits"};
 
     if(memLevel < 1 || memLevel > max_mem_level)
-        BOOST_THROW_EXCEPTION(std::invalid_argument{
-            "invalid memLevel"});
+        throw std::invalid_argument{"invalid memLevel"};
 
     w_bits_ = windowBits;
 
@@ -359,7 +355,7 @@ doWrite(z_params& zs, std::optional<Flush> flush, error_code& ec)
     maybe_init();
 
     if(zs.next_in == nullptr && zs.avail_in != 0)
-        BOOST_THROW_EXCEPTION(std::invalid_argument{"invalid input"});
+        throw std::invalid_argument{"invalid input"};
 
     if(zs.next_out == nullptr ||
         (status_ == FINISH_STATE && flush != Flush::finish))

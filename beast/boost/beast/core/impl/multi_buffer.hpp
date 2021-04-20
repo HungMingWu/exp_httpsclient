@@ -13,7 +13,6 @@
 #include <boost/beast/core/buffer_traits.hpp>
 #include <boost/config/workaround.hpp>
 #include <boost/assert.hpp>
-#include <boost/throw_exception.hpp>
 #include <algorithm>
 #include <exception>
 #include <iterator>
@@ -683,8 +682,8 @@ reserve(std::size_t n)
     // VFALCO The amount needs to be adjusted for
     //        the sizeof(element) plus padding
     if(n > alloc_traits::max_size(this->get()))
-        BOOST_THROW_EXCEPTION(std::length_error(
-        "A basic_multi_buffer exceeded the allocator's maximum size"));
+        throw std::length_error(
+        "A basic_multi_buffer exceeded the allocator's maximum size");
     std::size_t total = in_size_;
     if(n <= total)
         return;
@@ -852,8 +851,7 @@ prepare(size_type n) ->
 {
     auto const n0 = n;
     if(in_size_ > max_ || n > (max_ - in_size_))
-        BOOST_THROW_EXCEPTION(std::length_error{
-            "basic_multi_buffer too long"});
+        throw std::length_error{"basic_multi_buffer too long"};
     list_type reuse;
     std::size_t total = in_size_;
     // put all empty buffers on reuse list
@@ -1228,8 +1226,8 @@ alloc(std::size_t size) ->
     element&
 {
     if(size > alloc_traits::max_size(this->get()))
-        BOOST_THROW_EXCEPTION(std::length_error(
-        "A basic_multi_buffer exceeded the allocator's maximum size"));
+        throw std::length_error(
+        "A basic_multi_buffer exceeded the allocator's maximum size");
     auto a = rebind_type{this->get()};
     auto const p = alloc_traits::allocate(a,
         (sizeof(element) + size + sizeof(align_type) - 1) /

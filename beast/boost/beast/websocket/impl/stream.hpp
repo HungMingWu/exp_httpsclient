@@ -27,7 +27,6 @@
 #include <boost/beast/core/detail/clamp.hpp>
 #include <boost/asio/steady_timer.hpp>
 #include <boost/assert.hpp>
-#include <boost/throw_exception.hpp>
 #include <algorithm>
 #include <chrono>
 #include <memory>
@@ -272,8 +271,7 @@ stream<NextLayer, deflateSupported>::
 write_buffer_bytes(std::size_t amount)
 {
     if(amount < 8)
-        BOOST_THROW_EXCEPTION(std::invalid_argument{
-            "write buffer size underflow"});
+        throw std::invalid_argument{"write buffer size underflow"};
     impl_->wr_buf_opt = amount;
 }
 

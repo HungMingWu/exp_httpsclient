@@ -29,7 +29,6 @@
 #include <boost/asio/post.hpp>
 #include <boost/assert.hpp>
 #include <boost/config.hpp>
-#include <boost/throw_exception.hpp>
 #include <algorithm>
 #include <limits>
 #include <memory>
@@ -876,7 +875,7 @@ read(DynamicBuffer& buffer)
     error_code ec;
     auto const bytes_written = read(buffer, ec);
     if(ec)
-        BOOST_THROW_EXCEPTION(system_error{ec});
+        throw system_error{ec};
     return bytes_written;
 }
 
@@ -943,7 +942,7 @@ read_some(
     auto const bytes_written =
         read_some(buffer, limit, ec);
     if(ec)
-        BOOST_THROW_EXCEPTION(system_error{ec});
+        throw system_error{ec};
     return bytes_written;
 }
 
@@ -1018,7 +1017,7 @@ read_some(
     error_code ec;
     auto const bytes_written = read_some(buffers, ec);
     if(ec)
-        BOOST_THROW_EXCEPTION(system_error{ec});
+        throw system_error{ec};
     return bytes_written;
 }
 

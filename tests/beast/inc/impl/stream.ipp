@@ -32,8 +32,7 @@ void basic_stream<Executor>::initiate_read(
 
     ++in_->nread;
     if(in_->op != nullptr)
-        BOOST_THROW_EXCEPTION(
-            std::logic_error{"in_->op != nullptr"});
+        throw std::logic_error{"in_->op != nullptr"};
 
     // test failure
     error_code ec;

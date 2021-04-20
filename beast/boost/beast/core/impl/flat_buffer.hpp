@@ -11,7 +11,6 @@
 #define BOOST_BEAST_IMPL_FLAT_BUFFER_HPP
 
 #include <boost/assert.hpp>
-#include <boost/throw_exception.hpp>
 #include <memory>
 #include <stdexcept>
 
@@ -320,8 +319,7 @@ prepare(std::size_t n) ->
 {
     auto const len = size();
     if(len > max_ || n > (max_ - len))
-        BOOST_THROW_EXCEPTION(std::length_error{
-            "basic_flat_buffer too long"});
+        throw std::length_error{"basic_flat_buffer too long"};
     if(n <= dist(out_, end_))
     {
         // existing capacity is sufficient
@@ -532,8 +530,8 @@ basic_flat_buffer<Allocator>::
 alloc(std::size_t n)
 {
     if(n > alloc_traits::max_size(this->get()))
-        BOOST_THROW_EXCEPTION(std::length_error(
-            "A basic_flat_buffer exceeded the allocator's maximum size"));
+        throw std::length_error(
+            "A basic_flat_buffer exceeded the allocator's maximum size");
     return alloc_traits::allocate(this->get(), n);
 }
 

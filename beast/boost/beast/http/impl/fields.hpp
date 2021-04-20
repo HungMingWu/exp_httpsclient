@@ -21,7 +21,6 @@
 #include <boost/beast/http/rfc7230.hpp>
 #include <boost/beast/http/status.hpp>
 #include <boost/beast/http/chunk_encode.hpp>
-#include <boost/throw_exception.hpp>
 #include <stdexcept>
 #include <string>
 
@@ -482,8 +481,7 @@ at(field name) const
     BOOST_ASSERT(name != field::unknown);
     auto const it = find(name);
     if(it == end())
-        BOOST_THROW_EXCEPTION(std::out_of_range{
-            "field not found"});
+        throw std::out_of_range{"field not found"};
     return it->value();
 }
 
@@ -494,8 +492,7 @@ at(string_view name) const
 {
     auto const it = find(name);
     if(it == end())
-        BOOST_THROW_EXCEPTION(std::out_of_range{
-            "field not found"});
+        throw std::out_of_range{"field not found"};
     return it->value();
 }
 
@@ -964,12 +961,10 @@ new_element(field name,
 {
     if(sname.size() + 2 >
             (std::numeric_limits<off_t>::max)())
-        BOOST_THROW_EXCEPTION(std::length_error{
-            "field name too large"});
+        throw std::length_error{"field name too large"};
     if(value.size() + 2 >
             (std::numeric_limits<off_t>::max)())
-        BOOST_THROW_EXCEPTION(std::length_error{
-            "field value too large"});
+        throw std::length_error{"field value too large"};
     value = detail::trim(value);
     std::uint16_t const off =
         static_cast<off_t>(sname.size() + 2);

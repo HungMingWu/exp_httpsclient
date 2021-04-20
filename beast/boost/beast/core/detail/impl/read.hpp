@@ -16,7 +16,6 @@
 #include <boost/beast/core/read_size.hpp>
 #include <boost/asio/basic_stream_socket.hpp>
 #include <boost/asio/coroutine.hpp>
-#include <boost/throw_exception.hpp>
 
 namespace boost {
 namespace beast {
@@ -169,7 +168,7 @@ read(
     auto const bytes_transferred = detail::read(
         stream, buffer, std::move(cond), ec);
     if(ec)
-        BOOST_THROW_EXCEPTION(system_error{ec});
+        throw system_error{ec};
     return bytes_transferred;
 }
 

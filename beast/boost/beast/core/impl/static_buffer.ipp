@@ -12,7 +12,6 @@
 
 #include <boost/beast/core/static_buffer.hpp>
 #include <boost/asio/buffer.hpp>
-#include <boost/throw_exception.hpp>
 #include <stdexcept>
 
 namespace boost {
@@ -78,8 +77,7 @@ prepare(std::size_t n) ->
 {
     using net::mutable_buffer;
     if(n > capacity_ - in_size_)
-        BOOST_THROW_EXCEPTION(std::length_error{
-            "static_buffer overflow"});
+        throw std::length_error{"static_buffer overflow"};
     out_size_ = n;
     auto const out_off =
         (in_off_ + in_size_) % capacity_;

@@ -38,7 +38,6 @@
 #define BOOST_BEAST_ZLIB_DETAIL_INFLATE_STREAM_IPP
 
 #include <boost/beast/zlib/detail/inflate_stream.hpp>
-#include <boost/throw_exception.hpp>
 #include <array>
 
 namespace boost {
@@ -57,8 +56,7 @@ inflate_stream::
 doReset(int windowBits)
 {
     if(windowBits < 8 || windowBits > 15)
-        BOOST_THROW_EXCEPTION(std::domain_error{
-            "windowBits out of range"});
+        throw std::domain_error{"windowBits out of range"};
     w_.reset(windowBits);
 
     bi_.flush();
@@ -524,8 +522,7 @@ doWrite(z_params& zs, Flush flush, error_code& ec)
 
         case SYNC:
         default:
-            BOOST_THROW_EXCEPTION(std::logic_error{
-                "stream error"});
+            throw std::logic_error{"stream error"};
         }
     }
 }
@@ -750,8 +747,8 @@ inflate_table(
 
     auto const not_enough = []
     {
-        BOOST_THROW_EXCEPTION(std::logic_error{
-            "insufficient output size when inflating tables"});
+        throw std::logic_error{
+            "insufficient output size when inflating tables"};
     };
 
     // check available table space
@@ -891,7 +888,7 @@ get_fixed_tables() ->
                 inflate_table(build::lens,
                     lens, 288, &next, &lenbits, work, ec);
                 if(ec)
-                    BOOST_THROW_EXCEPTION(std::logic_error{ec.message()});
+                    throw std::logic_error{ec.message()};
             }
 
             // VFALCO These fixups are from ZLib
@@ -907,7 +904,7 @@ get_fixed_tables() ->
                 inflate_table(build::dists,
                     lens, 32, &next, &distbits, work, ec);
                 if(ec)
-                    BOOST_THROW_EXCEPTION(std::logic_error{ec.message()});
+                    throw std::logic_error{ec.message()};
             }
         }
     };

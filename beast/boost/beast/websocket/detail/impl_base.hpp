@@ -215,20 +215,16 @@ struct impl_base<true>
     {
         if( o.server_max_window_bits > 15 ||
             o.server_max_window_bits < 9)
-            BOOST_THROW_EXCEPTION(std::invalid_argument{
-                "invalid server_max_window_bits"});
+            throw std::invalid_argument{"invalid server_max_window_bits"};
         if( o.client_max_window_bits > 15 ||
             o.client_max_window_bits < 9)
-            BOOST_THROW_EXCEPTION(std::invalid_argument{
-                "invalid client_max_window_bits"});
+            throw std::invalid_argument{"invalid client_max_window_bits"};
         if( o.compLevel < 0 ||
             o.compLevel > 9)
-            BOOST_THROW_EXCEPTION(std::invalid_argument{
-                "invalid compLevel"});
+            throw std::invalid_argument{"invalid compLevel"};
         if( o.memLevel < 1 ||
             o.memLevel > 9)
-            BOOST_THROW_EXCEPTION(std::invalid_argument{
-                "invalid memLevel"});
+            throw std::invalid_argument{"invalid memLevel"};
         pmd_opts_ = o;
     }
 
@@ -415,8 +411,7 @@ struct impl_base<false>
             // Can't enable permessage-deflate
             // when deflateSupported == false.
             //
-            BOOST_THROW_EXCEPTION(std::invalid_argument{
-                "deflateSupported == false"});
+            throw std::invalid_argument{"deflateSupported == false"};
         }
     }
 

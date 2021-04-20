@@ -12,7 +12,6 @@
 
 #include <boost/beast/core/error.hpp>
 #include <boost/assert.hpp>
-#include <boost/throw_exception.hpp>
 #include <stdexcept>
 
 namespace boost {
@@ -42,8 +41,7 @@ header<true, Fields>::
 method(verb v)
 {
     if(v == verb::unknown)
-        BOOST_THROW_EXCEPTION(
-            std::invalid_argument{"unknown method"});
+        throw std::invalid_argument{"unknown method"};
     method_ = v;
     this->set_method_impl({});
 }
@@ -134,9 +132,7 @@ header<false, Fields>::
 result(unsigned v)
 {
     if(v > 999)
-        BOOST_THROW_EXCEPTION(
-            std::invalid_argument{
-                "invalid status-code"});
+        throw std::invalid_argument{"invalid status-code"};
     result_ = static_cast<status>(v);
 }
 
@@ -357,8 +353,7 @@ prepare_payload(std::true_type)
 {
     auto const n = payload_size();
     if(this->method() == verb::trace && (! n || *n > 0))
-        BOOST_THROW_EXCEPTION(std::invalid_argument{
-            "invalid request body"});
+        throw std::invalid_argument{"invalid request body"};
     if(n)
     {
         if(*n > 0 ||
@@ -395,8 +390,7 @@ prepare_payload(std::false_type)
         this->result() == status::not_modified)))
     {
         // The response body MUST be empty for this case
-        BOOST_THROW_EXCEPTION(std::invalid_argument{
-            "invalid response body"});
+        throw std::invalid_argument{"invalid response body"};
     }
     if(n)
         this->content_length(n);

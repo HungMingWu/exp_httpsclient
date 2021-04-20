@@ -18,7 +18,6 @@
 #include <boost/beast/websocket/impl/stream_impl.hpp>
 #include <boost/asio/coroutine.hpp>
 #include <boost/asio/post.hpp>
-#include <boost/throw_exception.hpp>
 #include <memory>
 
 namespace boost {
@@ -278,7 +277,7 @@ ping(ping_data const& payload)
     error_code ec;
     ping(payload, ec);
     if(ec)
-        BOOST_THROW_EXCEPTION(system_error{ec});
+        throw system_error{ec};
 }
 
 template<class NextLayer, bool deflateSupported>
@@ -304,7 +303,7 @@ pong(ping_data const& payload)
     error_code ec;
     pong(payload, ec);
     if(ec)
-        BOOST_THROW_EXCEPTION(system_error{ec});
+        throw system_error{ec};
 }
 
 template<class NextLayer, bool deflateSupported>

@@ -42,7 +42,6 @@
 #include <boost/beast/zlib/detail/ranges.hpp>
 #include <boost/assert.hpp>
 #include <boost/config.hpp>
-#include <boost/throw_exception.hpp>
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>

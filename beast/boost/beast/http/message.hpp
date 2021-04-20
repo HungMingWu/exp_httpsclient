@@ -18,7 +18,6 @@
 #include <boost/beast/core/string.hpp>
 #include <boost/core/empty_value.hpp>
 #include <boost/assert.hpp>
-#include <boost/throw_exception.hpp>
 #include <memory>
 #include <optional>
 #include <stdexcept>

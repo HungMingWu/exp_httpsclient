@@ -11,7 +11,6 @@
 #define BOOST_BEAST_IMPL_STATIC_STRING_HPP
 
 #include <boost/beast/core/detail/static_string.hpp>
-#include <boost/throw_exception.hpp>
 
 namespace boost {
 namespace beast {
@@ -66,8 +65,7 @@ static_string(CharT const* s)
 {
     auto const count = Traits::length(s);
     if(count > max_size())
-        BOOST_THROW_EXCEPTION(std::length_error{
-            "count > max_size()"});
+        throw std::length_error{"count > max_size()"};
     n_ = count;
     Traits::copy(&s_[0], s, n_ + 1);
 }
@@ -129,8 +127,7 @@ operator=(CharT const* s) ->
 {
     auto const count = Traits::length(s);
     if(count > max_size())
-        BOOST_THROW_EXCEPTION(std::length_error{
-            "count > max_size()"});
+        throw std::length_error{"count > max_size()"};
     n_ = count;
     Traits::copy(&s_[0], s, n_ + 1);
     return *this;
@@ -143,8 +140,7 @@ assign(size_type count, CharT ch) ->
     static_string&
 {
     if(count > max_size())
-        BOOST_THROW_EXCEPTION(std::length_error{
-            "count > max_size()"});
+        throw std::length_error{"count > max_size()"};
     n_ = count;
     Traits::assign(&s_[0], n_, ch);
     term();
@@ -183,8 +179,7 @@ assign(CharT const* s, size_type count) ->
     static_string&
 {
     if(count > max_size())
-        BOOST_THROW_EXCEPTION(std::length_error{
-            "count > max_size()"});
+        throw std::length_error{"count > max_size()"};
     n_ = count;
     Traits::copy(&s_[0], s, n_);
     term();
@@ -200,8 +195,7 @@ assign(InputIt first, InputIt last) ->
 {
     std::size_t const n = std::distance(first, last);
     if(n > max_size())
-        BOOST_THROW_EXCEPTION(std::length_error{
-            "n > max_size()"});
+        throw std::length_error{"n > max_size()"};
     n_ = n;
     for(auto it = &s_[0]; first != last; ++it, ++first)
         Traits::assign(*it, *first);
@@ -219,8 +213,7 @@ assign(T const& t, size_type pos, size_type count) ->
 {
     auto const sv = string_view_type(t).substr(pos, count);
     if(sv.size() > max_size())
-        BOOST_THROW_EXCEPTION(std::length_error{
-            "sv.size() > max_size()"});
+        throw std::length_error{"sv.size() > max_size()"};
     n_ = sv.size();
     Traits::copy(&s_[0], &sv[0], n_);
     term();
@@ -238,8 +231,7 @@ at(size_type pos) ->
     reference
 {
     if(pos >= size())
-        BOOST_THROW_EXCEPTION(std::out_of_range{
-            "pos >= size()"});
+        throw std::out_of_range{"pos >= size()"};
     return s_[pos];
 }
 
@@ -250,8 +242,7 @@ at(size_type pos) const ->
     const_reference
 {
     if(pos >= size())
-        BOOST_THROW_EXCEPTION(std::out_of_range{
-            "pos >= size()"});
+        throw std::out_of_range{"pos >= size()"};
     return s_[pos];
 }
 
@@ -265,8 +256,7 @@ static_string<N, CharT, Traits>::
 reserve(std::size_t n)
 {
     if(n > max_size())
-        BOOST_THROW_EXCEPTION(std::length_error{
-            "n > max_size()"});
+        throw std::length_error{"n > max_size()"};
 }
 
 //
@@ -289,8 +279,7 @@ insert(size_type index, size_type count, CharT ch) ->
     static_string&
 {
     if(index > size())
-        BOOST_THROW_EXCEPTION(std::out_of_range{
-            "index > size()"});
+        throw std::out_of_range{"index > size()"};
     insert(begin() + index, count, ch);
     return *this;
 }
@@ -302,11 +291,9 @@ insert(size_type index, CharT const* s, size_type count) ->
     static_string&
 {
     if(index > size())
-        BOOST_THROW_EXCEPTION(std::out_of_range{
-            "index > size()"});
+        throw std::out_of_range{"index > size()"};
     if(size() + count > max_size())
-        BOOST_THROW_EXCEPTION(std::length_error{
-            "size() + count > max_size()"});
+        throw std::length_error{"size() + count > max_size()"};
     Traits::move(
         &s_[index + count], &s_[index], size() - index);
     n_ += count;
@@ -335,8 +322,7 @@ insert(const_iterator pos, size_type count, CharT ch) ->
     iterator
 {
     if(size() + count > max_size())
-        BOOST_THROW_EXCEPTION(std::length_error{
-            "size() + count() > max_size()"});
+        throw std::length_error{"size() + count() > max_size()"};
     auto const index = pos - &s_[0];
     Traits::move(
         &s_[index + count], &s_[index], size() - index);
@@ -357,8 +343,7 @@ insert(const_iterator pos, InputIt first, InputIt last) ->
 {
     std::size_t const count = std::distance(first, last);
     if(size() + count > max_size())
-        BOOST_THROW_EXCEPTION(std::length_error{
-            "size() + count > max_size()"});
+        throw std::length_error{"size() + count > max_size()"};
     std::size_t const index = pos - begin();
     Traits::move(
         &s_[index + count], &s_[index], size() - index);
@@ -393,8 +378,7 @@ erase(size_type index, size_type count) ->
     static_string&
 {
     if(index > size())
-        BOOST_THROW_EXCEPTION(std::out_of_range{
-            "index > size()"});
+        throw std::out_of_range{"index > size()"};
     auto const n = (std::min)(count, size() - index);
     Traits::move(
         &s_[index], &s_[index + n], size() - (index + n) + 1);
@@ -429,8 +413,7 @@ static_string<N, CharT, Traits>::
 push_back(CharT ch)
 {
     if(size() >= max_size())
-        BOOST_THROW_EXCEPTION(std::length_error{
-            "size() >= max_size()"});
+        throw std::length_error{"size() >= max_size()"};
     Traits::assign(s_[n_++], ch);
     term();
 }
@@ -445,8 +428,7 @@ append(static_string<M, CharT, Traits> const& str,
 {
     // Valid range is [0, size)
     if(pos >= str.size())
-        BOOST_THROW_EXCEPTION(std::out_of_range{
-            "pos > str.size()"});
+        throw std::out_of_range{"pos > str.size()"};
     string_view_type const ss{&str.s_[pos],
         (std::min)(count, str.size() - pos)};
     insert(size(), ss.data(), ss.size());
@@ -460,8 +442,7 @@ substr(size_type pos, size_type count) const ->
     string_view_type
 {
     if(pos > size())
-        BOOST_THROW_EXCEPTION(std::out_of_range{
-            "pos > size()"});
+        throw std::out_of_range{"pos > size()"};
     return{&s_[pos], (std::min)(count, size() - pos)};
 }
 
@@ -482,8 +463,7 @@ static_string<N, CharT, Traits>::
 resize(std::size_t n)
 {
     if(n > max_size())
-        BOOST_THROW_EXCEPTION(std::length_error{
-            "n > max_size()"});
+        throw std::length_error{"n > max_size()"};
     if(n > n_)
         Traits::assign(&s_[n_], n - n_, CharT{});
     n_ = n;
@@ -496,8 +476,7 @@ static_string<N, CharT, Traits>::
 resize(std::size_t n, CharT c)
 {
     if(n > max_size())
-        BOOST_THROW_EXCEPTION(std::length_error{
-            "n > max_size()"});
+        throw std::length_error{"n > max_size()"};
     if(n > n_)
         Traits::assign(&s_[n_], n - n_, c);
     n_ = n;
@@ -523,11 +502,9 @@ static_string<N, CharT, Traits>::
 swap(static_string<M, CharT, Traits>& str)
 {
     if(size() > str.max_size())
-        BOOST_THROW_EXCEPTION(std::length_error{
-            "size() > str.max_size()"});
+        throw std::length_error{"size() > str.max_size()"};
     if(str.size() > max_size())
-        BOOST_THROW_EXCEPTION(std::length_error{
-            "str.size() > max_size()"});
+        throw std::length_error{"str.size() > max_size()"};
     static_string tmp(str);
     str.n_ = n_;
     Traits::copy(&str.s_[0], &s_[0], n_ + 1);
@@ -554,8 +531,7 @@ static_string<N, CharT, Traits>::
 assign_char(CharT, std::false_type) ->
     static_string&
 {
-    BOOST_THROW_EXCEPTION(std::length_error{
-        "max_size() == 0"});
+    throw std::length_error{"max_size() == 0"};
 }
 
 template<class Integer, class>

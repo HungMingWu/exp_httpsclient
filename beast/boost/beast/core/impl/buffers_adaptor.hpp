@@ -14,7 +14,6 @@
 #include <boost/beast/core/buffers_adaptor.hpp>
 #include <boost/asio/buffer.hpp>
 #include <boost/config/workaround.hpp>
-#include <boost/throw_exception.hpp>
 #include <algorithm>
 #include <cstring>
 #include <iterator>
@@ -348,8 +347,7 @@ prepare(std::size_t n) ->
         }
     }
     if(n > 0)
-        BOOST_THROW_EXCEPTION(std::length_error{
-            "buffers_adaptor too long"});
+        throw std::length_error{"buffers_adaptor too long"};
     return mutable_buffers_type(out_, end_, out_pos_, prepared);
 }
 
