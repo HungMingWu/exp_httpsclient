@@ -235,11 +235,11 @@ detect_ssl(
         auto const result = detail::is_tls_client_hello(buffer.data());
 
         // If we got an answer, return it
-        if(! boost::indeterminate(result))
+        if(!result)
         {
             // A definite answer is a success
             ec = {};
-            return static_cast<bool>(result);
+            return static_cast<bool>(*result);
         }
 
         // Try to fill our buffer by reading from the stream.
@@ -571,7 +571,7 @@ operator()(error_code ec, std::size_t bytes_transferred, bool cont)
             result_ = is_tls_client_hello(buffer_.data());
 
             // If we got an answer, then the operation is complete
-            if(! boost::indeterminate(result_))
+            if(!result_)
                 break;
 
             // Try to fill our buffer by reading from the stream.
@@ -654,7 +654,7 @@ operator()(error_code ec, std::size_t bytes_transferred, bool cont)
         // At this point, we are guaranteed that the original initiating
         // function is no longer on our stack frame.
 
-        this->complete_now(ec, static_cast<bool>(result_));
+        this->complete_now(ec, static_cast<bool>(*result_));
     }
 }
 

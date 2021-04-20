@@ -14,7 +14,6 @@
 
 #if BOOST_BEAST_USE_POSIX_FILE
 
-#include <boost/core/exchange.hpp>
 #include <limits>
 #include <fcntl.h>
 #include <sys/types.h>
