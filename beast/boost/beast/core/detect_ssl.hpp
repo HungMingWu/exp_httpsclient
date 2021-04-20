@@ -15,9 +15,9 @@
 #include <boost/beast/core/error.hpp>
 #include <boost/beast/core/read_size.hpp>
 #include <boost/beast/core/stream_traits.hpp>
-#include <boost/logic/tribool.hpp>
 #include <boost/asio/async_result.hpp>
 #include <boost/asio/coroutine.hpp>
+#include <optional>
 #include <type_traits>
 
 namespace boost {
@@ -80,7 +80,7 @@ namespace detail {
     (RFC2246: The TLS Protocol)
 */
 template <class ConstBufferSequence>
-boost::tribool
+std::optional<bool>
 is_tls_client_hello (ConstBufferSequence const& buffers);
 
 } // detail
@@ -92,7 +92,7 @@ is_tls_client_hello (ConstBufferSequence const& buffers);
 namespace detail {
 
 template <class ConstBufferSequence>
-boost::tribool
+std::optional<bool>
 is_tls_client_hello (ConstBufferSequence const& buffers)
 {
     // Make sure buffers meets the requirements
@@ -126,7 +126,7 @@ is_tls_client_hello (ConstBufferSequence const& buffers)
 
     // Can't do much without any bytes
     if(n < 1)
-        return boost::indeterminate;
+        return std::nullopt;
 
     // Require the first byte to be 0x16, indicating a TLS handshake record
     if(buf[0] != 0x16)
@@ -134,7 +134,7 @@ is_tls_client_hello (ConstBufferSequence const& buffers)
 
     // We need at least 5 bytes to know the record payload size
     if(n < 5)
-        return boost::indeterminate;
+        return std::nullopt;
 
     // Calculate the record payload size
     std::uint32_t const length = (buf[3] << 8) + buf[4];
@@ -146,7 +146,7 @@ is_tls_client_hello (ConstBufferSequence const& buffers)
 
     // We need at least 6 bytes to know the handshake type
     if(n < 6)
-        return boost::indeterminate;
+        return std::nullopt;
 
     // The handshake_type must be 0x01 == client_hello
     if(buf[5] != 0x01)
@@ -154,7 +154,7 @@ is_tls_client_hello (ConstBufferSequence const& buffers)
 
     // We need at least 9 bytes to know the payload size
     if(n < 9)
-        return boost::indeterminate;
+        return std::nullopt;
 
     // Calculate the message payload size
     std::uint32_t const size =
@@ -491,7 +491,7 @@ class detect_ssl_op
     // We're going to need this in case we have to post the handler
     error_code ec_;
 
-    boost::tribool result_ = false;
+    std::optional<bool> result_ = std::nullopt;
 
 public:
     // Completion handlers must be MoveConstructible.
