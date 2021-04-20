@@ -133,7 +133,7 @@ read_some(MutableBufferSequence const& buffers)
     error_code ec;
     auto n = read_some(buffers, ec);
     if(ec)
-        BOOST_THROW_EXCEPTION(boost::system::system_error{ec});
+        throw boost::system::system_error{ec};
     return n;
 }
 
@@ -184,7 +184,7 @@ write_some(ConstBufferSequence const& buffers)
     error_code ec;
     auto n = write_some(buffers, ec);
     if(ec)
-        BOOST_THROW_EXCEPTION(boost::system::system_error{ec});
+        throw boost::system::system_error{ec};
     return n;
 }
 

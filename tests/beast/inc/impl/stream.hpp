@@ -261,7 +261,7 @@ read_some(MutableBufferSequence const& buffers)
     error_code ec;
     auto const n = read_some(buffers, ec);
     if(ec)
-        BOOST_THROW_EXCEPTION(system_error{ec});
+        throw system_error{ec};
     return n;
 }
 
@@ -350,7 +350,7 @@ write_some(ConstBufferSequence const& buffers)
     auto const bytes_transferred =
         write_some(buffers, ec);
     if(ec)
-        BOOST_THROW_EXCEPTION(system_error{ec});
+        throw system_error{ec};
     return bytes_transferred;
 }
 

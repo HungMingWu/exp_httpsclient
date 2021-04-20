@@ -72,8 +72,7 @@ read_size_or_throw(
 {
     auto const n = read_size(buffer, max_size);
     if(n == 0)
-        BOOST_THROW_EXCEPTION(std::length_error{
-            "buffer overflow"});
+        throw std::length_error{"buffer overflow"};
     return n;
 }
 
