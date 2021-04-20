@@ -29,7 +29,7 @@ public:
     soft_mutex& operator=(soft_mutex const&) = delete;
 
     soft_mutex(soft_mutex&& other) noexcept
-        : id_(boost::exchange(other.id_, 0))
+        : id_(std::exchange(other.id_, 0))
     {
     }
 

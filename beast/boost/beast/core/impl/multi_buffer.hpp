@@ -12,7 +12,6 @@
 
 #include <boost/beast/core/buffer_traits.hpp>
 #include <boost/config/workaround.hpp>
-#include <boost/core/exchange.hpp>
 #include <boost/assert.hpp>
 #include <boost/throw_exception.hpp>
 #include <algorithm>
@@ -508,10 +507,10 @@ basic_multi_buffer(
     : boost::empty_value<Allocator>(
         boost::empty_init_t(), std::move(other.get()))
     , max_(other.max_)
-    , in_size_(boost::exchange(other.in_size_, 0))
-    , in_pos_(boost::exchange(other.in_pos_, 0))
-    , out_pos_(boost::exchange(other.out_pos_, 0))
-    , out_end_(boost::exchange(other.out_end_, 0))
+    , in_size_(std::exchange(other.in_size_, 0))
+    , in_pos_(std::exchange(other.in_pos_, 0))
+    , out_pos_(std::exchange(other.out_pos_, 0))
+    , out_end_(std::exchange(other.out_end_, 0))
 {
     auto const at_end =
         other.out_ == other.list_.end();

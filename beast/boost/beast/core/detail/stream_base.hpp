@@ -12,7 +12,6 @@
 
 #include <boost/asio/steady_timer.hpp>
 #include <boost/assert.hpp>
-#include <boost/core/exchange.hpp>
 #include <chrono>
 #include <cstdint>
 #include <utility>
@@ -90,7 +89,7 @@ struct stream_base
         pending_guard(
             pending_guard&& other) noexcept
             : b_(other.b_)
-            , clear_(boost::exchange(
+            , clear_(std::exchange(
                 other.clear_, false))
         {
         }

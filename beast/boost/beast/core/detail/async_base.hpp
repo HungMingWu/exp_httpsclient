@@ -10,8 +10,6 @@
 #ifndef BOOST_BEAST_CORE_DETAIL_ASYNC_BASE_HPP
 #define BOOST_BEAST_CORE_DETAIL_ASYNC_BASE_HPP
 
-#include <boost/core/exchange.hpp>
-
 namespace boost {
 namespace beast {
 namespace detail {

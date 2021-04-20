@@ -12,7 +12,6 @@
 
 #include <boost/beast/core/error.hpp>
 #include <boost/asio/io_context.hpp>
-#include <boost/core/exchange.hpp>
 #include <optional>
 
 namespace boost {

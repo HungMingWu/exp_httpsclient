@@ -11,7 +11,6 @@
 #define BOOST_BEAST_WEBSOCKET_DETAIL_DECORATOR_HPP
 
 #include <boost/beast/websocket/rfc6455.hpp>
-#include <boost/core/exchange.hpp>
 #include <boost/type_traits/make_void.hpp>
 #include <algorithm>
 #include <memory>
@@ -153,7 +152,7 @@ public:
     }
 
     decorator(decorator&& other) noexcept
-        : vtable_(boost::exchange(
+        : vtable_(std::exchange(
             other.vtable_, vtable::get_default()))
     {
         vtable_->move(
@@ -176,7 +175,7 @@ public:
     operator=(decorator&& other) noexcept
     {
         vtable_->destroy(storage_);
-        vtable_ = boost::exchange(
+        vtable_ = std::exchange(
             other.vtable_, vtable::get_default());
         vtable_->move(storage_, other.storage_);
         return *this;

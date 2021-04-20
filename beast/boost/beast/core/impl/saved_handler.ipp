@@ -11,7 +11,6 @@
 #define BOOST_BEAST_CORE_IMPL_SAVED_HANDLER_IPP
 
 #include <boost/beast/core/saved_handler.hpp>
-#include <boost/core/exchange.hpp>
 
 namespace boost {
 namespace beast {
@@ -25,7 +24,7 @@ saved_handler::
 
 saved_handler::
 saved_handler(saved_handler&& other) noexcept
-    : p_(boost::exchange(other.p_, nullptr))
+    : p_(std::exchange(other.p_, nullptr))
 {
 }
 
@@ -35,7 +34,7 @@ operator=(saved_handler&& other) noexcept
 {
     // Can't delete a handler before invoking
     BOOST_ASSERT(! has_value());
-    p_ = boost::exchange(other.p_, nullptr);
+    p_ = std::exchange(other.p_, nullptr);
     return *this;
 }
 
@@ -45,7 +44,7 @@ reset() noexcept
 {
     if(! p_)
         return false;
-    boost::exchange(p_, nullptr)->destroy();
+    std::exchange(p_, nullptr)->destroy();
     return true;
 }
 
@@ -55,7 +54,7 @@ invoke()
 {
     // Can't invoke without a value
     BOOST_ASSERT(has_value());
-    boost::exchange(
+    std::exchange(
         p_, nullptr)->invoke();
 }
 
@@ -65,7 +64,7 @@ maybe_invoke()
 {
     if(! p_)
         return false;
-    boost::exchange(
+    std::exchange(
         p_, nullptr)->invoke();
     return true;
 }

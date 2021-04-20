@@ -15,7 +15,6 @@
 #if BOOST_BEAST_USE_WIN32_FILE
 
 #include <boost/beast/core/detail/win32_unicode_path.hpp>
-#include <boost/core/exchange.hpp>
 #include <boost/winapi/access_rights.hpp>
 #include <boost/winapi/error_codes.hpp>
 #include <boost/winapi/get_last_error.hpp>
@@ -64,7 +63,7 @@ file_win32::
 
 file_win32::
 file_win32(file_win32&& other)
-    : h_(boost::exchange(other.h_,
+    : h_(std::exchange(other.h_,
         boost::winapi::INVALID_HANDLE_VALUE_))
 {
 }

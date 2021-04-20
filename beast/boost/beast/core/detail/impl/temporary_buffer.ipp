@@ -12,7 +12,6 @@
 
 #include <boost/beast/core/detail/temporary_buffer.hpp>
 #include <boost/beast/core/detail/clamp.hpp>
-#include <boost/core/exchange.hpp>
 #include <boost/assert.hpp>
 #include <memory>
 #include <cstring>
@@ -59,7 +58,7 @@ grow(std::size_t n)
         n, size_, capacity));
     char* const p = new char[capacity];
     std::memcpy(p, data_, size_);
-    deallocate(boost::exchange(data_, p));
+    deallocate(std::exchange(data_, p));
     capacity_ = capacity;
 }
 } // detail

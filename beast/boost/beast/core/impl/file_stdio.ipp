@@ -13,7 +13,6 @@
 #include <boost/beast/core/file_stdio.hpp>
 #include <boost/beast/core/detail/win32_unicode_path.hpp>
 #include <boost/config/workaround.hpp>
-#include <boost/core/exchange.hpp>
 #include <limits>
 
 namespace boost {
@@ -28,7 +27,7 @@ file_stdio::
 
 file_stdio::
 file_stdio(file_stdio&& other)
-    : f_(boost::exchange(other.f_, nullptr))
+    : f_(std::exchange(other.f_, nullptr))
 {
 }
 

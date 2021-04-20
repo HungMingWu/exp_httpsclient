@@ -10,7 +10,6 @@
 #ifndef BOOST_BEAST_IMPL_FLAT_BUFFER_HPP
 #define BOOST_BEAST_IMPL_FLAT_BUFFER_HPP
 
-#include <boost/core/exchange.hpp>
 #include <boost/assert.hpp>
 #include <boost/throw_exception.hpp>
 #include <memory>
@@ -98,11 +97,11 @@ basic_flat_buffer<Allocator>::
 basic_flat_buffer(basic_flat_buffer&& other) noexcept
     : boost::empty_value<base_alloc_type>(
         boost::empty_init_t{}, std::move(other.get()))
-    , begin_(boost::exchange(other.begin_, nullptr))
-    , in_(boost::exchange(other.in_, nullptr))
-    , out_(boost::exchange(other.out_, nullptr))
-    , last_(boost::exchange(other.last_, nullptr))
-    , end_(boost::exchange(other.end_, nullptr))
+    , begin_(std::exchange(other.begin_, nullptr))
+    , in_(std::exchange(other.in_, nullptr))
+    , out_(std::exchange(other.out_, nullptr))
+    , last_(std::exchange(other.last_, nullptr))
+    , end_(std::exchange(other.end_, nullptr))
     , max_(other.max_)
 {
 }
