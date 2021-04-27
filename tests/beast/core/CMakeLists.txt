@@ -9,6 +9,7 @@ PRIVATE
 	buffers_cat.cpp
 	buffers_prefix.cpp
 	buffers_range.cpp
+	buffers_suffix.cpp
 	detail_base64.cpp
 	detail_buffer.cpp
 	detail_clamp.cpp

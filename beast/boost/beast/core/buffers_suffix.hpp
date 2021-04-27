@@ -91,6 +91,9 @@ public:
 
 #endif
 
+    /// Constructor
+    buffers_suffix();
+
     /// Copy Constructor
     buffers_suffix(buffers_suffix const&);
 

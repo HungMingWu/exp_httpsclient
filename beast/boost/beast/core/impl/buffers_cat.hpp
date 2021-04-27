@@ -139,9 +139,6 @@ class buffers_cat_view<Bn...>::const_iterator
 
     friend class buffers_cat_view<Bn...>;
 
-    template<std::size_t I>
-    using C = std::integral_constant<std::size_t, I>;
-
 public:
     using value_type = typename
         buffers_cat_view<Bn...>::value_type;
