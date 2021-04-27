@@ -137,3 +137,10 @@ TEST_CASE("testAsyncRead eof", "detect_ssl") {
         test::fail_handler(net::error::eof));
     test::run(ioc);
 }
+
+#if BOOST_ASIO_HAS_CO_AWAIT
+static_assert(
+    std::is_same_v<
+        net::awaitable<bool>, decltype(
+            async_detect_ssl(stream, b, net::use_awaitable))>);
+#endif

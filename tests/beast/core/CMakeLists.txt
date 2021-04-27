@@ -19,4 +19,5 @@ PRIVATE
 	detail_tuple.cpp
 	detail_varint.cpp
 	detect_ssl.cpp
+	error.cpp
 )
