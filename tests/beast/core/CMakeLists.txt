@@ -10,6 +10,7 @@ PRIVATE
 	buffers_prefix.cpp
 	buffers_range.cpp
 	buffers_suffix.cpp
+	buffers_to_string.cpp
 	detail_base64.cpp
 	detail_buffer.cpp
 	detail_clamp.cpp
