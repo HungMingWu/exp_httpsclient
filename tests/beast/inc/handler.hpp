@@ -64,7 +64,7 @@ public:
     operator()(error_code ec, Args&&...)
     {
         REQUIRE(! pass_); // can't call twice
-        REQUIRE(!ec_ || ec == *ec_);
+        REQUIRE((!ec_ || ec == *ec_));
         pass_ = true;
     }
 

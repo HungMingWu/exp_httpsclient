@@ -18,4 +18,5 @@ PRIVATE
 	detail_sha1.cpp
 	detail_tuple.cpp
 	detail_varint.cpp
+	detect_ssl.cpp
 )
