@@ -22,4 +22,5 @@ PRIVATE
 	error.cpp
 	flat_buffer.cpp
 	flat_static_buffer.cpp
+	flat_stream.cpp
 )
