@@ -23,4 +23,5 @@ PRIVATE
 	flat_buffer.cpp
 	flat_static_buffer.cpp
 	flat_stream.cpp
+	make_printable.cpp
 )
