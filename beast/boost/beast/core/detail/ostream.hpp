@@ -13,6 +13,7 @@
 #include <boost/beast/core/buffers_prefix.hpp>
 #include <boost/beast/core/buffers_range.hpp>
 #include <boost/asio/buffer.hpp>
+#include <boost/assert.hpp>
 #include <memory>
 #include <ostream>
 #include <streambuf>

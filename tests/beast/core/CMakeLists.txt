@@ -21,4 +21,5 @@ PRIVATE
 	detect_ssl.cpp
 	error.cpp
 	flat_buffer.cpp
+	flat_static_buffer.cpp
 )
