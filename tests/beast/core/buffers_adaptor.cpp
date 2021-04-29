@@ -9,7 +9,7 @@ static_assert(
     is_mutable_dynamic_buffer<
     buffers_adaptor<buffers_triple>>::value);
 
-TEST_CASE("testDynamicBuffer", "buffers_adaptor") {
+TEST_CASE("buffers_adaptor testDynamicBuffer", "buffers_adaptor") {
     char s[13];
     buffers_triple tb(s, sizeof(s));
     buffers_adaptor<buffers_triple> b(tb);

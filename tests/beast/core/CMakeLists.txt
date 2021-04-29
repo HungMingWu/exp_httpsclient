@@ -20,4 +20,5 @@ PRIVATE
 	detail_varint.cpp
 	detect_ssl.cpp
 	error.cpp
+	flat_buffer.cpp
 )
