@@ -1,4 +1,5 @@
 #include "catch.hpp"
+#include <sstream>
 #include <string_view>
 #include <boost/asio/buffer.hpp>
 #include <boost/beast/core/make_printable.hpp>
