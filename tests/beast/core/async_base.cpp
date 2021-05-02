@@ -79,7 +79,7 @@ namespace boost {
                     return false;
                 }
             };
-            BOOST_STATIC_ASSERT(net::execution::is_executor<ex1_type>::value);
+            static_assert(net::execution::is_executor<ex1_type>::value);
 #else
             struct ex1_type
             {
@@ -90,7 +90,7 @@ namespace boost {
                 template<class F> void post(F&&) {}
                 template<class F> void defer(F&&) {}
             };
-            BOOST_STATIC_ASSERT(net::is_executor<ex1_type>::value);
+            static_assert(net::is_executor<ex1_type>::value);
 #endif
 
 

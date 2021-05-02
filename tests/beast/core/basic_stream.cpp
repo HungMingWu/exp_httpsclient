@@ -1013,7 +1013,7 @@ TEST_CASE("testIssue1589", "basic_stream") {
             tcp,
             strand,
             boost::beast::unlimited_rate_policy> stream(std::move(sock));
-        BOOST_STATIC_ASSERT(
+        static_assert(
             std::is_convertible<
             decltype(sock)::executor_type,
             decltype(stream)::executor_type>::value);

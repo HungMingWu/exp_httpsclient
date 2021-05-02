@@ -43,9 +43,9 @@ public:
     using value_type = buffers_type<Buffers>;
 #endif
 
-    BOOST_STATIC_ASSERT(std::is_same<
+    static_assert(std::is_same_v<
         typename const_iterator::value_type,
-        typename buffers_prefix_view::value_type>::value);
+        typename buffers_prefix_view::value_type>);
 
     using pointer = value_type const*;
     using reference = value_type;
@@ -156,8 +156,7 @@ setup(std::size_t size)
             size_ += size;
 
             // by design, this subtraction can wrap
-            BOOST_STATIC_ASSERT(std::is_unsigned<
-                decltype(remain_)>::value);
+            static_assert(std::is_unsigned_v<decltype(remain_)>);
             remain_ = size - len;
             break;
         }

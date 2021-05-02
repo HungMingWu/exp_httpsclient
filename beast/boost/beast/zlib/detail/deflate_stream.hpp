@@ -86,7 +86,7 @@ protected:
     static std::uint16_t constexpr maxMatch = 258;
 
     // Can't change minMatch without also changing code, see original zlib
-    BOOST_STATIC_ASSERT(minMatch == 3);
+    static_assert(minMatch == 3);
 
     // end of block literal code
     static std::uint16_t constexpr END_BLOCK = 256;
@@ -701,7 +701,7 @@ Unsigned
 deflate_stream::
 bi_reverse(Unsigned code, unsigned len)
 {
-    BOOST_STATIC_ASSERT(std::is_unsigned<Unsigned>::value);
+    static_assert(std::is_unsigned_v<Unsigned>);
     BOOST_ASSERT(len <= 8 * sizeof(unsigned));
     Unsigned res = 0;
     do

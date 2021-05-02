@@ -93,7 +93,7 @@ class flat_stream
     NextLayer stream_;
     flat_buffer buffer_;
 
-    BOOST_STATIC_ASSERT(has_get_executor<NextLayer>::value);
+    static_assert(has_get_executor<NextLayer>::value);
 
     struct ops;
 

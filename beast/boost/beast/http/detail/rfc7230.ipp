@@ -11,6 +11,7 @@
 #define BOOST_BEAST_HTTP_DETAIL_RFC7230_IPP
 
 #include <boost/beast/core/string.hpp>
+#include <array>
 #include <iterator>
 #include <utility>
 
@@ -28,7 +29,7 @@ is_digit(char c)
 char
 is_alpha(char c)
 {
-    static char constexpr tab[] = {
+    static constexpr std::array<char, 256> tab = {
         0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0, // 0
         0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0, // 16
         0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0, // 32
@@ -46,7 +47,6 @@ is_alpha(char c)
         0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0, // 224
         0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0  // 240
     };
-    BOOST_STATIC_ASSERT(sizeof(tab) == 256);
     return tab[static_cast<unsigned char>(c)];
 }
 
@@ -54,7 +54,7 @@ char
 is_text(char c)
 {
     // TEXT = <any OCTET except CTLs, but including LWS>
-    static char constexpr tab[] = {
+    static constexpr std::array<char, 256> tab = {
         0, 0, 0, 0,  0, 0, 0, 0,  0, 1, 0, 0,  0, 0, 0, 0, // 0
         0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0, // 16
         1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1, // 32
@@ -72,7 +72,6 @@ is_text(char c)
         1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1, // 224
         1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1  // 240
     };
-    BOOST_STATIC_ASSERT(sizeof(tab) == 256);
     return tab[static_cast<unsigned char>(c)];
 }
 
@@ -85,7 +84,7 @@ is_token_char(char c)
                 "^" | "_" | "`" | "|" | "~" |
                 DIGIT | ALPHA
     */
-    static char constexpr tab[] = {
+    static constexpr std::array<char, 256> tab = {
         0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0, // 0
         0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0, // 16
         0, 1, 0, 1,  1, 1, 1, 1,  0, 0, 1, 1,  0, 1, 1, 0, // 32
@@ -103,7 +102,6 @@ is_token_char(char c)
         0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0, // 224
         0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0  // 240
     };
-    BOOST_STATIC_ASSERT(sizeof(tab) == 256);
     return tab[static_cast<unsigned char>(c)];
 }
 
@@ -113,7 +111,7 @@ is_qdchar(char c)
     /*
         qdtext = HTAB / SP / "!" / %x23-5B ; '#'-'[' / %x5D-7E ; ']'-'~' / obs-text
     */
-    static char constexpr tab[] = {
+    static constexpr std::array<char, 256> tab = {
         0, 0, 0, 0,  0, 0, 0, 0,  0, 1, 0, 0,  0, 0, 0, 0, // 0
         0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0, // 16
         1, 1, 0, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1, // 32
@@ -131,7 +129,6 @@ is_qdchar(char c)
         1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1, // 224
         1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1  // 240
     };
-    BOOST_STATIC_ASSERT(sizeof(tab) == 256);
     return tab[static_cast<unsigned char>(c)];
 }
 
@@ -142,7 +139,7 @@ is_qpchar(char c)
         quoted-pair = "\" ( HTAB / SP / VCHAR / obs-text )
         obs-text = %x80-FF
     */
-    static char constexpr tab[] = {
+    static constexpr std::array<char, 256> tab = {
         0, 0, 0, 0,  0, 0, 0, 0,  0, 1, 0, 0,  0, 0, 0, 0, // 0
         0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0,  0, 0, 0, 0, // 16
         1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1, // 32
@@ -160,7 +157,6 @@ is_qpchar(char c)
         1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1, // 224
         1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1,  1, 1, 1, 1  // 240
     };
-    BOOST_STATIC_ASSERT(sizeof(tab) == 256);
     return tab[static_cast<unsigned char>(c)];
 }
 
@@ -171,7 +167,7 @@ char
 to_value_char(char c)
 {
     // TEXT = <any OCTET except CTLs, but including LWS>
-    static unsigned char constexpr tab[] = {
+    static constexpr std::array<unsigned char, 256> tab = {
           0,   0,   0,   0,   0,   0,   0,   0,   0,   9,   0,   0,   0,   0,   0,   0, // 0
           0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0, // 16
          32,  33,  34,  35,  36,  37,  38,  39,  40,  41,  42,  43,  44,  45,  46,  47, // 32
@@ -189,7 +185,6 @@ to_value_char(char c)
         224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239, // 224
         240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254, 255  // 240
     };
-    BOOST_STATIC_ASSERT(sizeof(tab) == 256);
     return static_cast<char>(tab[static_cast<unsigned char>(c)]);
 }
 
@@ -197,7 +192,7 @@ to_value_char(char c)
 std::int8_t
 unhex(char c)
 {
-    static signed char constexpr tab[] = {
+    static constexpr std::array<signed char, 256> tab = {
         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 0
         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 16
         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 32
@@ -215,7 +210,6 @@ unhex(char c)
         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, // 224
         -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1  // 240
     };
-    BOOST_STATIC_ASSERT(sizeof(tab) == 256);
     return tab[static_cast<unsigned char>(c)];
 }
 

@@ -236,7 +236,7 @@ public:
     {
         // Callback may not be constant, caller is responsible for
         // managing the lifetime of the callback. Copies are not made.
-        BOOST_STATIC_ASSERT(! std::is_const<Callback>::value);
+        static_assert(! std::is_const_v<Callback>);
 
         // Can't set the callback after receiving any chunk data!
         BOOST_ASSERT(! rd_inited_);
@@ -284,7 +284,7 @@ public:
     {
         // Callback may not be constant, caller is responsible for
         // managing the lifetime of the callback. Copies are not made.
-        BOOST_STATIC_ASSERT(! std::is_const<Callback>::value);
+        static_assert(! std::is_const_v<Callback>);
 
         // Can't set the callback after receiving any chunk data!
         BOOST_ASSERT(! rd_inited_);

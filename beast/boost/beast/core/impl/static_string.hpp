@@ -540,7 +540,7 @@ to_static_string(Integer x)
 {
     using CharT = char;
     using Traits = std::char_traits<CharT>;
-    BOOST_STATIC_ASSERT(std::is_integral<Integer>::value);
+    static_assert(std::is_integral_v<Integer>);
     char buf[detail::max_digits(sizeof(Integer))];
     auto last = buf + sizeof(buf);
     auto it = detail::raw_to_string<

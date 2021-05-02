@@ -14,7 +14,6 @@
 #include <boost/config.hpp>
 #include <boost/version.hpp>
 #include <boost/core/ignore_unused.hpp>
-#include <boost/static_assert.hpp>
 
 namespace boost {
 namespace asio

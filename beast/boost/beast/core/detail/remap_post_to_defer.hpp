@@ -23,7 +23,7 @@ template<class Executor>
 class remap_post_to_defer
     : private boost::empty_value<Executor>
 {
-    BOOST_STATIC_ASSERT(
+    static_assert(
         net::is_executor<Executor>::value);
 
     Executor const&
