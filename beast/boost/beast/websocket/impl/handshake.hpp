@@ -293,7 +293,7 @@ async_handshake(
     string_view target,
     HandshakeHandler&& handler)
 {
-    static_assert(is_async_stream<next_layer_type>::value,
+    static_assert(AsyncStream<next_layer_type>,
         "AsyncStream type requirements not met");
     detail::sec_ws_key_type key;
     auto req = impl_->build_request(
@@ -319,7 +319,7 @@ async_handshake(
     string_view target,
     HandshakeHandler&& handler)
 {
-    static_assert(is_async_stream<next_layer_type>::value,
+    static_assert(AsyncStream<next_layer_type>,
         "AsyncStream type requirements not met");
     detail::sec_ws_key_type key;
     auto req = impl_->build_request(
@@ -341,7 +341,7 @@ stream<NextLayer, deflateSupported>::
 handshake(string_view host,
     string_view target)
 {
-    static_assert(is_sync_stream<next_layer_type>::value,
+    static_assert(SyncStream<next_layer_type>,
         "SyncStream type requirements not met");
     error_code ec;
     handshake(
@@ -357,7 +357,7 @@ handshake(response_type& res,
     string_view host,
         string_view target)
 {
-    static_assert(is_sync_stream<next_layer_type>::value,
+    static_assert(SyncStream<next_layer_type>,
         "SyncStream type requirements not met");
     error_code ec;
     handshake(res, host, target, ec);
@@ -371,7 +371,7 @@ stream<NextLayer, deflateSupported>::
 handshake(string_view host,
     string_view target, error_code& ec)
 {
-    static_assert(is_sync_stream<next_layer_type>::value,
+    static_assert(SyncStream<next_layer_type>,
         "SyncStream type requirements not met");
     do_handshake(nullptr,
         host, target, &default_decorate_req, ec);
@@ -385,7 +385,7 @@ handshake(response_type& res,
         string_view target,
             error_code& ec)
 {
-    static_assert(is_sync_stream<next_layer_type>::value,
+    static_assert(SyncStream<next_layer_type>,
         "SyncStream type requirements not met");
     do_handshake(&res,
         host, target, &default_decorate_req, ec);

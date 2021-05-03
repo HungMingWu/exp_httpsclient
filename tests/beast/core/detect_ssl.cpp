@@ -139,6 +139,7 @@ TEST_CASE("testAsyncRead eof", "detect_ssl") {
     test::run(ioc);
 }
 
+#undef ASIO_HAS_CO_AWAIT
 #if ASIO_HAS_CO_AWAIT
 static_assert(
     std::is_same_v<

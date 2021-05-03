@@ -104,314 +104,63 @@ template<class T>
 using executor_type =
     decltype(std::declval<T&>().get_executor());
 
-/** Determine if `T` has the `get_executor` member function.
+/** Determine if `T` has the `get_executor` member function. */
 
-    Metafunctions are used to perform compile time checking of template
-    types. This type will be `std::true_type` if `T` has the member
-    function with the correct signature, else type will be `std::false_type`. 
-
-    @par Example
-
-    Use with tag dispatching:
-
-    @code
-    template<class T>
-    void maybe_hello(T const& t, std::true_type)
-    {
-        net::post(
-            t.get_executor(),
-            []
-            {
-                std::cout << "Hello, world!" << std::endl;
-            });
-    }
-
-    template<class T>
-    void maybe_hello(T const&, std::false_type)
-    {
-        // T does not have get_executor
-    }
-
-    template<class T>
-    void maybe_hello(T const& t)
-    {
-        maybe_hello(t, has_get_executor<T>{});
-    }
-    @endcode
-
-    Use with `static_assert`:
-
-    @code
-    struct stream
-    {
-        using executor_type = net::io_context::executor_type;
-        executor_type get_executor() noexcept;
-    };
-
-    static_assert(has_get_executor<stream>::value, "Missing get_executor member");
-    @endcode
-*/
-#if BOOST_BEAST_DOXYGEN
-template<class T>
-using has_get_executor = __see_below__;
-#else
-template<class T, class = void>
-struct has_get_executor : std::false_type {};
-
-template<class T>
-struct has_get_executor<T, std::void_t<decltype(
-    std::declval<T&>().get_executor())>> : std::true_type {};
-#endif
+template <typename T>
+concept has_get_executor_v = requires (T t) {
+    { t.get_executor() };
+};
 
 //------------------------------------------------------------------------------
 
-/** Determine if at type meets the requirements of <em>SyncReadStream</em>.
+/** Determine if at type meets the requirements of <em>SyncReadStream</em>. */
 
-    Metafunctions are used to perform compile time checking of template
-    types. This type will be `std::true_type` if `T` meets the requirements,
-    else the type will be `std::false_type`. 
+template <typename T>
+concept SyncReadStream = requires (T t) {
+    { t.read_some(std::declval<detail::MutableBufferSequence>()) }
+        -> std::convertible_to<std::size_t>;
+    { t.read_some(std::declval<detail::MutableBufferSequence>(),
+                  std::declval<std::error_code&>()) }
+        -> std::convertible_to<std::size_t>;
+};
 
-    @par Example
-    Use with `static_assert`:
-    @code
-    template<class SyncReadStream>
-    void f(SyncReadStream& stream)
-    {
-        static_assert(is_sync_read_stream<SyncReadStream>::value,
-            "SyncReadStream type requirements not met");
-    ...
-    @endcode
+/** Determine if `T` meets the requirements of <em>SyncWriteStream</em>. */
 
-    Use with `std::enable_if` (SFINAE):
-    @code
-    template<class SyncReadStream>
-    typename std::enable_if<is_sync_read_stream<SyncReadStream>::value>::type
-    f(SyncReadStream& stream);
-    @endcode
-*/
-#if BOOST_BEAST_DOXYGEN
-template<class T>
-using is_sync_read_stream = __see_below__;
-#else
-template<class T, class = void>
-struct is_sync_read_stream : std::false_type {};
+template <typename T>
+concept SyncWriteStream = requires (T t) {
+    { t.write_some(std::declval<detail::ConstBufferSequence>()) }
+        -> std::convertible_to<std::size_t>;
+    { t.write_some(std::declval<detail::ConstBufferSequence>(),
+                   std::declval<std::error_code&>()) }
+        -> std::convertible_to<std::size_t>;
+};
 
-template<class T>
-struct is_sync_read_stream<T, std::void_t<decltype(
-    std::declval<std::size_t&>() = std::declval<T&>().read_some(
-        std::declval<detail::MutableBufferSequence>()),
-    std::declval<std::size_t&>() = std::declval<T&>().read_some(
-        std::declval<detail::MutableBufferSequence>(),
-        std::declval<std::error_code&>())
-            )>> : std::true_type {};
-#endif
-
-/** Determine if `T` meets the requirements of <em>SyncWriteStream</em>.
-
-    Metafunctions are used to perform compile time checking of template
-    types. This type will be `std::true_type` if `T` meets the requirements,
-    else the type will be `std::false_type`. 
-
-    @par Example
-
-    Use with `static_assert`:
-
-    @code
-    template<class SyncReadStream>
-    void f(SyncReadStream& stream)
-    {
-        static_assert(is_sync_read_stream<SyncReadStream>::value,
-            "SyncReadStream type requirements not met");
-    ...
-    @endcode
-
-    Use with `std::enable_if` (SFINAE):
-
-    @code
-    template<class SyncReadStream>
-    typename std::enable_if<is_sync_read_stream<SyncReadStream>::value>::type
-    f(SyncReadStream& stream);
-    @endcode
-*/
-#if BOOST_BEAST_DOXYGEN
-template<class T>
-using is_sync_write_stream = __see_below__;
-#else
-template<class T, class = void>
-struct is_sync_write_stream : std::false_type {};
-
-template<class T>
-struct is_sync_write_stream<T, std::void_t<decltype(
-    (
-    std::declval<std::size_t&>() = std::declval<T&>().write_some(
-        std::declval<detail::ConstBufferSequence>()))
-    ,std::declval<std::size_t&>() = std::declval<T&>().write_some(
-        std::declval<detail::ConstBufferSequence>(),
-        std::declval<std::error_code&>())
-            )>> : std::true_type {};
-#endif
-
-/** Determine if `T` meets the requirements of @b SyncStream.
-
-    Metafunctions are used to perform compile time checking of template
-    types. This type will be `std::true_type` if `T` meets the requirements,
-    else the type will be `std::false_type`. 
-
-    @par Example
-
-    Use with `static_assert`:
-
-    @code
-    template<class SyncStream>
-    void f(SyncStream& stream)
-    {
-        static_assert(is_sync_stream<SyncStream>::value,
-            "SyncStream type requirements not met");
-    ...
-    @endcode
-
-    Use with `std::enable_if` (SFINAE):
-
-    @code
-    template<class SyncStream>
-    typename std::enable_if<is_sync_stream<SyncStream>::value>::type
-    f(SyncStream& stream);
-    @endcode
-*/
-#if BOOST_BEAST_DOXYGEN
-template<class T>
-using is_sync_stream = __see_below__;
-#else
-template<class T>
-using is_sync_stream = std::integral_constant<bool,
-    is_sync_read_stream<T>::value && is_sync_write_stream<T>::value>;
-#endif
+/** Determine if `T` meets the requirements of @b SyncStream. */
+template <typename T>
+concept SyncStream = SyncReadStream<T> && SyncWriteStream<T>;
 
 //------------------------------------------------------------------------------
 
-/** Determine if `T` meets the requirements of <em>AsyncReadStream</em>.
+/** Determine if `T` meets the requirements of <em>AsyncReadStream</em>. */
 
-    Metafunctions are used to perform compile time checking of template
-    types. This type will be `std::true_type` if `T` meets the requirements,
-    else the type will be `std::false_type`. 
+template <typename T>
+concept AsyncReadStream = requires (T t) {
+    { t.async_read_some(std::declval<detail::MutableBufferSequence>(),
+                        std::declval<detail::ReadHandler>()) };
+} && has_get_executor_v<T>;
 
-    @par Example
-    
-    Use with `static_assert`:
-    
-    @code
-    template<class AsyncReadStream>
-    void f(AsyncReadStream& stream)
-    {
-        static_assert(is_async_read_stream<AsyncReadStream>::value,
-            "AsyncReadStream type requirements not met");
-    ...
-    @endcode
-    
-    Use with `std::enable_if` (SFINAE):
-    
-    @code
-        template<class AsyncReadStream>
-        typename std::enable_if<is_async_read_stream<AsyncReadStream>::value>::type
-        f(AsyncReadStream& stream);
-    @endcode
-*/
-#if BOOST_BEAST_DOXYGEN
-template<class T>
-using is_async_read_stream = __see_below__;
-#else
-template<class T, class = void>
-struct is_async_read_stream : std::false_type {};
+/** Determine if `T` meets the requirements of <em>AsyncWriteStream</em>. */
 
-template<class T>
-struct is_async_read_stream<T, std::void_t<decltype(
-    std::declval<T&>().async_read_some(
-        std::declval<detail::MutableBufferSequence>(),
-        std::declval<detail::ReadHandler>())
-            )>> : std::integral_constant<bool,
-    has_get_executor<T>::value
-        > {};
-#endif
+template <typename T>
+concept AsyncWriteStream = requires (T t) {
+    { t.async_write_some(std::declval<detail::ConstBufferSequence>(),
+        std::declval<detail::WriteHandler>()) };
+} && has_get_executor_v<T>;
 
-/** Determine if `T` meets the requirements of <em>AsyncWriteStream</em>.
+/** Determine if `T` meets the requirements of @b AsyncStream. */
 
-    Metafunctions are used to perform compile time checking of template
-    types. This type will be `std::true_type` if `T` meets the requirements,
-    else the type will be `std::false_type`. 
-
-    @par Example
-
-    Use with `static_assert`:
-
-    @code
-    template<class AsyncWriteStream>
-    void f(AsyncWriteStream& stream)
-    {
-        static_assert(is_async_write_stream<AsyncWriteStream>::value,
-            "AsyncWriteStream type requirements not met");
-    ...
-    @endcode
-
-    Use with `std::enable_if` (SFINAE):
-
-    @code
-    template<class AsyncWriteStream>
-    typename std::enable_if<is_async_write_stream<AsyncWriteStream>::value>::type
-    f(AsyncWriteStream& stream);
-    @endcode
-*/
-#if BOOST_BEAST_DOXYGEN
-template<class T>
-using is_async_write_stream = __see_below__;
-#else
-template<class T, class = void>
-struct is_async_write_stream : std::false_type {};
-
-template<class T>
-struct is_async_write_stream<T, std::void_t<decltype(
-    std::declval<T&>().async_write_some(
-        std::declval<detail::ConstBufferSequence>(),
-        std::declval<detail::WriteHandler>())
-            )>> : std::integral_constant<bool,
-    has_get_executor<T>::value
-        > {};
-#endif
-
-/** Determine if `T` meets the requirements of @b AsyncStream.
-
-    Metafunctions are used to perform compile time checking of template
-    types. This type will be `std::true_type` if `T` meets the requirements,
-    else the type will be `std::false_type`. 
-
-    @par Example
-
-    Use with `static_assert`:
-
-    @code
-    template<class AsyncStream>
-    void f(AsyncStream& stream)
-    {
-        static_assert(is_async_stream<AsyncStream>::value,
-            "AsyncStream type requirements not met");
-    ...
-    @endcode
-
-    Use with `std::enable_if` (SFINAE):
-
-    @code
-    template<class AsyncStream>
-    typename std::enable_if<is_async_stream<AsyncStream>::value>::type
-    f(AsyncStream& stream);
-    @endcode
-*/
-#if BOOST_BEAST_DOXYGEN
-template<class T>
-using is_async_stream = __see_below__;
-#else
-template<class T>
-using is_async_stream = std::integral_constant<bool,
-    is_async_read_stream<T>::value && is_async_write_stream<T>::value>;
-#endif
+template <typename T>
+concept AsyncStream = AsyncReadStream<T> && AsyncWriteStream<T>;
 
 //------------------------------------------------------------------------------
 

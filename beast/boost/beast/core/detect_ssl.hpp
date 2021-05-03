@@ -206,23 +206,16 @@ is_tls_client_hello (ConstBufferSequence const& buffers)
     @return `true` if the buffer contains a TLS client handshake and
     no error occurred, otherwise `false`.
 */
-template<
-    class SyncReadStream,
-    class DynamicBuffer>
+template<class DynamicBuffer>
 bool
 detect_ssl(
-    SyncReadStream& stream,
+    SyncReadStream auto& stream,
     DynamicBuffer& buffer,
     error_code& ec)
 {
     namespace beast = boost::beast;
 
     // Make sure arguments meet the requirements
-
-    static_assert(
-        is_sync_read_stream<SyncReadStream>::value,
-        "SyncReadStream type requirements not met");
-    
     static_assert(
         net::is_dynamic_buffer<DynamicBuffer>::value,
         "DynamicBuffer type requirements not met");
@@ -392,7 +385,7 @@ struct run_detect_ssl_op
 
 // Here is the implementation of the asynchronous initiation function
 template<
-    class AsyncReadStream,
+    class AsyncStream,
     class DynamicBuffer,
     class CompletionToken>
 #if BOOST_BEAST_DOXYGEN
@@ -401,7 +394,7 @@ ASIO_INITFN_RESULT_TYPE(CompletionToken, void(error_code, bool))
 auto
 #endif
 async_detect_ssl(
-    AsyncReadStream& stream,
+    AsyncStream& stream,
     DynamicBuffer& buffer,
     CompletionToken&& token)
         -> typename net::async_result<
@@ -411,7 +404,7 @@ async_detect_ssl(
     // Make sure arguments meet the type requirements
 
     static_assert(
-        is_async_read_stream<AsyncReadStream>::value,
+        AsyncReadStream<AsyncStream>,
         "SyncReadStream type requirements not met");
 
     static_assert(

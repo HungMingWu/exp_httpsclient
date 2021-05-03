@@ -68,12 +68,10 @@ namespace detail {
     @throws net::system_error Thrown on failure.
 */    
 template<
-    class SyncReadStream,
     class DynamicBuffer,
     class CompletionCondition
 #if ! BOOST_BEAST_DOXYGEN
     , class = typename std::enable_if<
-        is_sync_read_stream<SyncReadStream>::value &&
         net::is_dynamic_buffer<DynamicBuffer>::value &&
         detail::is_invocable<CompletionCondition,
             void(error_code&, std::size_t, DynamicBuffer&)>::value
@@ -82,7 +80,7 @@ template<
 >
 std::size_t
 read(
-    SyncReadStream& stream,
+    SyncReadStream auto& stream,
     DynamicBuffer& buffer,
     CompletionCondition completion_condition);
 
@@ -129,12 +127,10 @@ read(
     @returns The number of bytes transferred from the stream.
 */    
 template<
-    class SyncReadStream,
     class DynamicBuffer,
     class CompletionCondition
 #if ! BOOST_BEAST_DOXYGEN
     , class = typename std::enable_if<
-        is_sync_read_stream<SyncReadStream>::value &&
         net::is_dynamic_buffer<DynamicBuffer>::value &&
         detail::is_invocable<CompletionCondition,
             void(error_code&, std::size_t, DynamicBuffer&)>::value
@@ -143,7 +139,7 @@ template<
 >
 std::size_t
 read(
-    SyncReadStream& stream,
+    SyncReadStream auto& stream,
     DynamicBuffer& buffer,
     CompletionCondition completion_condition,
     error_code& ec);
@@ -216,13 +212,13 @@ read(
     manner equivalent to using `net::post`.
 */
 template<
-    class AsyncReadStream,
+    class AsyncStream,
     class DynamicBuffer,
     class CompletionCondition,
     BOOST_BEAST_ASYNC_TPARAM2 ReadHandler
 #if ! BOOST_BEAST_DOXYGEN
     , class = typename std::enable_if<
-        is_async_read_stream<AsyncReadStream>::value &&
+        AsyncReadStream<AsyncStream> &&
         net::is_dynamic_buffer<DynamicBuffer>::value &&
         detail::is_invocable<CompletionCondition,
             void(error_code&, std::size_t, DynamicBuffer&)>::value
@@ -231,7 +227,7 @@ template<
 >
 BOOST_BEAST_ASYNC_RESULT2(ReadHandler)
 async_read(
-    AsyncReadStream& stream,
+    AsyncStream& stream,
     DynamicBuffer& buffer,
     CompletionCondition&& completion_condition,
     ReadHandler&& handler);

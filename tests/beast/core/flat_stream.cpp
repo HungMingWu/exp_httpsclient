@@ -1,16 +1,14 @@
 #include "catch.hpp"
 #include <boost/beast/core/flat_stream.hpp>
 #include <asio/io_context.hpp>
-#include "stream_tests.hpp"
 #include "stream.hpp"
 namespace net = asio;
 using namespace boost::beast;
 
-TEST_CASE("flat_stream testMembers basic", "flat_stream") {
-	test_sync_stream<flat_stream<test::stream>>();
-
-	test_async_stream<flat_stream<test::stream>>();
-}
+static_assert(SyncReadStream<flat_stream<test::stream>>);
+static_assert(SyncWriteStream<flat_stream<test::stream>>);
+static_assert(AsyncReadStream<flat_stream<test::stream>>);
+static_assert(AsyncWriteStream<flat_stream<test::stream>>);
 
 TEST_CASE("flat_stream testMembers read/write", "flat_stream") {
     net::io_context ioc;
@@ -180,6 +178,7 @@ TEST_CASE("flat_stream testSplit", "flat_stream") {
     check({ 1,2,3,4 }, 3, 3, true);
 }
 
+#undef ASIO_HAS_CO_AWAIT
 #if ASIO_HAS_CO_AWAIT
 static_assert(std::is_same_v<
         net::awaitable<std::size_t>, decltype(

@@ -147,7 +147,7 @@ async_write_some(
     ConstBufferSequence const& buffers,
     WriteHandler&& handler)
 {
-    static_assert(is_async_write_stream<next_layer_type>::value,
+    static_assert(AsyncWriteStream<next_layer_type>,
         "AsyncWriteStream type requirements not met");
     static_assert(net::is_const_buffer_sequence<
         ConstBufferSequence>::value,
@@ -166,7 +166,7 @@ buffered_read_stream<Stream, DynamicBuffer>::
 read_some(
     MutableBufferSequence const& buffers)
 {
-    static_assert(is_sync_read_stream<next_layer_type>::value,
+    static_assert(SyncReadStream<next_layer_type>,
         "SyncReadStream type requirements not met");
     static_assert(net::is_mutable_buffer_sequence<
         MutableBufferSequence>::value,
@@ -185,7 +185,7 @@ buffered_read_stream<Stream, DynamicBuffer>::
 read_some(MutableBufferSequence const& buffers,
     error_code& ec)
 {
-    static_assert(is_sync_read_stream<next_layer_type>::value,
+    static_assert(SyncReadStream<next_layer_type>,
         "SyncReadStream type requirements not met");
     static_assert(net::is_mutable_buffer_sequence<
         MutableBufferSequence>::value,
@@ -218,7 +218,7 @@ async_read_some(
     MutableBufferSequence const& buffers,
     ReadHandler&& handler)
 {
-    static_assert(is_async_read_stream<next_layer_type>::value,
+    static_assert(AsyncReadStream<next_layer_type>,
         "AsyncReadStream type requirements not met");
     static_assert(net::is_mutable_buffer_sequence<
         MutableBufferSequence>::value,

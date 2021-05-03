@@ -10,7 +10,6 @@
 #include <boost/beast/core/basic_stream.hpp>
 #include <boost/beast/core/tcp_stream.hpp>
 #include <boost/beast/core/role.hpp>
-#include "stream_tests.hpp"
 
 namespace net = asio;
 using tcp = net::ip::tcp;
@@ -20,10 +19,15 @@ using strand = net::strand<executor>;
 TEST_CASE("testSpecialMembers net::io_context::executor_type", "basic_stream") {
     net::io_context ioc;
     auto ex = ioc.get_executor();
-    boost::beast::basic_stream<tcp, executor> s1(ioc);
-    boost::beast::basic_stream<tcp, executor> s2(ex);
-    boost::beast::basic_stream<tcp, executor> s3(ioc, tcp::v4());
-    boost::beast::basic_stream<tcp, executor> s4(std::move(s1));
+    using stream_type = boost::beast::basic_stream<tcp, executor>;
+    static_assert(boost::beast::SyncReadStream<stream_type>);
+    static_assert(boost::beast::SyncWriteStream<stream_type>);
+    static_assert(boost::beast::AsyncReadStream<stream_type>);
+    static_assert(boost::beast::AsyncWriteStream<stream_type>);
+    stream_type s1(ioc);
+    stream_type s2(ex);
+    stream_type s3(ioc, tcp::v4());
+    stream_type s4(std::move(s1));
     s2.socket() =
         net::basic_stream_socket<tcp, executor>(ioc);
     REQUIRE(s1.get_executor() == ex);
@@ -34,33 +38,22 @@ TEST_CASE("testSpecialMembers net::io_context::executor_type", "basic_stream") {
     REQUIRE((!static_cast<
         boost::beast::basic_stream<tcp, executor> const&>(
             s2).socket().is_open()));
-
-    boost::beast::test_sync_stream<
-        boost::beast::basic_stream<
-        tcp, executor>>();
-
-    boost::beast::test_async_stream<
-        boost::beast::basic_stream<
-        tcp, executor>>();
 }
 
 TEST_CASE("testSpecialMembers net::io_context::strand", "basic_stream") {
     net::io_context ioc;
     auto ex = net::make_strand(ioc);
-    boost::beast::basic_stream<tcp, strand> s1(ex);
-    boost::beast::basic_stream<tcp, strand> s2(ex, tcp::v4());
-    boost::beast::basic_stream<tcp, strand> s3(std::move(s1));
+    using stream_type = boost::beast::basic_stream<tcp, strand>;
+    static_assert(boost::beast::SyncReadStream<stream_type>);
+    static_assert(boost::beast::SyncWriteStream<stream_type>);
+    static_assert(boost::beast::AsyncReadStream<stream_type>);
+    static_assert(boost::beast::AsyncWriteStream<stream_type>);
+    stream_type s1(ex);
+    stream_type s2(ex, tcp::v4());
+    stream_type s3(std::move(s1));
     REQUIRE(s1.get_executor() == ex);
     REQUIRE(s2.get_executor() == ex);
     REQUIRE(s3.get_executor() == ex);
-
-    boost::beast::test_sync_stream<
-        boost::beast::basic_stream<
-        tcp, strand>>();
-
-    boost::beast::test_async_stream<
-        boost::beast::basic_stream<
-        tcp, strand>>();
 }
 
 TEST_CASE("testSpecialMembers layers", "basic_stream") {

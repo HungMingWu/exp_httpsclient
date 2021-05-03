@@ -10,5 +10,5 @@ INTERFACE
 
 target_compile_features(beast 
 INTERFACE 
-	cxx_std_17
+	cxx_std_20
 )

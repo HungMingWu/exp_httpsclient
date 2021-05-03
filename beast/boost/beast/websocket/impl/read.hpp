@@ -867,7 +867,7 @@ std::size_t
 stream<NextLayer, deflateSupported>::
 read(DynamicBuffer& buffer)
 {
-    static_assert(is_sync_stream<next_layer_type>::value,
+    static_assert(SyncStream<next_layer_type>,
         "SyncStream type requirements not met");
     static_assert(
         net::is_dynamic_buffer<DynamicBuffer>::value,
@@ -885,7 +885,7 @@ std::size_t
 stream<NextLayer, deflateSupported>::
 read(DynamicBuffer& buffer, error_code& ec)
 {
-    static_assert(is_sync_stream<next_layer_type>::value,
+    static_assert(SyncStream<next_layer_type>,
         "SyncStream type requirements not met");
     static_assert(
         net::is_dynamic_buffer<DynamicBuffer>::value,
@@ -907,7 +907,7 @@ BOOST_BEAST_ASYNC_RESULT2(ReadHandler)
 stream<NextLayer, deflateSupported>::
 async_read(DynamicBuffer& buffer, ReadHandler&& handler)
 {
-    static_assert(is_async_stream<next_layer_type>::value,
+    static_assert(AsyncStream<next_layer_type>,
         "AsyncStream type requirements not met");
     static_assert(
         net::is_dynamic_buffer<DynamicBuffer>::value,
@@ -933,7 +933,7 @@ read_some(
     DynamicBuffer& buffer,
     std::size_t limit)
 {
-    static_assert(is_sync_stream<next_layer_type>::value,
+    static_assert(SyncStream<next_layer_type>,
         "SyncStream type requirements not met");
     static_assert(
         net::is_dynamic_buffer<DynamicBuffer>::value,
@@ -955,7 +955,7 @@ read_some(
     std::size_t limit,
     error_code& ec)
 {
-    static_assert(is_sync_stream<next_layer_type>::value,
+    static_assert(SyncStream<next_layer_type>,
         "SyncStream type requirements not met");
     static_assert(
         net::is_dynamic_buffer<DynamicBuffer>::value,
@@ -984,7 +984,7 @@ async_read_some(
     std::size_t limit,
     ReadHandler&& handler)
 {
-    static_assert(is_async_stream<next_layer_type>::value,
+    static_assert(AsyncStream<next_layer_type>,
         "AsyncStream type requirements not met");
     static_assert(
         net::is_dynamic_buffer<DynamicBuffer>::value,
@@ -1009,7 +1009,7 @@ stream<NextLayer, deflateSupported>::
 read_some(
     MutableBufferSequence const& buffers)
 {
-    static_assert(is_sync_stream<next_layer_type>::value,
+    static_assert(SyncStream<next_layer_type>,
         "SyncStream type requirements not met");
     static_assert(net::is_mutable_buffer_sequence<
             MutableBufferSequence>::value,
@@ -1029,7 +1029,7 @@ read_some(
     MutableBufferSequence const& buffers,
     error_code& ec)
 {
-    static_assert(is_sync_stream<next_layer_type>::value,
+    static_assert(SyncStream<next_layer_type>,
         "SyncStream type requirements not met");
     static_assert(net::is_mutable_buffer_sequence<
             MutableBufferSequence>::value,
@@ -1368,7 +1368,7 @@ async_read_some(
     MutableBufferSequence const& buffers,
     ReadHandler&& handler)
 {
-    static_assert(is_async_stream<next_layer_type>::value,
+    static_assert(AsyncStream<next_layer_type>,
         "AsyncStream type requirements not met");
     static_assert(net::is_mutable_buffer_sequence<
             MutableBufferSequence>::value,

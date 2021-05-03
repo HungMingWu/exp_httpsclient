@@ -287,7 +287,7 @@ public:
     std::size_t
     write_some(ConstBufferSequence const& buffers)
     {
-        static_assert(is_sync_write_stream<next_layer_type>::value,
+        static_assert(SyncWriteStream<next_layer_type>,
             "SyncWriteStream type requirements not met");
         return next_layer_.write_some(buffers);
     }
@@ -309,7 +309,7 @@ public:
     write_some(ConstBufferSequence const& buffers,
         error_code& ec)
     {
-        static_assert(is_sync_write_stream<next_layer_type>::value,
+        static_assert(SyncWriteStream<next_layer_type>,
             "SyncWriteStream type requirements not met");
         return next_layer_.write_some(buffers, ec);
     }

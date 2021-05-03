@@ -327,7 +327,7 @@ BOOST_BEAST_ASYNC_RESULT1(WriteHandler)
 stream<NextLayer, deflateSupported>::
 async_ping(ping_data const& payload, WriteHandler&& handler)
 {
-    static_assert(is_async_stream<next_layer_type>::value,
+    static_assert(AsyncStream<next_layer_type>,
         "AsyncStream type requirements not met");
     return net::async_initiate<
         WriteHandler,
@@ -345,7 +345,7 @@ BOOST_BEAST_ASYNC_RESULT1(WriteHandler)
 stream<NextLayer, deflateSupported>::
 async_pong(ping_data const& payload, WriteHandler&& handler)
 {
-    static_assert(is_async_stream<next_layer_type>::value,
+    static_assert(AsyncStream<next_layer_type>,
         "AsyncStream type requirements not met");
     return net::async_initiate<
         WriteHandler,

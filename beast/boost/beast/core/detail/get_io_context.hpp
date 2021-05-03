@@ -78,28 +78,17 @@ get_io_context(...)
 
 //------------------------------------------------------------------------------
 
-template<class T>
-net::io_context*
-get_io_context_impl(T& t, std::true_type)
-{
-    return get_io_context(
-        t.get_executor());
-}
-
-template<class T>
-net::io_context*
-get_io_context_impl(T const&, std::false_type)
-{
-    return nullptr;
-}
-
 // Returns the io_context*, or nullptr, for any object.
 template<class T>
 net::io_context*
 get_io_context(T& t)
 {
-    return get_io_context_impl(t,
-        has_get_executor<T>{});
+    if constexpr (has_get_executor_v<T>) {
+        return get_io_context(t.get_executor());
+    }
+    else {
+        return nullptr;
+    }
 }
 
 } // detail

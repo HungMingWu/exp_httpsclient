@@ -464,7 +464,7 @@ void
 stream<NextLayer, deflateSupported>::
 accept()
 {
-    static_assert(is_sync_stream<next_layer_type>::value,
+    static_assert(SyncStream<next_layer_type>,
         "SyncStream type requirements not met");
     error_code ec;
     accept(ec);
@@ -477,7 +477,7 @@ void
 stream<NextLayer, deflateSupported>::
 accept(error_code& ec)
 {
-    static_assert(is_sync_stream<next_layer_type>::value,
+    static_assert(SyncStream<next_layer_type>,
         "SyncStream type requirements not met");
     do_accept(
         net::const_buffer{},
@@ -491,7 +491,7 @@ typename std::enable_if<! http::detail::is_header<
 stream<NextLayer, deflateSupported>::
 accept(ConstBufferSequence const& buffers)
 {
-    static_assert(is_sync_stream<next_layer_type>::value,
+    static_assert(SyncStream<next_layer_type>,
         "SyncStream type requirements not met");
     static_assert(net::is_const_buffer_sequence<
         ConstBufferSequence>::value,
@@ -509,7 +509,7 @@ stream<NextLayer, deflateSupported>::
 accept(
     ConstBufferSequence const& buffers, error_code& ec)
 {
-    static_assert(is_sync_stream<next_layer_type>::value,
+    static_assert(SyncStream<next_layer_type>,
         "SyncStream type requirements not met");
     static_assert(net::is_const_buffer_sequence<
         ConstBufferSequence>::value,
@@ -526,7 +526,7 @@ accept(
     http::request<Body,
         http::basic_fields<Allocator>> const& req)
 {
-    static_assert(is_sync_stream<next_layer_type>::value,
+    static_assert(SyncStream<next_layer_type>,
         "SyncStream type requirements not met");
     error_code ec;
     accept(req, ec);
@@ -543,7 +543,7 @@ accept(
         http::basic_fields<Allocator>> const& req,
     error_code& ec)
 {
-    static_assert(is_sync_stream<next_layer_type>::value,
+    static_assert(SyncStream<next_layer_type>,
         "SyncStream type requirements not met");
     impl_->reset();
     do_accept(req, &default_decorate_res, ec);
@@ -559,7 +559,7 @@ stream<NextLayer, deflateSupported>::
 async_accept(
     AcceptHandler&& handler)
 {
-    static_assert(is_async_stream<next_layer_type>::value,
+    static_assert(AsyncStream<next_layer_type>,
         "AsyncStream type requirements not met");
     impl_->reset();
     return net::async_initiate<
@@ -586,7 +586,7 @@ async_accept(
         ConstBufferSequence>::value>::type*
 )
 {
-    static_assert(is_async_stream<next_layer_type>::value,
+    static_assert(AsyncStream<next_layer_type>,
         "AsyncStream type requirements not met");
     static_assert(net::is_const_buffer_sequence<
         ConstBufferSequence>::value,
@@ -612,7 +612,7 @@ async_accept(
     http::request<Body, http::basic_fields<Allocator>> const& req,
     AcceptHandler&& handler)
 {
-    static_assert(is_async_stream<next_layer_type>::value,
+    static_assert(AsyncStream<next_layer_type>,
         "AsyncStream type requirements not met");
     impl_->reset();
     return net::async_initiate<

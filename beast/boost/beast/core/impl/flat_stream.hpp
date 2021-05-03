@@ -125,7 +125,7 @@ std::size_t
 flat_stream<NextLayer>::
 read_some(MutableBufferSequence const& buffers)
 {
-    static_assert(boost::beast::is_sync_read_stream<next_layer_type>::value,
+    static_assert(boost::beast::SyncReadStream<next_layer_type>,
         "SyncReadStream type requirements not met");
     static_assert(net::is_mutable_buffer_sequence<
         MutableBufferSequence>::value,
@@ -143,7 +143,7 @@ std::size_t
 flat_stream<NextLayer>::
 read_some(MutableBufferSequence const& buffers, error_code& ec)
 {
-    static_assert(boost::beast::is_sync_read_stream<next_layer_type>::value,
+    static_assert(boost::beast::SyncReadStream<next_layer_type>,
         "SyncReadStream type requirements not met");
     static_assert(net::is_mutable_buffer_sequence<
         MutableBufferSequence>::value,
@@ -161,7 +161,7 @@ async_read_some(
     MutableBufferSequence const& buffers,
     ReadHandler&& handler)
 {
-    static_assert(boost::beast::is_async_read_stream<next_layer_type>::value,
+    static_assert(boost::beast::AsyncReadStream<next_layer_type>,
         "AsyncReadStream type requirements not met");
     static_assert(net::is_mutable_buffer_sequence<
         MutableBufferSequence >::value,
@@ -176,7 +176,7 @@ std::size_t
 flat_stream<NextLayer>::
 write_some(ConstBufferSequence const& buffers)
 {
-    static_assert(boost::beast::is_sync_write_stream<next_layer_type>::value,
+    static_assert(boost::beast::SyncWriteStream<next_layer_type>,
         "SyncWriteStream type requirements not met");
     static_assert(net::is_const_buffer_sequence<
         ConstBufferSequence>::value,
@@ -209,7 +209,7 @@ std::size_t
 flat_stream<NextLayer>::
 write_some(ConstBufferSequence const& buffers, error_code& ec)
 {
-    static_assert(boost::beast::is_sync_write_stream<next_layer_type>::value,
+    static_assert(boost::beast::SyncWriteStream<next_layer_type>,
         "SyncWriteStream type requirements not met");
     static_assert(net::is_const_buffer_sequence<
         ConstBufferSequence>::value,
@@ -242,7 +242,7 @@ async_write_some(
     ConstBufferSequence const& buffers,
     WriteHandler&& handler)
 {
-    static_assert(boost::beast::is_async_write_stream<next_layer_type>::value,
+    static_assert(boost::beast::AsyncWriteStream<next_layer_type>,
         "AsyncWriteStream type requirements not met");
     static_assert(net::is_const_buffer_sequence<
         ConstBufferSequence>::value,

@@ -145,17 +145,17 @@ struct run_read_op
 //------------------------------------------------------------------------------
 
 template<
-    class SyncReadStream,
+    class SyncStream,
     class DynamicBuffer,
     class CompletionCondition,
     class>
 std::size_t
 read(
-    SyncReadStream& stream,
+    SyncStream& stream,
     DynamicBuffer& buffer,
     CompletionCondition cond)
 {
-    static_assert(is_sync_read_stream<SyncReadStream>::value,
+    static_assert(SyncReadStream<SyncStream>,
         "SyncReadStream type requirements not met");
     static_assert(
         net::is_dynamic_buffer<DynamicBuffer>::value,
@@ -173,18 +173,18 @@ read(
 }
 
 template<
-    class SyncReadStream,
+    class SyncStream,
     class DynamicBuffer,
     class CompletionCondition,
     class>
 std::size_t
 read(
-    SyncReadStream& stream,
+    SyncStream& stream,
     DynamicBuffer& buffer,
     CompletionCondition cond,
     error_code& ec)
 {
-    static_assert(is_sync_read_stream<SyncReadStream>::value,
+    static_assert(SyncReadStream<SyncStream>,
         "SyncReadStream type requirements not met");
     static_assert(
         net::is_dynamic_buffer<DynamicBuffer>::value,
@@ -210,19 +210,19 @@ read(
 }
 
 template<
-    class AsyncReadStream,
+    class AsyncStream,
     class DynamicBuffer,
     class CompletionCondition,
     BOOST_BEAST_ASYNC_TPARAM2 ReadHandler,
     class>
 BOOST_BEAST_ASYNC_RESULT2(ReadHandler)
 async_read(
-    AsyncReadStream& stream,
+    AsyncStream& stream,
     DynamicBuffer& buffer,
     CompletionCondition&& cond,
     ReadHandler&& handler)
 {
-    static_assert(is_async_read_stream<AsyncReadStream>::value,
+    static_assert(AsyncReadStream<AsyncStream>,
         "AsyncReadStream type requirements not met");
     static_assert(
         net::is_dynamic_buffer<DynamicBuffer>::value,

@@ -545,7 +545,7 @@ std::size_t
 stream<NextLayer, deflateSupported>::
 write_some(bool fin, ConstBufferSequence const& buffers)
 {
-    static_assert(is_sync_stream<next_layer_type>::value,
+    static_assert(SyncStream<next_layer_type>,
         "SyncStream type requirements not met");
     static_assert(net::is_const_buffer_sequence<
         ConstBufferSequence>::value,
@@ -565,7 +565,7 @@ stream<NextLayer, deflateSupported>::
 write_some(bool fin,
     ConstBufferSequence const& buffers, error_code& ec)
 {
-    static_assert(is_sync_stream<next_layer_type>::value,
+    static_assert(SyncStream<next_layer_type>,
         "SyncStream type requirements not met");
     static_assert(net::is_const_buffer_sequence<
         ConstBufferSequence>::value,
@@ -777,7 +777,7 @@ stream<NextLayer, deflateSupported>::
 async_write_some(bool fin,
     ConstBufferSequence const& bs, WriteHandler&& handler)
 {
-    static_assert(is_async_stream<next_layer_type>::value,
+    static_assert(AsyncStream<next_layer_type>,
         "AsyncStream type requirements not met");
     static_assert(net::is_const_buffer_sequence<
         ConstBufferSequence>::value,
@@ -800,7 +800,7 @@ std::size_t
 stream<NextLayer, deflateSupported>::
 write(ConstBufferSequence const& buffers)
 {
-    static_assert(is_sync_stream<next_layer_type>::value,
+    static_assert(SyncStream<next_layer_type>,
         "SyncStream type requirements not met");
     static_assert(net::is_const_buffer_sequence<
         ConstBufferSequence>::value,
@@ -818,7 +818,7 @@ std::size_t
 stream<NextLayer, deflateSupported>::
 write(ConstBufferSequence const& buffers, error_code& ec)
 {
-    static_assert(is_sync_stream<next_layer_type>::value,
+    static_assert(SyncStream<next_layer_type>,
         "SyncStream type requirements not met");
     static_assert(net::is_const_buffer_sequence<
         ConstBufferSequence>::value,
@@ -833,7 +833,7 @@ stream<NextLayer, deflateSupported>::
 async_write(
     ConstBufferSequence const& bs, WriteHandler&& handler)
 {
-    static_assert(is_async_stream<next_layer_type>::value,
+    static_assert(AsyncStream<next_layer_type>,
         "AsyncStream type requirements not met");
     static_assert(net::is_const_buffer_sequence<
         ConstBufferSequence>::value,

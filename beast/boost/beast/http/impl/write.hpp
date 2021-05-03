@@ -511,14 +511,14 @@ async_write_some_impl(
 //------------------------------------------------------------------------------
 
 template<
-    class SyncWriteStream,
+    class SyncStream,
     bool isRequest, class Body, class Fields>
 std::size_t
 write_some(
-    SyncWriteStream& stream,
+    SyncStream& stream,
     serializer<isRequest, Body, Fields>& sr)
 {
-    static_assert(is_sync_write_stream<SyncWriteStream>::value,
+    static_assert(SyncWriteStream<SyncStream>,
         "SyncWriteStream type requirements not met");
     static_assert(is_body<Body>::value,
         "Body type requirements not met");
@@ -533,15 +533,15 @@ write_some(
 }
 
 template<
-    class SyncWriteStream,
+    class SyncStream,
     bool isRequest, class Body, class Fields>
 std::size_t
 write_some(
-    SyncWriteStream& stream,
+    SyncStream& stream,
     serializer<isRequest, Body, Fields>& sr,
     error_code& ec)
 {
-    static_assert(is_sync_write_stream<SyncWriteStream>::value,
+    static_assert(SyncWriteStream<SyncStream>,
         "SyncWriteStream type requirements not met");
     static_assert(is_body<Body>::value,
         "Body type requirements not met");
@@ -551,17 +551,16 @@ write_some(
 }
 
 template<
-    class AsyncWriteStream,
+    class AsyncStream,
     bool isRequest, class Body, class Fields,
     BOOST_BEAST_ASYNC_TPARAM2 WriteHandler>
 BOOST_BEAST_ASYNC_RESULT2(WriteHandler)
 async_write_some(
-    AsyncWriteStream& stream,
+    AsyncStream& stream,
     serializer<isRequest, Body, Fields>& sr,
     WriteHandler&& handler)
 {
-    static_assert(is_async_write_stream<
-            AsyncWriteStream>::value,
+    static_assert(AsyncWriteStream<AsyncStream>,
         "AsyncWriteStream type requirements not met");
     static_assert(is_body<Body>::value,
         "Body type requirements not met");
@@ -574,13 +573,13 @@ async_write_some(
 //------------------------------------------------------------------------------
 
 template<
-    class SyncWriteStream,
+    class SyncStream,
     bool isRequest, class Body, class Fields>
 std::size_t
-write_header(SyncWriteStream& stream,
+write_header(SyncStream& stream,
     serializer<isRequest, Body, Fields>& sr)
 {
-    static_assert(is_sync_write_stream<SyncWriteStream>::value,
+    static_assert(SyncWriteStream<SyncStream>,
         "SyncWriteStream type requirements not met");
     static_assert(is_body<Body>::value,
         "Body type requirements not met");
@@ -595,15 +594,15 @@ write_header(SyncWriteStream& stream,
 }
 
 template<
-    class SyncWriteStream,
+    class SyncStream,
     bool isRequest, class Body, class Fields>
 std::size_t
 write_header(
-    SyncWriteStream& stream,
+    SyncStream& stream,
     serializer<isRequest, Body, Fields>& sr,
     error_code& ec)
 {
-    static_assert(is_sync_write_stream<SyncWriteStream>::value,
+    static_assert(SyncWriteStream<SyncStream>,
         "SyncWriteStream type requirements not met");
     static_assert(is_body<Body>::value,
         "Body type requirements not met");
@@ -613,7 +612,7 @@ write_header(
     std::size_t bytes_transferred = 0;
     if(! sr.is_header_done())
     {
-        detail::write_lambda<SyncWriteStream> f{stream};
+        detail::write_lambda<SyncStream> f{stream};
         do
         {
             sr.next(ec, f);
@@ -633,17 +632,16 @@ write_header(
 }
 
 template<
-    class AsyncWriteStream,
+    class AsyncStream,
     bool isRequest, class Body, class Fields,
     BOOST_BEAST_ASYNC_TPARAM2 WriteHandler>
 BOOST_BEAST_ASYNC_RESULT2(WriteHandler)
 async_write_header(
-    AsyncWriteStream& stream,
+    AsyncStream& stream,
     serializer<isRequest, Body, Fields>& sr,
     WriteHandler&& handler)
 {
-    static_assert(is_async_write_stream<
-            AsyncWriteStream>::value,
+    static_assert(AsyncWriteStream<AsyncStream>,
         "AsyncWriteStream type requirements not met");
     static_assert(is_body<Body>::value,
         "Body type requirements not met");
@@ -663,14 +661,14 @@ async_write_header(
 //------------------------------------------------------------------------------
 
 template<
-    class SyncWriteStream,
+    class SyncStream,
     bool isRequest, class Body, class Fields>
 std::size_t
 write(
-    SyncWriteStream& stream,
+    SyncStream& stream,
     serializer<isRequest, Body, Fields>& sr)
 {
-    static_assert(is_sync_write_stream<SyncWriteStream>::value,
+    static_assert(SyncWriteStream<SyncStream>,
         "SyncWriteStream type requirements not met");
     error_code ec;
     auto const bytes_transferred =
@@ -681,15 +679,15 @@ write(
 }
 
 template<
-    class SyncWriteStream,
+    class SyncStream,
     bool isRequest, class Body, class Fields>
 std::size_t
 write(
-    SyncWriteStream& stream,
+    SyncStream& stream,
     serializer<isRequest, Body, Fields>& sr,
     error_code& ec)
 {
-    static_assert(is_sync_write_stream<SyncWriteStream>::value,
+    static_assert(SyncWriteStream<SyncStream>,
         "SyncWriteStream type requirements not met");
     std::size_t bytes_transferred = 0;
     sr.split(false);
@@ -706,17 +704,16 @@ write(
 }
 
 template<
-    class AsyncWriteStream,
+    class AsyncStream,
     bool isRequest, class Body, class Fields,
     BOOST_BEAST_ASYNC_TPARAM2 WriteHandler>
 BOOST_BEAST_ASYNC_RESULT2(WriteHandler)
 async_write(
-    AsyncWriteStream& stream,
+    AsyncStream& stream,
     serializer<isRequest, Body, Fields>& sr,
     WriteHandler&& handler)
 {
-    static_assert(is_async_write_stream<
-            AsyncWriteStream>::value,
+    static_assert(AsyncWriteStream<AsyncStream>,
         "AsyncWriteStream type requirements not met");
     static_assert(is_body<Body>::value,
         "Body type requirements not met");
@@ -736,16 +733,16 @@ async_write(
 //------------------------------------------------------------------------------
 
 template<
-    class SyncWriteStream,
+    class SyncStream,
     bool isRequest, class Body, class Fields>
 typename std::enable_if<
     is_mutable_body_writer<Body>::value,
     std::size_t>::type
 write(
-    SyncWriteStream& stream,
+    SyncStream& stream,
     message<isRequest, Body, Fields>& msg)
 {
-    static_assert(is_sync_write_stream<SyncWriteStream>::value,
+    static_assert(SyncWriteStream<SyncStream>,
         "SyncWriteStream type requirements not met");
     static_assert(is_body<Body>::value,
         "Body type requirements not met");
@@ -760,16 +757,16 @@ write(
 }
 
 template<
-    class SyncWriteStream,
+    class SyncStream,
     bool isRequest, class Body, class Fields>
 typename std::enable_if<
     ! is_mutable_body_writer<Body>::value,
     std::size_t>::type
 write(
-    SyncWriteStream& stream,
+    SyncStream& stream,
     message<isRequest, Body, Fields> const& msg)
 {
-    static_assert(is_sync_write_stream<SyncWriteStream>::value,
+    static_assert(SyncWriteStream<SyncStream>,
         "SyncWriteStream type requirements not met");
     static_assert(is_body<Body>::value,
         "Body type requirements not met");
@@ -784,17 +781,17 @@ write(
 }
 
 template<
-    class SyncWriteStream,
+    class SyncStream,
     bool isRequest, class Body, class Fields>
 typename std::enable_if<
     is_mutable_body_writer<Body>::value,
     std::size_t>::type
 write(
-    SyncWriteStream& stream,
+    SyncStream& stream,
     message<isRequest, Body, Fields>& msg,
     error_code& ec)
 {
-    static_assert(is_sync_write_stream<SyncWriteStream>::value,
+    static_assert(SyncWriteStream<SyncStream>,
         "SyncWriteStream type requirements not met");
     static_assert(is_body<Body>::value,
         "Body type requirements not met");
@@ -805,17 +802,17 @@ write(
 }
 
 template<
-    class SyncWriteStream,
+    class SyncStream,
     bool isRequest, class Body, class Fields>
 typename std::enable_if<
     ! is_mutable_body_writer<Body>::value,
     std::size_t>::type
 write(
-    SyncWriteStream& stream,
+    SyncStream& stream,
     message<isRequest, Body, Fields> const& msg,
     error_code& ec)
 {
-    static_assert(is_sync_write_stream<SyncWriteStream>::value,
+    static_assert(SyncWriteStream<SyncStream>,
         "SyncWriteStream type requirements not met");
     static_assert(is_body<Body>::value,
         "Body type requirements not met");
@@ -826,19 +823,18 @@ write(
 }
 
 template<
-    class AsyncWriteStream,
+    class AsyncStream,
     bool isRequest, class Body, class Fields,
     BOOST_BEAST_ASYNC_TPARAM2 WriteHandler>
 BOOST_BEAST_ASYNC_RESULT2(WriteHandler)
 async_write(
-    AsyncWriteStream& stream,
+    AsyncStream& stream,
     message<isRequest, Body, Fields>& msg,
     WriteHandler&& handler,
     typename std::enable_if<
         is_mutable_body_writer<Body>::value>::type*)
 {
-    static_assert(
-        is_async_write_stream<AsyncWriteStream>::value,
+    static_assert(AsyncWriteStream<AsyncStream>,
         "AsyncWriteStream type requirements not met");
     static_assert(is_body<Body>::value,
         "Body type requirements not met");
@@ -855,19 +851,18 @@ async_write(
 }
 
 template<
-    class AsyncWriteStream,
+    class AsyncStream,
     bool isRequest, class Body, class Fields,
     BOOST_BEAST_ASYNC_TPARAM2 WriteHandler>
 BOOST_BEAST_ASYNC_RESULT2(WriteHandler)
 async_write(
-    AsyncWriteStream& stream,
+    AsyncStream& stream,
     message<isRequest, Body, Fields> const& msg,
     WriteHandler&& handler,
     typename std::enable_if<
         ! is_mutable_body_writer<Body>::value>::type*)
 {
-    static_assert(
-        is_async_write_stream<AsyncWriteStream>::value,
+    static_assert(AsyncWriteStream<AsyncStream>,
         "AsyncWriteStream type requirements not met");
     static_assert(is_body<Body>::value,
         "Body type requirements not met");

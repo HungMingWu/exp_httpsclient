@@ -314,7 +314,7 @@ void
 stream<NextLayer, deflateSupported>::
 close(close_reason const& cr)
 {
-    static_assert(is_sync_stream<next_layer_type>::value,
+    static_assert(SyncStream<next_layer_type>,
         "SyncStream type requirements not met");
     error_code ec;
     close(cr, ec);
@@ -327,7 +327,7 @@ void
 stream<NextLayer, deflateSupported>::
 close(close_reason const& cr, error_code& ec)
 {
-    static_assert(is_sync_stream<next_layer_type>::value,
+    static_assert(SyncStream<next_layer_type>,
         "SyncStream type requirements not met");
     using beast::detail::clamp;
     auto& impl = *impl_;
@@ -434,7 +434,7 @@ BOOST_BEAST_ASYNC_RESULT1(CloseHandler)
 stream<NextLayer, deflateSupported>::
 async_close(close_reason const& cr, CloseHandler&& handler)
 {
-    static_assert(is_async_stream<next_layer_type>::value,
+    static_assert(AsyncStream<next_layer_type>,
         "AsyncStream type requirements not met");
     return net::async_initiate<
         CloseHandler,
