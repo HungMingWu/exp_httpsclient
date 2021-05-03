@@ -10,7 +10,7 @@
 #ifndef BOOST_BEAST_CORE_DETAIL_STREAM_BASE_HPP
 #define BOOST_BEAST_CORE_DETAIL_STREAM_BASE_HPP
 
-#include <boost/asio/steady_timer.hpp>
+#include <asio/steady_timer.hpp>
 #include <boost/assert.hpp>
 #include <chrono>
 #include <cstdint>

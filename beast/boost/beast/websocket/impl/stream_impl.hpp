@@ -30,7 +30,7 @@
 #include <boost/beast/core/static_buffer.hpp>
 #include <boost/beast/core/stream_traits.hpp>
 #include <boost/beast/core/detail/clamp.hpp>
-#include <boost/asio/steady_timer.hpp>
+#include <asio/steady_timer.hpp>
 #include <boost/core/empty_value.hpp>
 
 namespace boost {
@@ -417,7 +417,7 @@ struct stream<NextLayer, deflateSupported>::impl_type
                 timer.expires_after(
                     timeout_opt.handshake_timeout);
 
-                BOOST_ASIO_HANDLER_LOCATION((
+                ASIO_HANDLER_LOCATION((
                     __FILE__, __LINE__,
                     "websocket::check_stop_now"
                     ));
@@ -439,7 +439,7 @@ struct stream<NextLayer, deflateSupported>::impl_type
                     timer.expires_after(
                         timeout_opt.idle_timeout);
 
-                BOOST_ASIO_HANDLER_LOCATION((
+                ASIO_HANDLER_LOCATION((
                     __FILE__, __LINE__,
                     "websocket::check_stop_now"
                     ));
@@ -462,7 +462,7 @@ struct stream<NextLayer, deflateSupported>::impl_type
                 timer.expires_after(
                     timeout_opt.handshake_timeout);
 
-                BOOST_ASIO_HANDLER_LOCATION((
+                ASIO_HANDLER_LOCATION((
                     __FILE__, __LINE__,
                     "websocket::check_stop_now"
                     ));
@@ -566,7 +566,7 @@ private:
                     impl.idle_counter < 1)
                 {
                     {
-                        BOOST_ASIO_HANDLER_LOCATION((
+                        ASIO_HANDLER_LOCATION((
                             __FILE__, __LINE__,
                             "websocket::timeout_handler"
                             ));
@@ -578,7 +578,7 @@ private:
                         impl.timeout_opt.idle_timeout / 2);
 
                     {
-                        BOOST_ASIO_HANDLER_LOCATION((
+                        ASIO_HANDLER_LOCATION((
                             __FILE__, __LINE__,
                             "websocket::timeout_handler"
                             ));

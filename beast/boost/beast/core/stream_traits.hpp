@@ -12,7 +12,7 @@
 
 #include <boost/beast/core/detail/config.hpp>
 #include <boost/beast/core/detail/stream_traits.hpp>
-#include <boost/asio/basic_socket.hpp>
+#include <asio/basic_socket.hpp>
 
 namespace boost {
 namespace beast {
@@ -100,18 +100,9 @@ get_lowest_layer(T& t) noexcept
     @return The type of values returned from `get_executor`.
 */
 // Workaround for ICE on gcc 4.8
-#if BOOST_BEAST_DOXYGEN
-template<class T>
-using executor_type = __see_below__;
-#elif BOOST_WORKAROUND(BOOST_GCC, < 40900)
-template<class T>
-using executor_type =
-    typename std::decay<T>::type::executor_type;
-#else
 template<class T>
 using executor_type =
     decltype(std::declval<T&>().get_executor());
-#endif
 
 /** Determine if `T` has the `get_executor` member function.
 
@@ -211,7 +202,7 @@ struct is_sync_read_stream<T, boost::void_t<decltype(
         std::declval<detail::MutableBufferSequence>()),
     std::declval<std::size_t&>() = std::declval<T&>().read_some(
         std::declval<detail::MutableBufferSequence>(),
-        std::declval<boost::system::error_code&>())
+        std::declval<std::error_code&>())
             )>> : std::true_type {};
 #endif
 
@@ -256,7 +247,7 @@ struct is_sync_write_stream<T, boost::void_t<decltype(
         std::declval<detail::ConstBufferSequence>()))
     ,std::declval<std::size_t&>() = std::declval<T&>().write_some(
         std::declval<detail::ConstBufferSequence>(),
-        std::declval<boost::system::error_code&>())
+        std::declval<std::error_code&>())
             )>> : std::true_type {};
 #endif
 
@@ -442,7 +433,7 @@ beast_close_socket(
     net::basic_socket<
         Protocol, Executor>& sock)
 {
-    boost::system::error_code ec;
+    std::error_code ec;
     sock.close(ec);
 }
 

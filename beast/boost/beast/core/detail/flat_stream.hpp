@@ -11,7 +11,7 @@
 #define BOOST_BEAST_CORE_DETAIL_FLAT_STREAM_HPP
 
 #include <boost/beast/core/buffer_traits.hpp>
-#include <boost/asio/buffer.hpp>
+#include <asio/buffer.hpp>
 #include <cstdlib>
 
 namespace boost {

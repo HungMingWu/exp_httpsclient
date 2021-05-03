@@ -264,7 +264,7 @@ public:
         : net::const_buffer(
             buffer.data(),
             std::min<std::size_t>(size, buffer.size())
-        #if defined(BOOST_ASIO_ENABLE_BUFFER_DEBUGGING)
+        #if defined(ASIO_ENABLE_BUFFER_DEBUGGING)
             , buffer.get_debug_check()
         #endif
             )
@@ -300,7 +300,7 @@ public:
         : net::mutable_buffer(
             buffer.data(),
             std::min<std::size_t>(size, buffer.size())
-        #if defined(BOOST_ASIO_ENABLE_BUFFER_DEBUGGING)
+        #if defined(ASIO_ENABLE_BUFFER_DEBUGGING)
             , buffer.get_debug_check()
         #endif
             )

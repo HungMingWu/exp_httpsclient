@@ -15,7 +15,7 @@
 #include <boost/beast/websocket/rfc6455.hpp>
 #include <boost/beast/websocket/detail/utf8_checker.hpp>
 #include <boost/beast/core/flat_static_buffer.hpp>
-#include <boost/asio/buffer.hpp>
+#include <asio/buffer.hpp>
 #include <boost/assert.hpp>
 #include <boost/endian/conversion.hpp>
 #include <cstdint>

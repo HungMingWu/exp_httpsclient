@@ -25,7 +25,7 @@
 #include <boost/beast/core/buffers_suffix.hpp>
 #include <boost/beast/core/flat_static_buffer.hpp>
 #include <boost/beast/core/detail/clamp.hpp>
-#include <boost/asio/steady_timer.hpp>
+#include <asio/steady_timer.hpp>
 #include <boost/assert.hpp>
 #include <algorithm>
 #include <chrono>

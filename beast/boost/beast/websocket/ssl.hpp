@@ -12,8 +12,8 @@
 
 #include <boost/beast/core/detail/config.hpp>
 #include <boost/beast/websocket/teardown.hpp>
-#include <boost/asio/ip/tcp.hpp>
-#include <boost/asio/ssl/stream.hpp>
+#include <asio/ip/tcp.hpp>
+#include <asio/ssl/stream.hpp>
 
 namespace boost {
 namespace beast {

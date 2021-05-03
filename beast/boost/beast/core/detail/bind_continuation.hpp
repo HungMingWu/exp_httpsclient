@@ -12,7 +12,7 @@
 
 #include <boost/beast/core/detail/config.hpp>
 #include <boost/beast/core/detail/remap_post_to_defer.hpp>
-#include <boost/asio/bind_executor.hpp>
+#include <asio/bind_executor.hpp>
 #include <boost/core/empty_value.hpp>
 #include <type_traits>
 #include <utility>

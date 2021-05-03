@@ -1,10 +1,10 @@
 #include "catch.hpp"
 #include <boost/beast/core/buffers_adaptor.hpp>
 #include <boost/beast/core/read_size.hpp>
-#include <boost/asio/streambuf.hpp>
+#include <asio/streambuf.hpp>
 #include "test_buffer.hpp"
 using namespace boost::beast;
-namespace net = boost::asio;
+namespace net = asio;
 static_assert(
     is_mutable_dynamic_buffer<
     buffers_adaptor<buffers_triple>>::value);

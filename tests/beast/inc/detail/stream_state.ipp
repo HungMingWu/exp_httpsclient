@@ -50,7 +50,7 @@ make_impl(
     test::fail_count* fc) ->
     std::shared_ptr<detail::stream_state>
 {
-#if defined(BOOST_ASIO_USE_TS_EXECUTOR_AS_DEFAULT)
+#if defined(ASIO_USE_TS_EXECUTOR_AS_DEFAULT)
     auto& ctx = exec.context();
 #else
     auto& ctx = net::query(

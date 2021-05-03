@@ -11,7 +11,7 @@
 #define BOOST_BEAST_TEST_HANDLER_HPP
 
 #include <boost/beast/core/error.hpp>
-#include <boost/asio/io_context.hpp>
+#include <asio/io_context.hpp>
 #include <optional>
 
 namespace boost {

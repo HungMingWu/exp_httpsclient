@@ -11,7 +11,7 @@
 #define BOOST_BEAST_DETAIL_STREAM_TRAITS_HPP
 
 #include <boost/beast/core/error.hpp>
-#include <boost/asio/buffer.hpp>
+#include <asio/buffer.hpp>
 #include <boost/type_traits/make_void.hpp>
 #include <type_traits>
 

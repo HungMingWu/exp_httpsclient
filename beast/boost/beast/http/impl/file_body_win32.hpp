@@ -20,9 +20,9 @@
 #include <boost/beast/http/error.hpp>
 #include <boost/beast/http/write.hpp>
 #include <boost/beast/http/serializer.hpp>
-#include <boost/asio/async_result.hpp>
-#include <boost/asio/basic_stream_socket.hpp>
-#include <boost/asio/windows/overlapped_ptr.hpp>
+#include <asio/async_result.hpp>
+#include <asio/basic_stream_socket.hpp>
+#include <asio/windows/overlapped_ptr.hpp>
 #include <boost/winapi/basic_types.hpp>
 #include <boost/winapi/error_codes.hpp>
 #include <boost/winapi/get_last_error.hpp>
@@ -348,7 +348,7 @@ make_win32_error(
     boost::winapi::DWORD_ dwError) noexcept
 {
     // from
-    // https://github.com/boostorg/asio/blob/6534af41b471288091ae39f9ab801594189b6fc9/include/boost/asio/detail/impl/socket_ops.ipp#L842
+    // https://github.com/boostorg/asio/blob/6534af41b471288091ae39f9ab801594189b6fc9/include/asio/detail/impl/socket_ops.ipp#L842
     switch(dwError)
     {
     case boost::winapi::ERROR_NETNAME_DELETED_:
@@ -379,7 +379,7 @@ make_win32_error(
 
 //------------------------------------------------------------------------------
 
-#if BOOST_ASIO_HAS_WINDOWS_OVERLAPPED_PTR
+#if ASIO_HAS_WINDOWS_OVERLAPPED_PTR
 
 template<
     class Protocol, class Executor,
@@ -590,7 +590,7 @@ write_some(
     return nNumberOfBytesToWrite;
 }
 
-#if BOOST_ASIO_HAS_WINDOWS_OVERLAPPED_PTR
+#if ASIO_HAS_WINDOWS_OVERLAPPED_PTR
 
 template<
     class Protocol, class Executor,

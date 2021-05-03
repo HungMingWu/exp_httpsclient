@@ -16,11 +16,11 @@
 #include <boost/beast/core/rate_policy.hpp>
 #include <boost/beast/core/role.hpp>
 #include <boost/beast/core/stream_traits.hpp>
-#include <boost/asio/async_result.hpp>
-#include <boost/asio/basic_stream_socket.hpp>
-#include <boost/asio/connect.hpp>
-#include <boost/asio/executor.hpp>
-#include <boost/asio/is_executor.hpp>
+#include <asio/async_result.hpp>
+#include <asio/basic_stream_socket.hpp>
+#include <asio/connect.hpp>
+#include <asio/executor.hpp>
+#include <asio/is_executor.hpp>
 #include <boost/core/empty_value.hpp>
 #include <boost/config/workaround.hpp>
 #include <chrono>
@@ -306,19 +306,13 @@ private:
     struct ops;
 
 #if ! BOOST_BEAST_DOXYGEN
-    // boost::asio::ssl::stream needs these
-    // DEPRECATED
-    template<class>
-    friend class boost::asio::ssl::stream;
-    // DEPRECATED
+public:
     using lowest_layer_type = socket_type;
-    // DEPRECATED
     lowest_layer_type&
     lowest_layer() noexcept
     {
         return impl_->socket;
     }
-    // DEPRECATED
     lowest_layer_type const&
     lowest_layer() const noexcept
     {
@@ -723,7 +717,7 @@ public:
 
         @returns The successfully connected endpoint.
 
-        @throws boost::system::system_error Thrown on failure. If the sequence is
+        @throws std::system_error Thrown on failure. If the sequence is
         empty, the associated error code is `net::error::not_found`.
         Otherwise, contains the error from the last connection attempt.
     */
@@ -826,7 +820,7 @@ public:
 
         @returns An iterator denoting the successfully connected endpoint.
 
-        @throws boost::system::system_error Thrown on failure. If the sequence is
+        @throws std::system_error Thrown on failure. If the sequence is
         empty, the associated @c error_code is `net::error::not_found`.
         Otherwise, contains the error from the last connection attempt.
     */
@@ -973,7 +967,7 @@ public:
     */
     template<
         class EndpointSequence,
-        BOOST_ASIO_COMPLETION_TOKEN_FOR(
+        ASIO_COMPLETION_TOKEN_FOR(
             void(error_code, typename Protocol::endpoint))
             RangeConnectHandler =
                 net::default_completion_token_t<executor_type>
@@ -983,7 +977,7 @@ public:
                 EndpointSequence>::value>::type
     #endif
     >
-    BOOST_ASIO_INITFN_RESULT_TYPE(
+    ASIO_INITFN_RESULT_TYPE(
         RangeConnectHandler,
         void(error_code, typename Protocol::endpoint))
     async_connect(
@@ -1066,7 +1060,7 @@ public:
     template<
         class EndpointSequence,
         class ConnectCondition,
-        BOOST_ASIO_COMPLETION_TOKEN_FOR(
+        ASIO_COMPLETION_TOKEN_FOR(
             void(error_code, typename Protocol::endpoint))
             RangeConnectHandler =
                 net::default_completion_token_t<executor_type>
@@ -1076,7 +1070,7 @@ public:
                 EndpointSequence>::value>::type
     #endif
     >
-    BOOST_ASIO_INITFN_RESULT_TYPE(
+    ASIO_INITFN_RESULT_TYPE(
         RangeConnectHandler,
         void(error_code, typename Protocol::endpoint))
     async_connect(
@@ -1130,11 +1124,11 @@ public:
     */
     template<
         class Iterator,
-        BOOST_ASIO_COMPLETION_TOKEN_FOR(
+        ASIO_COMPLETION_TOKEN_FOR(
             void(error_code, Iterator))
             IteratorConnectHandler =
                 net::default_completion_token_t<executor_type>>
-    BOOST_ASIO_INITFN_RESULT_TYPE(
+    ASIO_INITFN_RESULT_TYPE(
         IteratorConnectHandler,
         void(error_code, Iterator))
     async_connect(
@@ -1191,11 +1185,11 @@ public:
     template<
         class Iterator,
         class ConnectCondition,
-        BOOST_ASIO_COMPLETION_TOKEN_FOR(
+        ASIO_COMPLETION_TOKEN_FOR(
             void(error_code, Iterator))
             IteratorConnectHandler =
                 net::default_completion_token_t<executor_type>>
-    BOOST_ASIO_INITFN_RESULT_TYPE(
+    ASIO_INITFN_RESULT_TYPE(
         IteratorConnectHandler,
         void(error_code, Iterator))
     async_connect(

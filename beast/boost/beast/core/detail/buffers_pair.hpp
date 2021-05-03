@@ -10,7 +10,7 @@
 #ifndef BOOST_BEAST_DETAIL_BUFFERS_PAIR_HPP
 #define BOOST_BEAST_DETAIL_BUFFERS_PAIR_HPP
 
-#include <boost/asio/buffer.hpp>
+#include <asio/buffer.hpp>
 #include <boost/assert.hpp>
 #include <boost/config/workaround.hpp>
 #include <type_traits>

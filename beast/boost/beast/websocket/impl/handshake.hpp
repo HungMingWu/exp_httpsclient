@@ -19,7 +19,7 @@
 #include <boost/beast/core/async_base.hpp>
 #include <boost/beast/core/flat_buffer.hpp>
 #include <boost/beast/core/stream_traits.hpp>
-#include <boost/asio/coroutine.hpp>
+#include <asio/coroutine.hpp>
 #include <boost/assert.hpp>
 #include <memory>
 
@@ -36,7 +36,7 @@ template<class Handler>
 class stream<NextLayer, deflateSupported>::handshake_op
     : public beast::stable_async_base<Handler,
         beast::executor_type<stream>>
-    , public asio::coroutine
+    , public ::asio::coroutine
 {
     struct data
     {
@@ -96,16 +96,16 @@ public:
             return this->complete(cont, ec);
         }
         auto& impl = *sp;
-        BOOST_ASIO_CORO_REENTER(*this)
+        ASIO_CORO_REENTER(*this)
         {
             impl.change_status(status::handshake);
             impl.update_timer(this->get_executor());
 
             // write HTTP request
             impl.do_pmd_config(d_.req);
-            BOOST_ASIO_CORO_YIELD
+            ASIO_CORO_YIELD
             {
-                BOOST_ASIO_HANDLER_LOCATION((
+                ASIO_HANDLER_LOCATION((
                     __FILE__, __LINE__,
                     "websocket::async_handshake"));
 
@@ -116,9 +116,9 @@ public:
                 goto upcall;
 
             // read HTTP response
-            BOOST_ASIO_CORO_YIELD
+            ASIO_CORO_YIELD
             {
-                BOOST_ASIO_HANDLER_LOCATION((
+                ASIO_HANDLER_LOCATION((
                     __FILE__, __LINE__,
                     "websocket::async_handshake"));
 
@@ -137,9 +137,9 @@ public:
                     impl.rd_buf.data()));
                 impl.rd_buf.clear();
 
-                BOOST_ASIO_CORO_YIELD
+                ASIO_CORO_YIELD
                 {
-                    BOOST_ASIO_HANDLER_LOCATION((
+                    ASIO_HANDLER_LOCATION((
                         __FILE__, __LINE__,
                         "websocket::async_handshake"));
 

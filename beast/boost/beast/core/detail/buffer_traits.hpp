@@ -10,7 +10,7 @@
 #ifndef BOOST_BEAST_DETAIL_BUFFER_TRAITS_HPP
 #define BOOST_BEAST_DETAIL_BUFFER_TRAITS_HPP
 
-#include <boost/asio/buffer.hpp>
+#include <asio/buffer.hpp>
 #include <boost/config/workaround.hpp>
 #include <boost/type_traits/make_void.hpp>
 #include <cstdint>
@@ -19,7 +19,6 @@
 namespace boost {
 namespace beast {
 namespace detail {
-
 #if BOOST_WORKAROUND(BOOST_MSVC, < 1910)
 
 template<class T>

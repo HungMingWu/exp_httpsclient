@@ -413,10 +413,10 @@ typedef int              locale_t;                     // locale_t is a POSIX-ex
 // most libraries will use select() but this define allows 'iostream' functionality
 // which is based on poll() only
 #if (_WRS_VXWORKS_MAJOR > 6)
-#  ifndef BOOST_ASIO_HAS_POSIX_STREAM_DESCRIPTOR
-#    define BOOST_ASIO_HAS_POSIX_STREAM_DESCRIPTOR
+#  ifndef ASIO_HAS_POSIX_STREAM_DESCRIPTOR
+#    define ASIO_HAS_POSIX_STREAM_DESCRIPTOR
 #  endif
 #else 
-#  define BOOST_ASIO_DISABLE_SERIAL_PORT
+#  define ASIO_DISABLE_SERIAL_PORT
 #endif
 

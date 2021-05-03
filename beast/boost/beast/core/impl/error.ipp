@@ -10,6 +10,8 @@
 #ifndef BOOST_BEAST_IMPL_ERROR_IPP
 #define BOOST_BEAST_IMPL_ERROR_IPP
 
+#include <string>
+#include <type_traits>
 #include <boost/beast/core/error.hpp>
 
 namespace boost {

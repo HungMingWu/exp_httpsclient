@@ -12,7 +12,7 @@
 
 #include <boost/beast/core/buffer_traits.hpp>
 #include <boost/beast/core/buffers_adaptor.hpp>
-#include <boost/asio/buffer.hpp>
+#include <asio/buffer.hpp>
 #include <boost/config/workaround.hpp>
 #include <algorithm>
 #include <cstring>

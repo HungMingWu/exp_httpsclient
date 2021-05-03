@@ -1,10 +1,12 @@
 #include "catch.hpp"
-#include <boost/asio/io_context.hpp>
-#include <boost/asio/bind_executor.hpp>
-#include <boost/asio/post.hpp>
-#include <boost/asio/strand.hpp>
+#include <asio/io_context.hpp>
+#include <asio/bind_executor.hpp>
+#include <asio/post.hpp>
+#include <asio/strand.hpp>
 #include <boost/beast/core/bind_handler.hpp>
 #include "test_handler.hpp"
+
+namespace net = asio;
 
 namespace {
     struct move_only
@@ -84,7 +86,7 @@ namespace {
         }
 
         void
-            operator()(boost::system::error_code, std::size_t n)
+            operator()(std::error_code, std::size_t n)
         {
             fail_ = false;
             REQUIRE(n == 256);
@@ -92,7 +94,7 @@ namespace {
 
         void
             operator()(
-                boost::system::error_code, std::size_t n, std::string_view s)
+                std::error_code, std::size_t n, std::string_view s)
         {
             boost::ignore_unused(s);
             fail_ = false;
@@ -116,10 +118,10 @@ namespace {
         }
 
         template<class F>
-        void testHooks(boost::asio::io_context& ioc, F&& f)
+        void testHooks(net::io_context& ioc, F&& f)
         {
             invoked_ = false;
-            boost::asio::post(ioc, std::forward<F>(f));
+            net::post(ioc, std::forward<F>(f));
             ioc.run();
             ioc.restart();
             REQUIRE(invoked_);
@@ -130,8 +132,8 @@ namespace {
     {
         bind_handler_test& s_;
 
-#if defined(BOOST_ASIO_NO_TS_EXECUTORS)
-        boost::asio::any_io_executor ex_;
+#if defined(ASIO_NO_TS_EXECUTORS)
+        net::any_io_executor ex_;
 
         // Storing the blocking property as a member is not strictly necessary,
         // as we could simply forward the calls
@@ -142,21 +144,21 @@ namespace {
         //   query(ex_, blocking)
         // when required. This forwarding approach is used here for the
         // outstanding_work property.
-        boost::asio::execution::blocking_t blocking_;
+        net::execution::blocking_t blocking_;
 
-#else  // defined(BOOST_ASIO_NO_TS_EXECUTORS)
-        boost::asio::io_context::executor_type ex_;
-#endif // defined(BOOST_ASIO_NO_TS_EXECUTORS)
+#else  // defined(ASIO_NO_TS_EXECUTORS)
+        net::io_context::executor_type ex_;
+#endif // defined(ASIO_NO_TS_EXECUTORS)
     public:
         test_executor(
             test_executor const&) = default;
 
         test_executor(
             bind_handler_test& s,
-            boost::asio::io_context& ioc)
+            net::io_context& ioc)
             : s_(s)
             , ex_(ioc.get_executor())
-#if defined(BOOST_ASIO_NO_TS_EXECUTORS)
+#if defined(ASIO_NO_TS_EXECUTORS)
             , blocking_(net::execution::blocking.possibly)
 #endif
         {
@@ -174,32 +176,32 @@ namespace {
             return ex_ != other.ex_;
         }
 
-#if defined(BOOST_ASIO_NO_TS_EXECUTORS)
+#if defined(ASIO_NO_TS_EXECUTORS)
 
-        boost::asio::execution_context&
+        net::execution_context&
             query(
-                boost::asio::execution::context_t c) const noexcept
+                net::execution::context_t c) const noexcept
         {
-            return boost::asio::query(ex_, c);
+            return net::query(ex_, c);
         }
 
-        boost::asio::execution::blocking_t
+        net::execution::blocking_t
             query(
-                boost::asio::execution::blocking_t) const noexcept
+                net::execution::blocking_t) const noexcept
         {
             return blocking_;
         }
 
-        boost::asio::execution::outstanding_work_t
+        net::execution::outstanding_work_t
             query(
-                boost::asio::execution::outstanding_work_t w) const noexcept
+                net::execution::outstanding_work_t w) const noexcept
         {
-            return boost::asio::query(ex_, w);
+            return net::query(ex_, w);
         }
 
         test_executor
             require(
-                boost::asio::execution::blocking_t::possibly_t b) const
+                net::execution::blocking_t::possibly_t b) const
         {
             test_executor new_ex(*this);
             new_ex.blocking_ = b;
@@ -208,34 +210,34 @@ namespace {
 
         test_executor
             require(
-                boost::asio::execution::blocking_t::never_t b) const
+                net::execution::blocking_t::never_t b) const
         {
             test_executor new_ex(*this);
             new_ex.blocking_ = b;
             return new_ex;
         }
 
-        test_executor prefer(boost::asio::execution::outstanding_work_t::untracked_t w) const
+        test_executor prefer(net::execution::outstanding_work_t::untracked_t w) const
         {
             test_executor new_ex(*this);
-            new_ex.ex_ = boost::asio::prefer(ex_, w);
+            new_ex.ex_ = net::prefer(ex_, w);
             return new_ex;
         }
 
-        test_executor prefer(boost::asio::execution::outstanding_work_t::tracked_t w) const
+        test_executor prefer(net::execution::outstanding_work_t::tracked_t w) const
         {
             test_executor new_ex(*this);
-            new_ex.ex_ = boost::asio::prefer(ex_, w);
+            new_ex.ex_ = net::prefer(ex_, w);
             return new_ex;
         }
 
         template<class F>
         void execute(F&& f) const
         {
-            if (blocking_ == boost::asio::execution::blocking.possibly)
+            if (blocking_ == net::execution::blocking.possibly)
             {
                 s_.on_invoke();
-                boost::asio::execution::execute(ex_, std::forward<F>(f));
+                net::execution::execute(ex_, std::forward<F>(f));
             }
             else
             {
@@ -245,8 +247,8 @@ namespace {
             }
         }
 #endif
-#if !defined(BOOST_ASIO_NO_TS_EXECUTORS)
-        boost::asio::execution_context&
+#if !defined(ASIO_NO_TS_EXECUTORS)
+        net::execution_context&
             context() const noexcept
         {
             return ex_.context();
@@ -269,10 +271,10 @@ namespace {
             dispatch(F&& f, Alloc const& a)
         {
             s_.on_invoke();
-            boost::asio::execution::execute(
-                boost::asio::prefer(ex_,
-                    boost::asio::execution::blocking.possibly,
-                    boost::asio::execution::allocator(a)),
+            net::execution::execute(
+                net::prefer(ex_,
+                    net::execution::blocking.possibly,
+                    net::execution::allocator(a)),
                 std::forward<F>(f));
             // previously equivalent to
             // ex_.dispatch(std::forward<F>(f), a);
@@ -295,7 +297,7 @@ namespace {
             // networking wrapper only uses dispatch
             REQUIRE(false);
         }
-#endif // !defined(BOOST_ASIO_NO_TS_EXECUTORS)
+#endif // !defined(ASIO_NO_TS_EXECUTORS)
     };
 }
 
@@ -352,9 +354,9 @@ TEST_CASE("testBindHandler perfect forwarding", "bind_handler") {
 }
 
 TEST_CASE("testBindHandler associated executor", "bind_handler") {
-    boost::asio::io_context ioc;
+    net::io_context ioc;
     bind_handler_test test;
-    test.testHooks(ioc, boost::beast::bind_handler(boost::asio::bind_executor(
+    test.testHooks(ioc, boost::beast::bind_handler(net::bind_executor(
         test_executor(test, ioc), test_cb{})));
 }
 
@@ -362,11 +364,11 @@ TEST_CASE("testBindHandler asio_handler_invoke", "bind_handler") {
     // make sure things compile, also can set a
     // breakpoint in asio_handler_invoke to make sure
     // it is instantiated.
-    boost::asio::io_context ioc;
-    boost::asio::strand<
-        boost::asio::io_context::executor_type> s{
+    net::io_context ioc;
+    net::strand<
+        net::io_context::executor_type> s{
             ioc.get_executor() };
-    boost::asio::post(s,
+    net::post(s,
         boost::beast::bind_handler(test_cb{}, 42));
     ioc.run();
 }
@@ -420,12 +422,11 @@ TEST_CASE("testBindFrontHandler", "bind_handler") {
 }
 
 TEST_CASE("testBindFrontHandler associated executor", "bind_handler") {
-    boost::asio::io_context ioc;
+    net::io_context ioc;
     bind_handler_test test;
     using m1 = move_arg<1>;
     using m2 = move_arg<2>;
     using namespace boost::beast;
-    namespace net = boost::asio;
 
     test.testHooks(ioc, bind_front_handler(net::bind_executor(
         test_executor(test, ioc), test_cb{})
@@ -463,6 +464,6 @@ TEST_CASE("testBindFrontHandler legacy hooks 2", "bind_handler") {
         [](boost::beast::legacy_handler h)
         {
             return boost::beast::bind_front_handler(
-                h, boost::system::error_code{}, std::size_t{});
+                h, std::error_code{}, std::size_t{});
         });
 }

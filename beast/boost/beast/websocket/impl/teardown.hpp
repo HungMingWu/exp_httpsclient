@@ -15,8 +15,8 @@
 #include <boost/beast/core/stream_traits.hpp>
 #include <boost/beast/core/detail/bind_continuation.hpp>
 #include <boost/beast/core/detail/is_invocable.hpp>
-#include <boost/asio/coroutine.hpp>
-#include <boost/asio/post.hpp>
+#include <asio/coroutine.hpp>
+#include <asio/post.hpp>
 #include <memory>
 
 namespace boost {
@@ -33,7 +33,7 @@ class teardown_tcp_op
         Handler, beast::executor_type<
             net::basic_stream_socket<
                 Protocol, Executor>>>
-    , public asio::coroutine
+    , public ::asio::coroutine
 {
     using socket_type =
         net::basic_stream_socket<Protocol, Executor>;
@@ -67,7 +67,7 @@ public:
         std::size_t bytes_transferred = 0,
         bool cont = true)
     {
-        BOOST_ASIO_CORO_REENTER(*this)
+        ASIO_CORO_REENTER(*this)
         {
             nb_ = s_.non_blocking();
             s_.non_blocking(true, ec);
@@ -85,9 +85,9 @@ public:
                 }
                 if(ec == net::error::would_block)
                 {
-                    BOOST_ASIO_CORO_YIELD
+                    ASIO_CORO_YIELD
                     {
-                        BOOST_ASIO_HANDLER_LOCATION((
+                        ASIO_HANDLER_LOCATION((
                             __FILE__, __LINE__,
                             "websocket::tcp::async_teardown"
                         ));
@@ -120,9 +120,9 @@ public:
         upcall:
             if(! cont)
             {
-                BOOST_ASIO_CORO_YIELD
+                ASIO_CORO_YIELD
                 {
-                    BOOST_ASIO_HANDLER_LOCATION((
+                    ASIO_HANDLER_LOCATION((
                         __FILE__, __LINE__,
                         "websocket::tcp::async_teardown"
                         ));

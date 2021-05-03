@@ -234,7 +234,7 @@ void
 teardown(
     role_type,
     basic_stream<Executor>& s,
-    boost::system::error_code& ec)
+    std::error_code& ec)
 {
     if( s.in_->fc &&
         s.in_->fc->fail(ec))

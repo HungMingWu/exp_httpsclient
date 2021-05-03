@@ -10,8 +10,7 @@
 #ifndef BOOST_BEAST_WEBSOCKET_IMPL_ERROR_HPP
 #define BOOST_BEAST_WEBSOCKET_IMPL_ERROR_HPP
 
-namespace boost {
-namespace system {
+namespace std {
 template<>
 struct is_error_code_enum<::boost::beast::websocket::error>
 {
@@ -22,8 +21,7 @@ struct is_error_condition_enum<::boost::beast::websocket::condition>
 {
     static bool const value = true;
 };
-} // system
-} // boost
+} // std
 
 namespace boost {
 namespace beast {

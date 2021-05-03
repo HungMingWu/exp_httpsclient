@@ -13,7 +13,7 @@
 #include <boost/beast/core/detail/config.hpp>
 #include <boost/beast/core/error.hpp>
 #include <boost/beast/core/role.hpp>
-#include <boost/asio/basic_stream_socket.hpp>
+#include <asio/basic_stream_socket.hpp>
 #include <type_traits>
 
 namespace boost {

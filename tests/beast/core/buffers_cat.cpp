@@ -4,7 +4,7 @@
 #include <boost/beast/core/buffer_traits.hpp>
 #include <boost/beast/core/buffers_prefix.hpp>
 #include <boost/beast/core/buffers_suffix.hpp>
-#include <boost/asio/buffer.hpp>
+#include <asio/buffer.hpp>
 #include <iterator>
 #include <list>
 #include <string_view>
@@ -12,14 +12,14 @@
 #include <vector>
 #include "test_buffer.hpp"
 
-namespace net = boost::asio;
+namespace net = asio;
 
 TEST_CASE("DefaultIterators", "buffer_cat") {
     // default ctor is one past the end
     char c[2] = {};
     auto bs = boost::beast::buffers_cat(
-        boost::asio::const_buffer(&c[0], 1),
-        boost::asio::const_buffer(&c[1], 1));
+        net::const_buffer(&c[0], 1),
+        net::const_buffer(&c[1], 1));
     decltype(bs)::const_iterator it;
     decltype(bs)::const_iterator it2;
     REQUIRE(it == it2);
@@ -54,8 +54,8 @@ TEST_CASE("DefaultIterators", "buffer_cat") {
 
 TEST_CASE("BufferSequence", "buffer_cat") {
     std::string_view s = "Hello, world!";
-    boost::asio::const_buffer b1(s.data(), 6);
-    boost::asio::const_buffer b2(
+    net::const_buffer b1(s.data(), 6);
+    net::const_buffer b2(
         s.data() + b1.size(), s.size() - b1.size());
     boost::beast::test_buffer_sequence(boost::beast::buffers_cat(b1, b2));
 }

@@ -14,7 +14,7 @@
 #include <boost/beast/core/buffer_traits.hpp>
 #include <boost/beast/core/buffers_prefix.hpp>
 #include <boost/beast/websocket/teardown.hpp>
-#include <boost/asio/coroutine.hpp>
+#include <asio/coroutine.hpp>
 #include <boost/assert.hpp>
 #include <cstdlib>
 #include <type_traits>
@@ -210,7 +210,7 @@ struct basic_stream<Protocol, Executor, RatePolicy>::ops
 template<bool isRead, class Buffers, class Handler>
 class transfer_op
     : public async_base<Handler, Executor>
-    , public boost::asio::coroutine
+    , public ::asio::coroutine
 {
     std::shared_ptr<impl_type> impl_;
     pending_guard pg_;
@@ -304,15 +304,15 @@ public:
         error_code ec,
         std::size_t bytes_transferred = 0)
     {
-        BOOST_ASIO_CORO_REENTER(*this)
+        ASIO_CORO_REENTER(*this)
         {
             // handle empty buffers
             if(detail::buffers_empty(b_))
             {
                 // make sure we perform the no-op
-                BOOST_ASIO_CORO_YIELD
+                ASIO_CORO_YIELD
                 {
-                    BOOST_ASIO_HANDLER_LOCATION((
+                    ASIO_HANDLER_LOCATION((
                         __FILE__, __LINE__,
                         (isRead ? "basic_stream::async_read_some"
                             : "basic_stream::async_write_some")));
@@ -332,7 +332,7 @@ public:
             // if a timeout is active, wait on the timer
             if(state().timer.expiry() != never())
             {
-                BOOST_ASIO_HANDLER_LOCATION((
+                ASIO_HANDLER_LOCATION((
                     __FILE__, __LINE__,
                     (isRead ? "basic_stream::async_read_some"
                         : "basic_stream::async_write_some")));
@@ -351,9 +351,9 @@ public:
             if(amount == 0)
             {
                 ++impl_->waiting;
-                BOOST_ASIO_CORO_YIELD
+                ASIO_CORO_YIELD
                 {
-                    BOOST_ASIO_HANDLER_LOCATION((
+                    ASIO_HANDLER_LOCATION((
                         __FILE__, __LINE__,
                         (isRead ? "basic_stream::async_read_some"
                             : "basic_stream::async_write_some")));
@@ -382,9 +382,9 @@ public:
                     available_bytes(), 1);
             }
 
-            BOOST_ASIO_CORO_YIELD
+            ASIO_CORO_YIELD
             {
-                BOOST_ASIO_HANDLER_LOCATION((
+                ASIO_HANDLER_LOCATION((
                     __FILE__, __LINE__,
                     (isRead ? "basic_stream::async_read_some"
                         : "basic_stream::async_write_some")));
@@ -452,7 +452,7 @@ public:
     {
         if(state().timer.expiry() != stream_base::never())
         {
-            BOOST_ASIO_HANDLER_LOCATION((
+            ASIO_HANDLER_LOCATION((
                 __FILE__, __LINE__,
                 "basic_stream::async_connect"));
 
@@ -464,7 +464,7 @@ public:
                     this->get_executor()});
         }
 
-        BOOST_ASIO_HANDLER_LOCATION((
+        ASIO_HANDLER_LOCATION((
             __FILE__, __LINE__,
             "basic_stream::async_connect"));
 
@@ -489,7 +489,7 @@ public:
     {
         if(state().timer.expiry() != stream_base::never())
         {
-            BOOST_ASIO_HANDLER_LOCATION((
+            ASIO_HANDLER_LOCATION((
                 __FILE__, __LINE__,
                 "basic_stream::async_connect"));
 
@@ -501,7 +501,7 @@ public:
                     this->get_executor()});
         }
 
-        BOOST_ASIO_HANDLER_LOCATION((
+        ASIO_HANDLER_LOCATION((
             __FILE__, __LINE__,
             "basic_stream::async_connect"));
 
@@ -526,7 +526,7 @@ public:
     {
         if(state().timer.expiry() != stream_base::never())
         {
-            BOOST_ASIO_HANDLER_LOCATION((
+            ASIO_HANDLER_LOCATION((
                 __FILE__, __LINE__,
                 "basic_stream::async_connect"));
 
@@ -538,7 +538,7 @@ public:
                     this->get_executor()});
         }
 
-        BOOST_ASIO_HANDLER_LOCATION((
+        ASIO_HANDLER_LOCATION((
             __FILE__, __LINE__,
             "basic_stream::async_connect"));
 
@@ -873,9 +873,9 @@ async_connect(
 template<class Protocol, class Executor, class RatePolicy>
 template<
     class EndpointSequence,
-    BOOST_ASIO_COMPLETION_TOKEN_FOR(void(error_code, typename Protocol::endpoint)) RangeConnectHandler,
+    ASIO_COMPLETION_TOKEN_FOR(void(error_code, typename Protocol::endpoint)) RangeConnectHandler,
     class>
-BOOST_ASIO_INITFN_RESULT_TYPE(RangeConnectHandler,void(error_code, typename Protocol::endpoint))
+ASIO_INITFN_RESULT_TYPE(RangeConnectHandler,void(error_code, typename Protocol::endpoint))
 basic_stream<Protocol, Executor, RatePolicy>::
 async_connect(
     EndpointSequence const& endpoints,
@@ -895,9 +895,9 @@ template<class Protocol, class Executor, class RatePolicy>
 template<
     class EndpointSequence,
     class ConnectCondition,
-    BOOST_ASIO_COMPLETION_TOKEN_FOR(void(error_code, typename Protocol::endpoint)) RangeConnectHandler,
+    ASIO_COMPLETION_TOKEN_FOR(void(error_code, typename Protocol::endpoint)) RangeConnectHandler,
     class>
-BOOST_ASIO_INITFN_RESULT_TYPE(RangeConnectHandler,void (error_code, typename Protocol::endpoint))
+ASIO_INITFN_RESULT_TYPE(RangeConnectHandler,void (error_code, typename Protocol::endpoint))
 basic_stream<Protocol, Executor, RatePolicy>::
 async_connect(
     EndpointSequence const& endpoints,
@@ -917,8 +917,8 @@ async_connect(
 template<class Protocol, class Executor, class RatePolicy>
 template<
     class Iterator,
-    BOOST_ASIO_COMPLETION_TOKEN_FOR(void(error_code, Iterator)) IteratorConnectHandler>
-BOOST_ASIO_INITFN_RESULT_TYPE(IteratorConnectHandler,void (error_code, Iterator))
+    ASIO_COMPLETION_TOKEN_FOR(void(error_code, Iterator)) IteratorConnectHandler>
+ASIO_INITFN_RESULT_TYPE(IteratorConnectHandler,void (error_code, Iterator))
 basic_stream<Protocol, Executor, RatePolicy>::
 async_connect(
     Iterator begin, Iterator end,
@@ -938,8 +938,8 @@ template<class Protocol, class Executor, class RatePolicy>
 template<
     class Iterator,
     class ConnectCondition,
-    BOOST_ASIO_COMPLETION_TOKEN_FOR(void(error_code, Iterator)) IteratorConnectHandler>
-BOOST_ASIO_INITFN_RESULT_TYPE(IteratorConnectHandler,void (error_code, Iterator))
+    ASIO_COMPLETION_TOKEN_FOR(void(error_code, Iterator)) IteratorConnectHandler>
+ASIO_INITFN_RESULT_TYPE(IteratorConnectHandler,void (error_code, Iterator))
 basic_stream<Protocol, Executor, RatePolicy>::
 async_connect(
     Iterator begin, Iterator end,

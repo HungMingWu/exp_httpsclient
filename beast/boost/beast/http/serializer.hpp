@@ -17,7 +17,7 @@
 #include <boost/beast/core/string.hpp>
 #include <boost/beast/http/message.hpp>
 #include <boost/beast/http/chunk_encode.hpp>
-#include <boost/asio/buffer.hpp>
+#include <asio/buffer.hpp>
 #include <optional>
 #include <variant>
 

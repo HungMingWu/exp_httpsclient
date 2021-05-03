@@ -23,7 +23,7 @@
 #include <boost/beast/core/buffers_suffix.hpp>
 #include <boost/beast/core/error.hpp>
 #include <boost/beast/core/detail/clamp.hpp>
-#include <boost/asio/buffer.hpp>
+#include <asio/buffer.hpp>
 #include <cstdint>
 #include <memory>
 #include <stdexcept>

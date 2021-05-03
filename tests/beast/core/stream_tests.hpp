@@ -13,7 +13,7 @@
 #include "catch.hpp"
 #include <boost/beast/core/error.hpp>
 #include <boost/beast/core/stream_traits.hpp>
-#include <boost/asio/buffer.hpp>
+#include <asio/buffer.hpp>
 
 namespace boost {
 namespace beast {

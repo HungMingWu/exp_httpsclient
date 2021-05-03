@@ -24,8 +24,8 @@
 #include <boost/beast/core/stream_traits.hpp>
 #include <boost/beast/core/string.hpp>
 #include <boost/beast/http/detail/type_traits.hpp>
-#include <boost/asio/async_result.hpp>
-#include <boost/asio/error.hpp>
+#include <asio/async_result.hpp>
+#include <asio/error.hpp>
 #include <algorithm>
 #include <cstdint>
 #include <functional>

@@ -11,7 +11,7 @@
 #define BOOST_BEAST_WEBSOCKET_DETAIL_UTF8_CHECKER_HPP
 
 #include <boost/beast/core/buffers_range.hpp>
-#include <boost/asio/buffer.hpp>
+#include <asio/buffer.hpp>
 
 #include <cstdint>
 

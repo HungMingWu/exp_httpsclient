@@ -16,8 +16,8 @@
 #include <boost/beast/core/detail/bind_continuation.hpp>
 #include <boost/beast/websocket/detail/frame.hpp>
 #include <boost/beast/websocket/impl/stream_impl.hpp>
-#include <boost/asio/coroutine.hpp>
-#include <boost/asio/post.hpp>
+#include <asio/coroutine.hpp>
+#include <asio/post.hpp>
 #include <memory>
 
 namespace boost {
@@ -34,7 +34,7 @@ template<class Handler>
 class stream<NextLayer, deflateSupported>::ping_op
     : public beast::stable_async_base<
         Handler, beast::executor_type<stream>>
-    , public asio::coroutine
+    , public ::asio::coroutine
 {
     std::weak_ptr<impl_type> wp_;
     detail::frame_buffer& fb_;
@@ -75,23 +75,23 @@ public:
             return this->complete(cont, ec);
         }
         auto& impl = *sp;
-        BOOST_ASIO_CORO_REENTER(*this)
+        ASIO_CORO_REENTER(*this)
         {
             // Acquire the write lock
             if(! impl.wr_block.try_lock(this))
             {
-                BOOST_ASIO_CORO_YIELD
+                ASIO_CORO_YIELD
                 {
-                    BOOST_ASIO_HANDLER_LOCATION((
+                    ASIO_HANDLER_LOCATION((
                         __FILE__, __LINE__,
                         "websocket::async_ping"));
 
                     impl.op_ping.emplace(std::move(*this));
                 }
                 impl.wr_block.lock(this);
-                BOOST_ASIO_CORO_YIELD
+                ASIO_CORO_YIELD
                 {
-                    BOOST_ASIO_HANDLER_LOCATION((
+                    ASIO_HANDLER_LOCATION((
                         __FILE__, __LINE__,
                         "websocket::async_ping"));
 
@@ -103,9 +103,9 @@ public:
                 goto upcall;
 
             // Send ping frame
-            BOOST_ASIO_CORO_YIELD
+            ASIO_CORO_YIELD
             {
-                BOOST_ASIO_HANDLER_LOCATION((
+                ASIO_HANDLER_LOCATION((
                     __FILE__, __LINE__,
                     "websocket::async_ping"));
 
@@ -132,7 +132,7 @@ public:
 template<class NextLayer, bool deflateSupported>
 template<class Executor>
 class stream<NextLayer, deflateSupported>::idle_ping_op
-    : public asio::coroutine
+    : public ::asio::coroutine
     , public boost::empty_value<Executor>
 {
     std::weak_ptr<impl_type> wp_;
@@ -184,23 +184,23 @@ public:
         if(! sp)
             return;
         auto& impl = *sp;
-        BOOST_ASIO_CORO_REENTER(*this)
+        ASIO_CORO_REENTER(*this)
         {
             // Acquire the write lock
             if(! impl.wr_block.try_lock(this))
             {
-                BOOST_ASIO_CORO_YIELD
+                ASIO_CORO_YIELD
                 {
-                    BOOST_ASIO_HANDLER_LOCATION((
+                    ASIO_HANDLER_LOCATION((
                                                 __FILE__, __LINE__,
                                                 "websocket::async_ping"));
 
                     impl.op_idle_ping.emplace(std::move(*this));
                 }
                 impl.wr_block.lock(this);
-                BOOST_ASIO_CORO_YIELD
+                ASIO_CORO_YIELD
                 {
-                    BOOST_ASIO_HANDLER_LOCATION((
+                    ASIO_HANDLER_LOCATION((
                         __FILE__, __LINE__,
                         "websocket::async_ping"));
 
@@ -213,9 +213,9 @@ public:
                 goto upcall;
 
             // Send ping frame
-            BOOST_ASIO_CORO_YIELD
+            ASIO_CORO_YIELD
             {
-                BOOST_ASIO_HANDLER_LOCATION((
+                ASIO_HANDLER_LOCATION((
                     __FILE__, __LINE__,
                     "websocket::async_ping"));
 

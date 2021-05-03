@@ -10,7 +10,7 @@
 #ifndef BOOST_BEAST_DETAIL_SERVICE_BASE_HPP
 #define BOOST_BEAST_DETAIL_SERVICE_BASE_HPP
 
-#include <boost/asio/execution_context.hpp>
+#include <asio/execution_context.hpp>
 
 namespace boost {
 namespace beast {

@@ -1,5 +1,6 @@
 #include "catch.hpp"
 #include <string_view>
+#include <asio/io_context.hpp>
 #include <boost/beast/core/detect_ssl.hpp>
 #include <boost/beast/core/flat_buffer.hpp>
 #include "handler.hpp"
@@ -44,7 +45,7 @@ TEST_CASE("testDetect", "detect_ssl") {
 TEST_CASE("testRead true 1", "detect_ssl") {
     net::io_context ioc;
 
-    boost::system::error_code ec;
+    std::error_code ec;
     flat_buffer b;
     test::stream s1(ioc);
     s1.append({ "\x16\x00\x00\x01\x00\x01\x00\x00\x00", 9 });
@@ -56,7 +57,7 @@ TEST_CASE("testRead true 1", "detect_ssl") {
 TEST_CASE("testRead true 2", "detect_ssl") {
     net::io_context ioc;
 
-    boost::system::error_code ec;
+    std::error_code ec;
     flat_buffer b;
     test::stream s1(ioc);
     auto s2 = test::connect(s1);
@@ -70,7 +71,7 @@ TEST_CASE("testRead true 2", "detect_ssl") {
 TEST_CASE("testRead false", "detect_ssl") {
     net::io_context ioc;
 
-    boost::system::error_code ec;
+    std::error_code ec;
     flat_buffer b;
     test::stream s1(ioc);
     s1.append({ "\x16\x00\x00\x01\x00\x01\x01\x00\x00", 9 });
@@ -82,7 +83,7 @@ TEST_CASE("testRead false", "detect_ssl") {
 TEST_CASE("testRead eof", "detect_ssl") {
     net::io_context ioc;
 
-    boost::system::error_code ec;
+    std::error_code ec;
     flat_buffer b;
     test::stream s1(ioc);
     auto s2 = test::connect(s1);
@@ -138,7 +139,7 @@ TEST_CASE("testAsyncRead eof", "detect_ssl") {
     test::run(ioc);
 }
 
-#if BOOST_ASIO_HAS_CO_AWAIT
+#if ASIO_HAS_CO_AWAIT
 static_assert(
     std::is_same_v<
         net::awaitable<bool>, decltype(

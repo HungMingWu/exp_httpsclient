@@ -1,10 +1,10 @@
 #include "catch.hpp"
 #include <sstream>
 #include <string_view>
-#include <boost/asio/buffer.hpp>
+#include <asio/buffer.hpp>
 #include <boost/beast/core/make_printable.hpp>
 #include "test_buffer.hpp"
-namespace net = boost::asio;
+namespace net = asio;
 using namespace boost::beast;
 
 TEST_CASE("testMakePrintable", "make_printable") {

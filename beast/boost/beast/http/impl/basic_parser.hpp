@@ -11,7 +11,7 @@
 #define BOOST_BEAST_HTTP_IMPL_BASIC_PARSER_HPP
 
 #include <boost/beast/core/buffer_traits.hpp>
-#include <boost/asio/buffer.hpp>
+#include <asio/buffer.hpp>
 
 namespace boost {
 namespace beast {

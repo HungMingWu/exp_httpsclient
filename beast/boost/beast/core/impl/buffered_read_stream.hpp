@@ -16,7 +16,7 @@
 #include <boost/beast/core/read_size.hpp>
 #include <boost/beast/core/stream_traits.hpp>
 #include <boost/beast/core/detail/is_invocable.hpp>
-#include <boost/asio/post.hpp>
+#include <asio/post.hpp>
 
 namespace boost {
 namespace beast {

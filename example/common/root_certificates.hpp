@@ -10,7 +10,7 @@
 #ifndef BOOST_BEAST_EXAMPLE_COMMON_ROOT_CERTIFICATES_HPP
 #define BOOST_BEAST_EXAMPLE_COMMON_ROOT_CERTIFICATES_HPP
 
-#include <boost/asio/ssl.hpp>
+#include <asio/ssl.hpp>
 #include <string>
 
 /*
@@ -38,13 +38,13 @@
     tl;dr: root_certificates.hpp should not be used in production code
 */
 
-namespace ssl = boost::asio::ssl; // from <boost/asio/ssl.hpp>
+namespace ssl = asio::ssl; // from <asio/ssl.hpp>
 
 namespace detail {
 
 inline
 void
-load_root_certificates(ssl::context& ctx, boost::system::error_code& ec)
+load_root_certificates(ssl::context& ctx, std::error_code& ec)
 {
     std::string const cert =
         /*  This is the DigiCert Global Root CA
@@ -122,7 +122,7 @@ load_root_certificates(ssl::context& ctx, boost::system::error_code& ec)
         ;
 
     ctx.add_certificate_authority(
-        boost::asio::buffer(cert.data(), cert.size()), ec);
+        asio::buffer(cert.data(), cert.size()), ec);
     if(ec)
         return;
 }
@@ -133,7 +133,7 @@ load_root_certificates(ssl::context& ctx, boost::system::error_code& ec)
 
 inline
 void
-load_root_certificates(ssl::context& ctx, boost::system::error_code& ec)
+load_root_certificates(ssl::context& ctx, std::error_code& ec)
 {
     detail::load_root_certificates(ctx, ec);
 }
@@ -142,10 +142,10 @@ inline
 void
 load_root_certificates(ssl::context& ctx)
 {
-    boost::system::error_code ec;
+    std::error_code ec;
     detail::load_root_certificates(ctx, ec);
     if(ec)
-        throw boost::system::system_error{ec};
+        throw std::system_error{ec};
 }
 
 #endif

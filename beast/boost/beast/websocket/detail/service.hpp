@@ -11,7 +11,7 @@
 #define BOOST_BEAST_WEBSOCKET_DETAIL_SERVICE_HPP
 
 #include <boost/beast/core/detail/service_base.hpp>
-#include <boost/asio/execution_context.hpp>
+#include <asio/execution_context.hpp>
 #include <mutex>
 #include <vector>
 

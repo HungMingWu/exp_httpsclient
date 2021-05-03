@@ -22,8 +22,8 @@
 #include <boost/beast/core/stream_traits.hpp>
 #include <boost/beast/core/detail/buffer.hpp>
 #include <boost/beast/version.hpp>
-#include <boost/asio/coroutine.hpp>
-#include <boost/asio/post.hpp>
+#include <asio/coroutine.hpp>
+#include <asio/post.hpp>
 #include <boost/assert.hpp>
 #include <memory>
 #include <type_traits>
@@ -165,7 +165,7 @@ template<class Handler>
 class stream<NextLayer, deflateSupported>::response_op
     : public beast::stable_async_base<
         Handler, beast::executor_type<stream>>
-    , public asio::coroutine
+    , public ::asio::coroutine
 {
     std::weak_ptr<impl_type> wp_;
     error_code result_; // must come before res_
@@ -207,15 +207,15 @@ public:
             return this->complete(cont, ec);
         }
         auto& impl = *sp;
-        BOOST_ASIO_CORO_REENTER(*this)
+        ASIO_CORO_REENTER(*this)
         {
             impl.change_status(status::handshake);
             impl.update_timer(this->get_executor());
 
             // Send response
-            BOOST_ASIO_CORO_YIELD
+            ASIO_CORO_YIELD
             {
-                BOOST_ASIO_HANDLER_LOCATION((
+                ASIO_HANDLER_LOCATION((
                     __FILE__, __LINE__,
                     "websocket::async_accept"));
 
@@ -246,7 +246,7 @@ template<class Handler, class Decorator>
 class stream<NextLayer, deflateSupported>::accept_op
     : public beast::stable_async_base<
         Handler, beast::executor_type<stream>>
-    , public asio::coroutine
+    , public ::asio::coroutine
 {
     std::weak_ptr<impl_type> wp_;
     http::request_parser<http::empty_body>& p_;
@@ -293,7 +293,7 @@ public:
             return this->complete(cont, ec);
         }
         auto& impl = *sp;
-        BOOST_ASIO_CORO_REENTER(*this)
+        ASIO_CORO_REENTER(*this)
         {
             impl.change_status(status::handshake);
             impl.update_timer(this->get_executor());
@@ -302,9 +302,9 @@ public:
             if(ec)
                 goto upcall;
 
-            BOOST_ASIO_CORO_YIELD
+            ASIO_CORO_YIELD
             {
-                BOOST_ASIO_HANDLER_LOCATION((
+                ASIO_HANDLER_LOCATION((
                     __FILE__, __LINE__,
                     "websocket::async_accept"));
 

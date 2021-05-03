@@ -1,8 +1,8 @@
 #include "catch.hpp"
-#include <boost/asio/buffer.hpp>
+#include <asio/buffer.hpp>
 #include <boost/beast/core/buffer_traits.hpp>
 #include <boost/beast/core/detail/is_invocable.hpp>
-namespace net = boost::asio;
+namespace net = asio;
 using namespace boost::beast;
 
 // is_const_buffer_sequence

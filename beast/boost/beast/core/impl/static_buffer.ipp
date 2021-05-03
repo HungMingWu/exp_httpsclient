@@ -11,7 +11,7 @@
 #define BOOST_BEAST_IMPL_STATIC_BUFFER_IPP
 
 #include <boost/beast/core/static_buffer.hpp>
-#include <boost/asio/buffer.hpp>
+#include <asio/buffer.hpp>
 #include <stdexcept>
 
 namespace boost {

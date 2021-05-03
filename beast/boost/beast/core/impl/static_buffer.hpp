@@ -10,7 +10,7 @@
 #ifndef BOOST_BEAST_IMPL_STATIC_BUFFER_HPP
 #define BOOST_BEAST_IMPL_STATIC_BUFFER_HPP
 
-#include <boost/asio/buffer.hpp>
+#include <asio/buffer.hpp>
 #include <stdexcept>
 
 namespace boost {

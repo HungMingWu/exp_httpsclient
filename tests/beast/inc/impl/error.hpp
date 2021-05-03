@@ -14,16 +14,14 @@
 #include <boost/beast/core/string.hpp>
 #include <type_traits>
 
-namespace boost {
-namespace system {
+namespace std {
 template<>
 struct is_error_code_enum<
     boost::beast::test::error>
         : std::true_type
 {
 };
-} // system
-} // boost
+} // std
 
 namespace boost {
 namespace beast {

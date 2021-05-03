@@ -12,15 +12,13 @@
 
 #include <type_traits>
 
-namespace boost {
-namespace system {
+namespace std {
 template<>
 struct is_error_code_enum<::boost::beast::http::error>
 {
     static bool const value = true;
 };
-} // system
-} // boost
+} // std
 
 namespace boost {
 namespace beast {

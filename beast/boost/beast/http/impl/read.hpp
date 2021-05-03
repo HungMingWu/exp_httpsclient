@@ -19,9 +19,9 @@
 #include <boost/beast/core/stream_traits.hpp>
 #include <boost/beast/core/detail/buffer.hpp>
 #include <boost/beast/core/detail/read.hpp>
-#include <boost/asio/error.hpp>
-#include <boost/asio/compose.hpp>
-#include <boost/asio/coroutine.hpp>
+#include <asio/error.hpp>
+#include <asio/compose.hpp>
+#include <asio/coroutine.hpp>
 
 namespace boost {
 namespace beast {
@@ -58,7 +58,7 @@ template<
 class read_msg_op
     : public beast::stable_async_base<
         Handler, beast::executor_type<Stream>>
-    , public asio::coroutine
+    , public ::asio::coroutine
 {
     using parser_type =
         parser<isRequest, Body, Allocator>;
@@ -97,7 +97,7 @@ public:
         , d_(beast::allocate_stable<data>(
             *this, s, m))
     {
-        BOOST_ASIO_HANDLER_LOCATION((
+        ASIO_HANDLER_LOCATION((
             __FILE__, __LINE__,
             "http::async_read(msg)"));
 
@@ -149,7 +149,7 @@ struct run_read_msg_op
 };
 
 template<class AsyncReadStream, class DynamicBuffer, bool isRequest>
-class read_some_op : asio::coroutine
+class read_some_op : ::asio::coroutine
 {
     AsyncReadStream& s_;
     DynamicBuffer& b_;
@@ -176,7 +176,7 @@ public:
         error_code ec = {},
         std::size_t bytes_transferred = 0)
     {
-        BOOST_ASIO_CORO_REENTER(*this)
+        ASIO_CORO_REENTER(*this)
         {
             if(b_.size() == 0)
                 goto do_read;
@@ -192,7 +192,7 @@ public:
                     break;
 
             do_read:
-                BOOST_ASIO_CORO_YIELD
+                ASIO_CORO_YIELD
                 {
                     cont_ = true;
                     // VFALCO This was read_size_or_throw
@@ -208,7 +208,7 @@ public:
                     if(ec)
                         goto upcall;
 
-                    BOOST_ASIO_HANDLER_LOCATION((
+                    ASIO_HANDLER_LOCATION((
                         __FILE__, __LINE__,
                         "http::async_read_some"));
 
@@ -238,9 +238,9 @@ public:
         upcall:
             if(! cont_)
             {
-                BOOST_ASIO_CORO_YIELD
+                ASIO_CORO_YIELD
                 {
-                    BOOST_ASIO_HANDLER_LOCATION((
+                    ASIO_HANDLER_LOCATION((
                         __FILE__, __LINE__,
                         "http::async_read_some"));
 
@@ -255,7 +255,7 @@ public:
 
 template<class Stream, class DynamicBuffer, bool isRequest, class Condition>
 class read_op
-    : asio::coroutine
+    : ::asio::coroutine
 {
     Stream& s_;
     DynamicBuffer& b_;
@@ -274,13 +274,13 @@ public:
     template<class Self>
     void operator()(Self& self, error_code ec = {}, std::size_t bytes_transferred = 0)
     {
-        BOOST_ASIO_CORO_REENTER(*this)
+        ASIO_CORO_REENTER(*this)
         {
             if (Condition{}(p_))
             {
-                BOOST_ASIO_CORO_YIELD
+                ASIO_CORO_YIELD
                 {
-                    BOOST_ASIO_HANDLER_LOCATION((
+                    ASIO_HANDLER_LOCATION((
                         __FILE__, __LINE__,
                         "http::async_read"));
 
@@ -291,9 +291,9 @@ public:
             {
                 do
                 {
-                    BOOST_ASIO_CORO_YIELD
+                    ASIO_CORO_YIELD
                     {
-                        BOOST_ASIO_HANDLER_LOCATION((
+                        ASIO_HANDLER_LOCATION((
                             __FILE__, __LINE__,
                             "http::async_read"));
 

@@ -1,8 +1,9 @@
 #ifndef BOOST_BEAST_CORE_DETAIL_WORK_GUARD_HPP
 #define BOOST_BEAST_CORE_DETAIL_WORK_GUARD_HPP
 
-#include <boost/asio/executor_work_guard.hpp>
-#include <boost/asio/execution.hpp>
+#include <asio/executor_work_guard.hpp>
+#include <asio/execution.hpp>
+#include <boost/assert.hpp>
 #include <optional>
 
 namespace boost {
@@ -16,7 +17,7 @@ template<class Executor>
 using select_work_guard_t = typename
     select_work_guard<Executor>::type;
 
-#if !defined(BOOST_ASIO_NO_TS_EXECUTORS)
+#if !defined(ASIO_NO_TS_EXECUTORS)
 template<class Executor>
 struct select_work_guard
 <
@@ -68,7 +69,7 @@ struct select_work_guard
     typename std::enable_if
     <
         net::execution::is_executor<Executor>::value
-#if defined(BOOST_ASIO_NO_TS_EXECUTORS)
+#if defined(ASIO_NO_TS_EXECUTORS)
         || net::is_executor<Executor>::value
 #else
         && !net::is_executor<Executor>::value

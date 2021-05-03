@@ -1,9 +1,9 @@
 #include "catch.hpp"
 #include <boost/beast/core/flat_stream.hpp>
-#include <boost/asio/io_context.hpp>
+#include <asio/io_context.hpp>
 #include "stream_tests.hpp"
 #include "stream.hpp"
-namespace net = boost::asio;
+namespace net = asio;
 using namespace boost::beast;
 
 TEST_CASE("flat_stream testMembers basic", "flat_stream") {
@@ -14,7 +14,7 @@ TEST_CASE("flat_stream testMembers basic", "flat_stream") {
 
 TEST_CASE("flat_stream testMembers read/write", "flat_stream") {
     net::io_context ioc;
-    error_code ec;
+    std::error_code ec;
     flat_stream<test::stream> s(ioc);
     {
         // VFALCO Hack to make test stream code = eof
@@ -180,7 +180,7 @@ TEST_CASE("flat_stream testSplit", "flat_stream") {
     check({ 1,2,3,4 }, 3, 3, true);
 }
 
-#if BOOST_ASIO_HAS_CO_AWAIT
+#if ASIO_HAS_CO_AWAIT
 static_assert(std::is_same_v<
         net::awaitable<std::size_t>, decltype(
             stream.async_read_some(rxbuf, net::use_awaitable))>);

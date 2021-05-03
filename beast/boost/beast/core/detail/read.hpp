@@ -14,7 +14,7 @@
 #include <boost/beast/core/error.hpp>
 #include <boost/beast/core/stream_traits.hpp>
 #include <boost/beast/core/detail/is_invocable.hpp>
-#include <boost/asio/async_result.hpp>
+#include <asio/async_result.hpp>
 #include <cstdlib>
 
 namespace boost {

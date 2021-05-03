@@ -13,7 +13,7 @@
 #include <boost/beast/core/detail/config.hpp>
 #include <boost/beast/core/string.hpp>
 #include <boost/beast/http/field.hpp>
-#include <boost/asio/buffer.hpp>
+#include <asio/buffer.hpp>
 #include <boost/core/empty_value.hpp>
 #include <boost/intrusive/list.hpp>
 #include <boost/intrusive/set.hpp>

@@ -1,9 +1,9 @@
 #include "catch.hpp"
 #include <string_view>
-#include <boost/asio/buffer.hpp>
+#include <asio/buffer.hpp>
 #include <boost/beast/core/buffers_range.hpp>
 #include "test_buffer.hpp"
-namespace net = boost::asio;
+namespace net = asio;
 using namespace boost::beast;
 static_assert(
     is_const_buffer_sequence<

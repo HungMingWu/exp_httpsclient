@@ -18,11 +18,11 @@
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
 #include <boost/beast/version.hpp>
-#include <boost/asio/bind_executor.hpp>
-#include <boost/asio/connect.hpp>
-#include <boost/asio/ip/tcp.hpp>
-#include <boost/asio/post.hpp>
-#include <boost/asio/strand.hpp>
+#include <asio/bind_executor.hpp>
+#include <asio/connect.hpp>
+#include <asio/ip/tcp.hpp>
+#include <asio/post.hpp>
+#include <asio/strand.hpp>
 #include <atomic>
 #include <chrono>
 #include <cstdlib>
@@ -38,8 +38,8 @@
 namespace chrono = std::chrono;         // from <chrono>
 namespace beast = boost::beast;         // from <boost/beast.hpp>
 namespace http = beast::http;           // from <boost/beast/http.hpp>
-namespace net = boost::asio;            // from <boost/asio.hpp>
-using tcp = net::ip::tcp;               // from <boost/asio/ip/tcp.hpp>
+namespace net = asio;                   // from <asio.hpp>
+using tcp = net::ip::tcp;               // from <asio/ip/tcp.hpp>
 
 //------------------------------------------------------------------------------
 

@@ -14,7 +14,7 @@
 #include <boost/beast/core/error.hpp>
 #include <boost/beast/core/string.hpp>
 #include <boost/beast/http/detail/type_traits.hpp>
-#include <boost/asio/buffer.hpp>
+#include <asio/buffer.hpp>
 #include <optional>
 #include <type_traits>
 #include <utility>

@@ -122,7 +122,7 @@ char const*
 basic_parser_base::
 find_eol(
     char const* it, char const* last,
-        error_code& ec)
+        std::error_code& ec)
 {
     for(;;)
     {
@@ -342,7 +342,7 @@ void
 basic_parser_base::
 parse_target(
     char const*& it, char const* last,
-    string_view& result, error_code& ec)
+    string_view& result, std::error_code& ec)
 {
     // parse target SP
     auto const first = it;

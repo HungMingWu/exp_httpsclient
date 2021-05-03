@@ -19,9 +19,9 @@
 
 // VFALCO We include this because anyone who uses ssl will
 //        very likely need to check for ssl::error::stream_truncated
-#include <boost/asio/ssl/error.hpp>
+#include <asio/ssl/error.hpp>
 
-#include <boost/asio/ssl/stream.hpp>
+#include <asio/ssl/stream.hpp>
 #include <cstddef>
 #include <memory>
 #include <type_traits>
@@ -194,7 +194,7 @@ public:
 
         @param v A bitmask of peer verification modes.
 
-        @throws boost::system::system_error Thrown on failure.
+        @throws std::system_error Thrown on failure.
 
         @note Calls @c SSL_set_verify.
     */
@@ -218,7 +218,7 @@ public:
     */
     void
     set_verify_mode(net::ssl::verify_mode v,
-        boost::system::error_code& ec)
+        std::error_code& ec)
     {
         p_->next_layer().set_verify_mode(v, ec);
     }
@@ -231,7 +231,7 @@ public:
         @param depth Maximum depth for the certificate chain verification that
         shall be allowed.
 
-        @throws boost::system::system_error Thrown on failure.
+        @throws std::system_error Thrown on failure.
 
         @note Calls @c SSL_set_verify_depth.
     */
@@ -255,7 +255,7 @@ public:
     */
     void
     set_verify_depth(
-        int depth, boost::system::error_code& ec)
+        int depth, std::error_code& ec)
     {
         p_->next_layer().set_verify_depth(depth, ec);
     }
@@ -274,7 +274,7 @@ public:
         The return value of the callback is true if the certificate has passed
         verification, false otherwise.
 
-        @throws boost::system::system_error Thrown on failure.
+        @throws std::system_error Thrown on failure.
 
         @note Calls @c SSL_set_verify.
     */
@@ -306,7 +306,7 @@ public:
     template<class VerifyCallback>
     void
     set_verify_callback(VerifyCallback callback,
-        boost::system::error_code& ec)
+        std::error_code& ec)
     {
         p_->next_layer().set_verify_callback(callback, ec);
     }
@@ -319,7 +319,7 @@ public:
         @param type The type of handshaking to be performed, i.e. as a client or as
         a server.
 
-        @throws boost::system::system_error Thrown on failure.
+        @throws std::system_error Thrown on failure.
     */
     void
     handshake(handshake_type type)
@@ -339,7 +339,7 @@ public:
     */
     void
     handshake(handshake_type type,
-        boost::system::error_code& ec)
+        std::error_code& ec)
     {
         p_->next_layer().handshake(type, ec);
     }
@@ -354,7 +354,7 @@ public:
 
         @param buffers The buffered data to be reused for the handshake.
 
-        @throws boost::system::system_error Thrown on failure.
+        @throws std::system_error Thrown on failure.
     */
     template<class ConstBufferSequence>
     void
@@ -380,7 +380,7 @@ public:
     void
     handshake(handshake_type type,
         ConstBufferSequence const& buffers,
-            boost::system::error_code& ec)
+            std::error_code& ec)
     {
         p_->next_layer().handshake(type, buffers, ec);
     }
@@ -397,16 +397,16 @@ public:
         completes. Copies will be made of the handler as required. The equivalent
         function signature of the handler must be:
         @code void handler(
-          const boost::system::error_code& error // Result of operation.
+          const std::error_code& error // Result of operation.
         ); @endcode
     */
     template<class HandshakeHandler>
-    BOOST_ASIO_INITFN_RESULT_TYPE(HandshakeHandler, void(boost::system::error_code))
+    ASIO_INITFN_RESULT_TYPE(HandshakeHandler, void(std::error_code))
     async_handshake(handshake_type type,
-        BOOST_ASIO_MOVE_ARG(HandshakeHandler) handler)
+        ASIO_MOVE_ARG(HandshakeHandler) handler)
     {
         return p_->next_layer().async_handshake(type,
-            BOOST_ASIO_MOVE_CAST(HandshakeHandler)(handler));
+            ASIO_MOVE_CAST(HandshakeHandler)(handler));
     }
 
     /** Start an asynchronous SSL handshake.
@@ -426,17 +426,17 @@ public:
         completes. Copies will be made of the handler as required. The equivalent
         function signature of the handler must be:
         @code void handler(
-          const boost::system::error_code& error, // Result of operation.
+          const std::error_code& error, // Result of operation.
           std::size_t bytes_transferred // Amount of buffers used in handshake.
         ); @endcode
     */
     template<class ConstBufferSequence, class BufferedHandshakeHandler>
-    BOOST_ASIO_INITFN_RESULT_TYPE(BufferedHandshakeHandler, void(boost::system::error_code, std::size_t))
+    ASIO_INITFN_RESULT_TYPE(BufferedHandshakeHandler, void(std::error_code, std::size_t))
     async_handshake(handshake_type type, ConstBufferSequence const& buffers,
-        BOOST_ASIO_MOVE_ARG(BufferedHandshakeHandler) handler)
+        ASIO_MOVE_ARG(BufferedHandshakeHandler) handler)
     {
         return p_->next_layer().async_handshake(type, buffers,
-            BOOST_ASIO_MOVE_CAST(BufferedHandshakeHandler)(handler));
+            ASIO_MOVE_CAST(BufferedHandshakeHandler)(handler));
     }
 
     /** Shut down SSL on the stream.
@@ -444,7 +444,7 @@ public:
         This function is used to shut down SSL on the stream. The function call
         will block until SSL has been shut down or an error occurs.
 
-        @throws boost::system::system_error Thrown on failure.
+        @throws std::system_error Thrown on failure.
     */
     void
     shutdown()
@@ -460,7 +460,7 @@ public:
         @param ec Set to indicate what error occurred, if any.
     */
     void
-    shutdown(boost::system::error_code& ec)
+    shutdown(std::error_code& ec)
     {
         p_->next_layer().shutdown(ec);
     }
@@ -474,15 +474,15 @@ public:
         completes. Copies will be made of the handler as required. The equivalent
         function signature of the handler must be:
         @code void handler(
-          const boost::system::error_code& error // Result of operation.
+          const std::error_code& error // Result of operation.
         ); @endcode
     */
     template<class ShutdownHandler>
-    BOOST_ASIO_INITFN_RESULT_TYPE(ShutdownHandler, void(boost::system::error_code))
-    async_shutdown(BOOST_ASIO_MOVE_ARG(ShutdownHandler) handler)
+    ASIO_INITFN_RESULT_TYPE(ShutdownHandler, void(std::error_code))
+    async_shutdown(ASIO_MOVE_ARG(ShutdownHandler) handler)
     {
         return p_->next_layer().async_shutdown(
-            BOOST_ASIO_MOVE_CAST(ShutdownHandler)(handler));
+            ASIO_MOVE_CAST(ShutdownHandler)(handler));
     }
 
     /** Write some data to the stream.
@@ -495,7 +495,7 @@ public:
 
         @returns The number of bytes written.
 
-        @throws boost::system::system_error Thrown on failure.
+        @throws std::system_error Thrown on failure.
 
         @note The `write_some` operation may not transmit all of the data to the
         peer. Consider using the `net::write` function if you need to
@@ -527,7 +527,7 @@ public:
     template<class ConstBufferSequence>
     std::size_t
     write_some(ConstBufferSequence const& buffers,
-        boost::system::error_code& ec)
+        std::error_code& ec)
     {
         return p_->write_some(buffers, ec);
     }
@@ -546,7 +546,7 @@ public:
         Copies will be made of the handler as required. The equivalent function
         signature of the handler must be:
         @code void handler(
-          const boost::system::error_code& error, // Result of operation.
+          const std::error_code& error, // Result of operation.
           std::size_t bytes_transferred           // Number of bytes written.
         ); @endcode
 
@@ -556,12 +556,12 @@ public:
         completes.
     */
     template<class ConstBufferSequence, BOOST_BEAST_ASYNC_TPARAM2 WriteHandler>
-    BOOST_ASIO_INITFN_RESULT_TYPE(WriteHandler, void(boost::system::error_code, std::size_t))
+    ASIO_INITFN_RESULT_TYPE(WriteHandler, void(std::error_code, std::size_t))
     async_write_some(ConstBufferSequence const& buffers,
-        BOOST_ASIO_MOVE_ARG(WriteHandler) handler)
+        ASIO_MOVE_ARG(WriteHandler) handler)
     {
         return p_->async_write_some(buffers,
-            BOOST_ASIO_MOVE_CAST(WriteHandler)(handler));
+            ASIO_MOVE_CAST(WriteHandler)(handler));
     }
 
     /** Read some data from the stream.
@@ -574,7 +574,7 @@ public:
 
         @returns The number of bytes read.
 
-        @throws boost::system::system_error Thrown on failure.
+        @throws std::system_error Thrown on failure.
 
         @note The `read_some` operation may not read all of the requested number of
         bytes. Consider using the `net::read` function if you need to ensure
@@ -608,7 +608,7 @@ public:
     template<class MutableBufferSequence>
     std::size_t
     read_some(MutableBufferSequence const& buffers,
-        boost::system::error_code& ec)
+        std::error_code& ec)
     {
         return p_->read_some(buffers, ec);
     }
@@ -627,7 +627,7 @@ public:
         Copies will be made of the handler as required. The equivalent function
         signature of the handler must be:
         @code void handler(
-          const boost::system::error_code& error, // Result of operation.
+          const std::error_code& error, // Result of operation.
           std::size_t bytes_transferred           // Number of bytes read.
         ); @endcode
 
@@ -637,12 +637,12 @@ public:
         the asynchronous operation completes.
     */
     template<class MutableBufferSequence, BOOST_BEAST_ASYNC_TPARAM2 ReadHandler>
-    BOOST_ASIO_INITFN_RESULT_TYPE(ReadHandler, void(boost::system::error_code, std::size_t))
+    ASIO_INITFN_RESULT_TYPE(ReadHandler, void(std::error_code, std::size_t))
     async_read_some(MutableBufferSequence const& buffers,
-        BOOST_ASIO_MOVE_ARG(ReadHandler) handler)
+        ASIO_MOVE_ARG(ReadHandler) handler)
     {
         return p_->async_read_some(buffers,
-            BOOST_ASIO_MOVE_CAST(ReadHandler)(handler));
+            ASIO_MOVE_CAST(ReadHandler)(handler));
     }
 
     // These hooks are used to inform boost::beast::websocket::stream on
@@ -655,7 +655,7 @@ public:
     teardown(
         boost::beast::role_type role,
         ssl_stream<SyncStream>& stream,
-        boost::system::error_code& ec);
+        std::error_code& ec);
 
     template<class AsyncStream, class TeardownHandler>
     friend
@@ -673,7 +673,7 @@ void
 teardown(
     boost::beast::role_type role,
     ssl_stream<SyncStream>& stream,
-    boost::system::error_code& ec)
+    std::error_code& ec)
 {
     // Just forward it to the underlying ssl::stream
     using boost::beast::websocket::teardown;

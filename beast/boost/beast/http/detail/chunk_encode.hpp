@@ -11,7 +11,7 @@
 #define BOOST_BEAST_HTTP_DETAIL_CHUNK_ENCODE_HPP
 
 #include <boost/beast/http/type_traits.hpp>
-#include <boost/asio/buffer.hpp>
+#include <asio/buffer.hpp>
 #include <algorithm>
 #include <array>
 #include <cstddef>

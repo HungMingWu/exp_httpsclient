@@ -25,8 +25,8 @@
 #include <boost/beast/core/detail/buffer.hpp>
 #include <boost/beast/core/detail/clamp.hpp>
 #include <boost/beast/core/detail/config.hpp>
-#include <boost/asio/coroutine.hpp>
-#include <boost/asio/post.hpp>
+#include <asio/coroutine.hpp>
+#include <asio/post.hpp>
 #include <boost/assert.hpp>
 #include <boost/config.hpp>
 #include <algorithm>
@@ -46,7 +46,7 @@ template<class Handler, class MutableBufferSequence>
 class stream<NextLayer, deflateSupported>::read_some_op
     : public beast::async_base<
         Handler, beast::executor_type<stream>>
-    , public asio::coroutine
+    , public ::asio::coroutine
 {
     std::weak_ptr<impl_type> wp_;
     MutableBufferSequence bs_;
@@ -90,7 +90,7 @@ public:
             return this->complete(cont, ec, bytes_written_);
         }
         auto& impl = *sp;
-        BOOST_ASIO_CORO_REENTER(*this)
+        ASIO_CORO_REENTER(*this)
         {
             impl.update_timer(this->get_executor());
 
@@ -99,18 +99,18 @@ public:
             if(! impl.rd_block.try_lock(this))
             {
             do_suspend:
-                BOOST_ASIO_CORO_YIELD
+                ASIO_CORO_YIELD
                 {
-                    BOOST_ASIO_HANDLER_LOCATION((
+                    ASIO_HANDLER_LOCATION((
                         __FILE__, __LINE__,
                         "websocket::async_read_some"));
 
                     impl.op_r_rd.emplace(std::move(*this));
                 }
                 impl.rd_block.lock(this);
-                BOOST_ASIO_CORO_YIELD
+                ASIO_CORO_YIELD
                 {
-                    BOOST_ASIO_HANDLER_LOCATION((
+                    ASIO_HANDLER_LOCATION((
                         __FILE__, __LINE__,
                         "websocket::async_read_some"));
 
@@ -171,9 +171,9 @@ public:
                         goto close;
                     }
                     BOOST_ASSERT(impl.rd_block.is_locked(this));
-                    BOOST_ASIO_CORO_YIELD
+                    ASIO_CORO_YIELD
                     {
-                        BOOST_ASIO_HANDLER_LOCATION((
+                        ASIO_HANDLER_LOCATION((
                             __FILE__, __LINE__,
                             "websocket::async_read_some"));
 
@@ -220,9 +220,9 @@ public:
                         {
                             if(! cont)
                             {
-                                BOOST_ASIO_CORO_YIELD
+                                ASIO_CORO_YIELD
                                 {
-                                    BOOST_ASIO_HANDLER_LOCATION((
+                                    ASIO_HANDLER_LOCATION((
                                         __FILE__, __LINE__,
                                         "websocket::async_read_some"));
 
@@ -261,18 +261,18 @@ public:
                         // Acquire the write lock
                         if(! impl.wr_block.try_lock(this))
                         {
-                            BOOST_ASIO_CORO_YIELD
+                            ASIO_CORO_YIELD
                             {
-                                BOOST_ASIO_HANDLER_LOCATION((
+                                ASIO_HANDLER_LOCATION((
                                     __FILE__, __LINE__,
                                     "websocket::async_read_some"));
 
                                 impl.op_rd.emplace(std::move(*this));
                             }
                             impl.wr_block.lock(this);
-                            BOOST_ASIO_CORO_YIELD
+                            ASIO_CORO_YIELD
                             {
-                                BOOST_ASIO_HANDLER_LOCATION((
+                                ASIO_HANDLER_LOCATION((
                                     __FILE__, __LINE__,
                                     "websocket::async_read_some"));
 
@@ -285,9 +285,9 @@ public:
 
                         // Send pong
                         BOOST_ASSERT(impl.wr_block.is_locked(this));
-                        BOOST_ASIO_CORO_YIELD
+                        ASIO_CORO_YIELD
                         {
-                            BOOST_ASIO_HANDLER_LOCATION((
+                            ASIO_HANDLER_LOCATION((
                                 __FILE__, __LINE__,
                                 "websocket::async_read_some"));
 
@@ -314,9 +314,9 @@ public:
                         {
                             if(! cont)
                             {
-                                BOOST_ASIO_CORO_YIELD
+                                ASIO_CORO_YIELD
                                 {
-                                    BOOST_ASIO_HANDLER_LOCATION((
+                                    ASIO_HANDLER_LOCATION((
                                         __FILE__, __LINE__,
                                         "websocket::async_read_some"));
 
@@ -345,9 +345,9 @@ public:
                         {
                             if(! cont)
                             {
-                                BOOST_ASIO_CORO_YIELD
+                                ASIO_CORO_YIELD
                                 {
-                                    BOOST_ASIO_HANDLER_LOCATION((
+                                    ASIO_HANDLER_LOCATION((
                                         __FILE__, __LINE__,
                                         "websocket::async_read_some"));
 
@@ -409,9 +409,9 @@ public:
                     {
                         // Fill the read buffer first, otherwise we
                         // get fewer bytes at the cost of one I/O.
-                        BOOST_ASIO_CORO_YIELD
+                        ASIO_CORO_YIELD
                         {
-                            BOOST_ASIO_HANDLER_LOCATION((
+                            ASIO_HANDLER_LOCATION((
                                 __FILE__, __LINE__,
                                 "websocket::async_read_some"));
 
@@ -461,9 +461,9 @@ public:
                         BOOST_ASSERT(buffer_bytes(cb_) > 0);
                         BOOST_ASSERT(buffer_bytes(buffers_prefix(
                             clamp(impl.rd_remain), cb_)) > 0);
-                        BOOST_ASIO_CORO_YIELD
+                        ASIO_CORO_YIELD
                         {
-                            BOOST_ASIO_HANDLER_LOCATION((
+                            ASIO_HANDLER_LOCATION((
                                 __FILE__, __LINE__,
                                 "websocket::async_read_some"));
 
@@ -511,9 +511,9 @@ public:
                         ! did_read_)
                     {
                         // read new
-                        BOOST_ASIO_CORO_YIELD
+                        ASIO_CORO_YIELD
                         {
-                            BOOST_ASIO_HANDLER_LOCATION((
+                            ASIO_HANDLER_LOCATION((
                                 __FILE__, __LINE__,
                                 "websocket::async_read_some"));
 
@@ -617,18 +617,18 @@ public:
             // Acquire the write lock
             if(! impl.wr_block.try_lock(this))
             {
-                BOOST_ASIO_CORO_YIELD
+                ASIO_CORO_YIELD
                 {
-                    BOOST_ASIO_HANDLER_LOCATION((
+                    ASIO_HANDLER_LOCATION((
                         __FILE__, __LINE__,
                         "websocket::async_read_some"));
 
                     impl.op_rd.emplace(std::move(*this));
                 }
                 impl.wr_block.lock(this);
-                BOOST_ASIO_CORO_YIELD
+                ASIO_CORO_YIELD
                 {
-                    BOOST_ASIO_HANDLER_LOCATION((
+                    ASIO_HANDLER_LOCATION((
                         __FILE__, __LINE__,
                         "websocket::async_read_some"));
 
@@ -653,9 +653,9 @@ public:
 
                 // Send close frame
                 BOOST_ASSERT(impl.wr_block.is_locked(this));
-                BOOST_ASIO_CORO_YIELD
+                ASIO_CORO_YIELD
                 {
-                    BOOST_ASIO_HANDLER_LOCATION((
+                    ASIO_HANDLER_LOCATION((
                         __FILE__, __LINE__,
                         "websocket::async_read_some"));
 
@@ -670,9 +670,9 @@ public:
             // Teardown
             using beast::websocket::async_teardown;
             BOOST_ASSERT(impl.wr_block.is_locked(this));
-            BOOST_ASIO_CORO_YIELD
+            ASIO_CORO_YIELD
             {
-                BOOST_ASIO_HANDLER_LOCATION((
+                ASIO_HANDLER_LOCATION((
                     __FILE__, __LINE__,
                     "websocket::async_read_some"));
 
@@ -714,7 +714,7 @@ template<class Handler,  class DynamicBuffer>
 class stream<NextLayer, deflateSupported>::read_op
     : public beast::async_base<
         Handler, beast::executor_type<stream>>
-    , public asio::coroutine
+    , public ::asio::coroutine
 {
     std::weak_ptr<impl_type> wp_;
     DynamicBuffer& b_;
@@ -759,12 +759,12 @@ public:
         auto& impl = *sp;
         using mutable_buffers_type = typename
             DynamicBuffer::mutable_buffers_type;
-        BOOST_ASIO_CORO_REENTER(*this)
+        ASIO_CORO_REENTER(*this)
         {
             do
             {
                 // VFALCO TODO use boost::beast::bind_continuation
-                BOOST_ASIO_CORO_YIELD
+                ASIO_CORO_YIELD
                 {
                     auto mb = beast::detail::dynamic_buffer_prepare(b_,
                         clamp(impl.read_size_hint_db(b_), limit_),
@@ -772,7 +772,7 @@ public:
                     if(impl.check_stop_now(ec))
                         goto upcall;
 
-                    BOOST_ASIO_HANDLER_LOCATION((
+                    ASIO_HANDLER_LOCATION((
                         __FILE__, __LINE__,
                         "websocket::async_read"));
 

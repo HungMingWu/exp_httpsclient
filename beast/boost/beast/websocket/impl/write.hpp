@@ -25,7 +25,7 @@
 #include <boost/beast/core/detail/config.hpp>
 #include <boost/beast/websocket/detail/frame.hpp>
 #include <boost/beast/websocket/impl/stream_impl.hpp>
-#include <boost/asio/coroutine.hpp>
+#include <asio/coroutine.hpp>
 #include <boost/assert.hpp>
 #include <boost/config.hpp>
 #include <algorithm>
@@ -40,7 +40,7 @@ template<class Handler, class Buffers>
 class stream<NextLayer, deflateSupported>::write_some_op
     : public beast::async_base<
         Handler, beast::executor_type<stream>>
-    , public asio::coroutine
+    , public ::asio::coroutine
 {
     enum
     {
@@ -166,15 +166,15 @@ operator()(
         return this->complete(cont, ec, bytes_transferred_);
     }
     auto& impl = *sp;
-    BOOST_ASIO_CORO_REENTER(*this)
+    ASIO_CORO_REENTER(*this)
     {
         // Acquire the write lock
         if(! impl.wr_block.try_lock(this))
         {
         do_suspend:
-            BOOST_ASIO_CORO_YIELD
+            ASIO_CORO_YIELD
             {
-                BOOST_ASIO_HANDLER_LOCATION((
+                ASIO_HANDLER_LOCATION((
                     __FILE__, __LINE__,
                     fin_ ?
                         "websocket::async_write" :
@@ -184,9 +184,9 @@ operator()(
                 impl.op_wr.emplace(std::move(*this));
             }
             impl.wr_block.lock(this);
-            BOOST_ASIO_CORO_YIELD
+            ASIO_CORO_YIELD
             {
-                BOOST_ASIO_HANDLER_LOCATION((
+                ASIO_HANDLER_LOCATION((
                     __FILE__, __LINE__,
                     fin_ ?
                         "websocket::async_write" :
@@ -211,9 +211,9 @@ operator()(
             detail::write<flat_static_buffer_base>(
                 impl.wr_fb, fh_);
             impl.wr_cont = ! fin_;
-            BOOST_ASIO_CORO_YIELD
+            ASIO_CORO_YIELD
             {
-                BOOST_ASIO_HANDLER_LOCATION((
+                ASIO_HANDLER_LOCATION((
                     __FILE__, __LINE__,
                     fin_ ?
                         "websocket::async_write" :
@@ -246,9 +246,9 @@ operator()(
                     impl.wr_fb, fh_);
                 impl.wr_cont = ! fin_;
                 // Send frame
-                BOOST_ASIO_CORO_YIELD
+                ASIO_CORO_YIELD
                 {
-                    BOOST_ASIO_HANDLER_LOCATION((
+                    ASIO_HANDLER_LOCATION((
                         __FILE__, __LINE__,
                         fin_ ?
                             "websocket::async_write" :
@@ -306,9 +306,9 @@ operator()(
             remain_ -= n;
             impl.wr_cont = ! fin_;
             // write frame header and some payload
-            BOOST_ASIO_CORO_YIELD
+            ASIO_CORO_YIELD
             {
-                BOOST_ASIO_HANDLER_LOCATION((
+                ASIO_HANDLER_LOCATION((
                     __FILE__, __LINE__,
                     fin_ ?
                         "websocket::async_write" :
@@ -335,9 +335,9 @@ operator()(
                     impl.wr_buf.get(), n), key_);
                 remain_ -= n;
                 // write more payload
-                BOOST_ASIO_CORO_YIELD
+                ASIO_CORO_YIELD
                 {
-                    BOOST_ASIO_HANDLER_LOCATION((
+                    ASIO_HANDLER_LOCATION((
                         __FILE__, __LINE__,
                         fin_ ?
                             "websocket::async_write" :
@@ -377,9 +377,9 @@ operator()(
                     impl.wr_fb, fh_);
                 impl.wr_cont = ! fin_;
                 // Send frame
-                BOOST_ASIO_CORO_YIELD
+                ASIO_CORO_YIELD
                 {
-                    BOOST_ASIO_HANDLER_LOCATION((
+                    ASIO_HANDLER_LOCATION((
                         __FILE__, __LINE__,
                         fin_ ?
                             "websocket::async_write" :
@@ -450,9 +450,9 @@ operator()(
                     flat_static_buffer_base>(impl.wr_fb, fh_);
                 impl.wr_cont = ! fin_;
                 // Send frame
-                BOOST_ASIO_CORO_YIELD
+                ASIO_CORO_YIELD
                 {
-                    BOOST_ASIO_HANDLER_LOCATION((
+                    ASIO_HANDLER_LOCATION((
                         __FILE__, __LINE__,
                         fin_ ?
                             "websocket::async_write" :

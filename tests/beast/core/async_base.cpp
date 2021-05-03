@@ -1,17 +1,19 @@
 #include "catch.hpp"
 #include "test_handler.hpp"
-#include <boost/asio/io_context.hpp>
-#include <boost/asio/buffer.hpp>
+#include <asio/io_context.hpp>
+#include <asio/buffer.hpp>
 #include <boost/beast/core/async_base.hpp>
 #include "handler.hpp"
 #include "stream.hpp"
+
+namespace net = asio;
 
 namespace boost {
     namespace beast {
 
         namespace {
 
-#if defined(BOOST_ASIO_NO_TS_EXECUTORS)
+#if defined(ASIO_NO_TS_EXECUTORS)
 
             static struct ex1_context : net::execution_context
             {
@@ -175,59 +177,57 @@ using no_ex_intrusivealloc_handler = no_ex_handler<boost::beast::intrusive_alloc
 using nested_ex_noalloc_handler = boost::beast::handler<boost::beast::nested_ex, boost::beast::no_alloc>;
 using intrusive_ex_noalloc_handler = boost::beast::handler<boost::beast::intrusive_ex, boost::beast::no_alloc>;
 
-namespace boost {
-    namespace asio {
+namespace asio {
 
-        template<class Allocator>
-        struct associated_allocator<
-            boost::beast::handler<
-            boost::beast::no_ex,
-            boost::beast::intrusive_alloc>,
-            Allocator>
-        {
-            using type =
-                boost::beast::intrusive_alloc::allocator_type;
+	template<class Allocator>
+	struct associated_allocator<
+		boost::beast::handler<
+		boost::beast::no_ex,
+		boost::beast::intrusive_alloc>,
+		Allocator>
+	{
+		using type =
+			boost::beast::intrusive_alloc::allocator_type;
 
-            static type get(
-                boost::beast::handler<
-                boost::beast::no_ex,
-                boost::beast::intrusive_alloc> const&,
-                Allocator const& = Allocator()) noexcept
-            {
-                return type{};
-            }
-        };
+		static type get(
+			boost::beast::handler<
+			boost::beast::no_ex,
+			boost::beast::intrusive_alloc> const&,
+			Allocator const& = Allocator()) noexcept
+		{
+			return type{};
+		}
+	};
 
-        template<class Executor>
-        struct associated_executor<
-            boost::beast::handler<
-            boost::beast::intrusive_ex,
-            boost::beast::no_alloc>,
-            Executor>
-        {
-            using type =
-                boost::beast::intrusive_ex::executor_type;
+	template<class Executor>
+	struct associated_executor<
+		boost::beast::handler<
+		boost::beast::intrusive_ex,
+		boost::beast::no_alloc>,
+		Executor>
+	{
+		using type =
+			boost::beast::intrusive_ex::executor_type;
 
-            static type get(
-                boost::beast::handler<
-                boost::beast::intrusive_ex,
-                boost::beast::no_alloc> const&,
-                Executor const& = Executor()) noexcept
-            {
-                return type{};
-            }
-        };
+		static type get(
+			boost::beast::handler<
+			boost::beast::intrusive_ex,
+			boost::beast::no_alloc> const&,
+			Executor const& = Executor()) noexcept
+		{
+			return type{};
+		}
+	};
 
-    } // asio
-} // boost
+} // asio
 
 static_assert(
     std::is_same_v<
         std::allocator<void>,
-        boost::asio::associated_allocator_t<
+        net::associated_allocator_t<
             boost::beast::async_base<
                 no_ex_alloc_handler,
-                boost::asio::io_context::executor_type
+                net::io_context::executor_type
             >
         >
     >);
@@ -236,10 +236,10 @@ static_assert(
 static_assert(
     std::is_same_v<
         std::allocator<int>,
-        boost::asio::associated_allocator_t<
+        net::associated_allocator_t<
             boost::beast::async_base<
                 no_ex_alloc_handler,
-                boost::asio::io_context::executor_type,
+                net::io_context::executor_type,
                 std::allocator<int>
             >
         >
@@ -248,10 +248,10 @@ static_assert(
 static_assert(
     std::is_same_v<
         std::allocator<void>,
-        boost::asio::associated_allocator_t<
+        net::associated_allocator_t<
             boost::beast::async_base<
                 no_ex_alloc_handler,
-                boost::asio::io_context::executor_type
+                net::io_context::executor_type
             >,
             std::allocator<int> // ignored
         >
@@ -260,10 +260,10 @@ static_assert(
 static_assert(
     std::is_same_v<
         std::allocator<int>,
-        boost::asio::associated_allocator_t<
+        net::associated_allocator_t<
             boost::beast::async_base<
                 no_ex_alloc_handler,
-                boost::asio::io_context::executor_type,
+                net::io_context::executor_type,
                 std::allocator<int>
             >,
             std::allocator<double> // ignored
@@ -275,10 +275,10 @@ static_assert(
 static_assert(
     std::is_same_v<
         boost::beast::nested_alloc::allocator_type,
-        boost::asio::associated_allocator_t<
+        net::associated_allocator_t<
             boost::beast::async_base<
                 no_ex_nestalloc_handler,
-                boost::asio::io_context::executor_type
+                net::io_context::executor_type
             >
         >
     >);
@@ -286,10 +286,10 @@ static_assert(
 static_assert(
     std::is_same_v<
         boost::beast::nested_alloc::allocator_type,
-        boost::asio::associated_allocator_t<
+        net::associated_allocator_t<
             boost::beast::async_base<
                 no_ex_nestalloc_handler,
-                boost::asio::io_context::executor_type,
+                net::io_context::executor_type,
                 std::allocator<int> // ignored
             >
         >
@@ -298,10 +298,10 @@ static_assert(
 static_assert(
     std::is_same_v<
         boost::beast::nested_alloc::allocator_type,
-        boost::asio::associated_allocator_t<
+        net::associated_allocator_t<
             boost::beast::async_base<
                 no_ex_nestalloc_handler,
-                boost::asio::io_context::executor_type
+                net::io_context::executor_type
             >,
             std::allocator<int> // ignored
         >
@@ -310,10 +310,10 @@ static_assert(
 static_assert(
     std::is_same_v<
         boost::beast::nested_alloc::allocator_type,
-        boost::asio::associated_allocator_t<
+        net::associated_allocator_t<
             boost::beast::async_base<
                 no_ex_nestalloc_handler,
-                boost::asio::io_context::executor_type,
+                net::io_context::executor_type,
                 std::allocator<int> // ignored
             >,
             std::allocator<int> // ignored
@@ -325,10 +325,10 @@ static_assert(
 static_assert(
     std::is_same_v<
         boost::beast::intrusive_alloc::allocator_type,
-        boost::asio::associated_allocator_t<
+        net::associated_allocator_t<
             boost::beast::async_base<
                 no_ex_intrusivealloc_handler,
-                boost::asio::io_context::executor_type
+                net::io_context::executor_type
             >
         >
     >);
@@ -336,10 +336,10 @@ static_assert(
 static_assert(
     std::is_same_v<
         boost::beast::intrusive_alloc::allocator_type,
-        boost::asio::associated_allocator_t<
+        net::associated_allocator_t<
             boost::beast::async_base<
                 no_ex_intrusivealloc_handler,
-                boost::asio::io_context::executor_type,
+                net::io_context::executor_type,
                 std::allocator<int> // ignored
             >
         >
@@ -348,10 +348,10 @@ static_assert(
 static_assert(
     std::is_same_v<
         boost::beast::intrusive_alloc::allocator_type,
-        boost::asio::associated_allocator_t<
+        net::associated_allocator_t<
             boost::beast::async_base<
                 no_ex_intrusivealloc_handler,
-                boost::asio::io_context::executor_type
+                net::io_context::executor_type
             >,
             std::allocator<int> // ignored
         >
@@ -360,10 +360,10 @@ static_assert(
 static_assert(
     std::is_same_v<
         boost::beast::intrusive_alloc::allocator_type,
-        boost::asio::associated_allocator_t<
+        net::associated_allocator_t<
             boost::beast::async_base<
                 no_ex_intrusivealloc_handler,
-                boost::asio::io_context::executor_type,
+                net::io_context::executor_type,
                 std::allocator<int> // ignored
             >,
             std::allocator<int> // ignored
@@ -375,7 +375,7 @@ static_assert(
 static_assert(
     std::is_same_v<
         boost::beast::ex1_type,
-        boost::asio::associated_executor_t<
+        net::associated_executor_t<
             boost::beast::async_base<
                 no_ex_alloc_handler,
                 boost::beast::ex1_type
@@ -386,12 +386,12 @@ static_assert(
 static_assert(
     std::is_same_v<
         boost::beast::ex1_type,
-        boost::asio::associated_executor_t<
+        net::associated_executor_t<
             boost::beast::async_base<
                 no_ex_alloc_handler,
                 boost::beast::ex1_type
             >,
-            boost::asio::system_executor // ignored
+            net::system_executor // ignored
         >
     >);
 
@@ -400,7 +400,7 @@ static_assert(
 static_assert(
     std::is_same_v<
         boost::beast::nested_ex::executor_type,
-        boost::asio::associated_executor_t<
+        net::associated_executor_t<
             boost::beast::async_base<
                 nested_ex_noalloc_handler,
                 boost::beast::ex1_type
@@ -411,12 +411,12 @@ static_assert(
 static_assert(
     std::is_same_v<
         boost::beast::nested_ex::executor_type,
-        boost::asio::associated_executor_t<
+        net::associated_executor_t<
             boost::beast::async_base<
                 nested_ex_noalloc_handler,
                 boost::beast::ex1_type
             >,
-            boost::asio::system_executor // ignored
+            net::system_executor // ignored
         >
     >);
 
@@ -425,7 +425,7 @@ static_assert(
 static_assert(
     std::is_same_v<
         boost::beast::intrusive_ex::executor_type,
-        boost::asio::associated_executor_t<
+        net::associated_executor_t<
             boost::beast::async_base<
                 intrusive_ex_noalloc_handler,
                 boost::beast::ex1_type
@@ -436,12 +436,12 @@ static_assert(
 static_assert(
     std::is_same_v<
         boost::beast::intrusive_ex::executor_type,
-        boost::asio::associated_executor_t<
+        net::associated_executor_t<
             boost::beast::async_base<
                 intrusive_ex_noalloc_handler,
                 boost::beast::ex1_type
             >,
-            boost::asio::system_executor // ignored
+            net::system_executor // ignored
         >
     >);
 
@@ -490,20 +490,20 @@ TEST_CASE("testBase observers", "async_base") {
 }
 
 TEST_CASE("testBase invocation 1", "async_base") {
-    boost::asio::io_context ioc;
+    net::io_context ioc;
     boost::beast::async_base<
         boost::beast::test::handler,
-        boost::asio::io_context::executor_type> op(
+        net::io_context::executor_type> op(
             boost::beast::test::any_handler(), ioc.get_executor());
     op.complete(true);
 }
 
 TEST_CASE("testBase invocation 2", "async_base") {
-    boost::asio::io_context ioc;
+    net::io_context ioc;
     auto op = new
         boost::beast::async_base<
         boost::beast::test::handler,
-        boost::asio::io_context::executor_type>(
+        net::io_context::executor_type>(
             boost::beast::test::any_handler(), ioc.get_executor());
     op->complete(false);
     delete op;

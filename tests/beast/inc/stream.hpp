@@ -15,13 +15,13 @@
 #include <boost/beast/core/flat_buffer.hpp>
 #include <boost/beast/core/role.hpp>
 #include <boost/beast/core/string.hpp>
-#include <boost/asio/async_result.hpp>
-#include <boost/asio/buffer.hpp>
-#include <boost/asio/error.hpp>
-#include <boost/asio/executor_work_guard.hpp>
-#include <boost/asio/any_io_executor.hpp>
-#include <boost/asio/io_context.hpp>
-#include <boost/asio/post.hpp>
+#include <asio/async_result.hpp>
+#include <asio/buffer.hpp>
+#include <asio/error.hpp>
+#include <asio/executor_work_guard.hpp>
+#include <asio/any_io_executor.hpp>
+#include <asio/io_context.hpp>
+#include <asio/post.hpp>
 #include <boost/assert.hpp>
 #include <condition_variable>
 #include <limits>
@@ -113,7 +113,7 @@ void
 teardown(
     role_type,
     basic_stream<Executor>& s,
-    boost::system::error_code& ec);
+    std::error_code& ec);
 
 template<class Executor, class TeardownHandler>
 void
@@ -159,19 +159,13 @@ private:
         std::size_t buf_size);
 
 #if ! BOOST_BEAST_DOXYGEN
-    // boost::asio::ssl::stream needs these
-    // DEPRECATED
-    template<class>
-    friend class boost::asio::ssl::stream;
-    // DEPRECATED
+public:
     using lowest_layer_type = basic_stream;
-    // DEPRECATED
     lowest_layer_type&
     lowest_layer() noexcept
     {
         return *this;
     }
-    // DEPRECATED
     lowest_layer_type const&
     lowest_layer() const noexcept
     {
@@ -398,7 +392,7 @@ public:
 
         @returns The number of bytes read.
 
-        @throws boost::system::system_error Thrown on failure.
+        @throws std::system_error Thrown on failure.
 
         @note The `read_some` operation may not read all of the requested number of
         bytes. Consider using the function `net::read` if you need to ensure
@@ -463,12 +457,12 @@ public:
     */
     template<
         class MutableBufferSequence,
-        BOOST_ASIO_COMPLETION_TOKEN_FOR(void(error_code, std::size_t)) ReadHandler
-            BOOST_ASIO_DEFAULT_COMPLETION_TOKEN_TYPE(executor_type)>
-    BOOST_ASIO_INITFN_RESULT_TYPE(ReadHandler, void(error_code, std::size_t))
+        ASIO_COMPLETION_TOKEN_FOR(void(error_code, std::size_t)) ReadHandler
+            ASIO_DEFAULT_COMPLETION_TOKEN_TYPE(executor_type)>
+    ASIO_INITFN_RESULT_TYPE(ReadHandler, void(error_code, std::size_t))
     async_read_some(
         MutableBufferSequence const& buffers,
-        ReadHandler&& handler BOOST_ASIO_DEFAULT_COMPLETION_TOKEN(executor_type));
+        ReadHandler&& handler ASIO_DEFAULT_COMPLETION_TOKEN(executor_type));
 
     /** Write some data to the stream.
 
@@ -480,7 +474,7 @@ public:
 
         @returns The number of bytes written.
 
-        @throws boost::system::system_error Thrown on failure.
+        @throws std::system_error Thrown on failure.
 
         @note The `write_some` operation may not transmit all of the data to the
         peer. Consider using the function `net::write` if you need to
@@ -542,12 +536,12 @@ public:
     */
     template<
         class ConstBufferSequence,
-        BOOST_ASIO_COMPLETION_TOKEN_FOR(void(error_code, std::size_t)) WriteHandler
-            BOOST_ASIO_DEFAULT_COMPLETION_TOKEN_TYPE(executor_type)>
-    BOOST_ASIO_INITFN_RESULT_TYPE(WriteHandler, void(error_code, std::size_t))
+        ASIO_COMPLETION_TOKEN_FOR(void(error_code, std::size_t)) WriteHandler
+            ASIO_DEFAULT_COMPLETION_TOKEN_TYPE(executor_type)>
+    ASIO_INITFN_RESULT_TYPE(WriteHandler, void(error_code, std::size_t))
     async_write_some(
         ConstBufferSequence const& buffers,
-        WriteHandler&& handler BOOST_ASIO_DEFAULT_COMPLETION_TOKEN(executor_type)
+        WriteHandler&& handler ASIO_DEFAULT_COMPLETION_TOKEN(executor_type)
         );
 
 #if ! BOOST_BEAST_DOXYGEN
@@ -556,7 +550,7 @@ public:
     teardown<>(
         role_type,
         basic_stream& s,
-        boost::system::error_code& ec);
+        std::error_code& ec);
 
     template<class Ex2, class TeardownHandler>
     friend

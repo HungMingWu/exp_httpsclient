@@ -15,7 +15,7 @@
 #include <boost/beast/core/string.hpp>
 #include <boost/beast/http/type_traits.hpp>
 #include <boost/beast/http/detail/chunk_encode.hpp>
-#include <boost/asio/buffer.hpp>
+#include <asio/buffer.hpp>
 #include <memory>
 #include <type_traits>
 

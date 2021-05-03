@@ -1,11 +1,11 @@
 #include "catch.hpp"
 #include <optional>
-#include <boost/asio/io_context.hpp>
-#include <boost/asio/read.hpp>
+#include <asio/io_context.hpp>
+#include <asio/read.hpp>
 #include <boost/beast/core/buffered_read_stream.hpp>
 #include "stream.hpp"
 
-namespace net = boost::asio;
+namespace net = asio;
 using namespace boost::beast;
 TEST_CASE("testSpecialMembers 1", "buffered_read_stream") {
     net::io_context ioc;
@@ -13,7 +13,7 @@ TEST_CASE("testSpecialMembers 1", "buffered_read_stream") {
         buffered_read_stream<test::stream, multi_buffer> srs(ioc);
         buffered_read_stream<test::stream, multi_buffer> srs2(std::move(srs));
         srs = std::move(srs2);
-#if defined(BOOST_ASIO_USE_TS_EXECUTOR_AS_DEFAULT)
+#if defined(ASIO_USE_TS_EXECUTOR_AS_DEFAULT)
         REQUIRE(&srs.get_executor().context() == &ioc);
         REQUIRE(
             &srs.get_executor().context() ==

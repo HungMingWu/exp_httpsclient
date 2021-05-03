@@ -11,11 +11,11 @@
 #define BOOST_BEAST_TEST_HANDLER_XXX_HPP
 
 #include <boost/beast/core/detail/config.hpp>
-#include <boost/asio/associated_allocator.hpp>
-#include <boost/asio/associated_executor.hpp>
-#include <boost/asio/handler_alloc_hook.hpp>
-#include <boost/asio/handler_continuation_hook.hpp>
-#include <boost/asio/handler_invoke_hook.hpp>
+#include <asio/associated_allocator.hpp>
+#include <asio/associated_executor.hpp>
+#include <asio/handler_alloc_hook.hpp>
+#include <asio/handler_continuation_hook.hpp>
+#include <asio/handler_invoke_hook.hpp>
 
 namespace boost {
     namespace beast {
@@ -65,7 +65,7 @@ namespace boost {
             {
             }
 
-#if defined(BOOST_ASIO_NO_TS_EXECUTORS)
+#if defined(ASIO_NO_TS_EXECUTORS)
                     void* query(net::execution::context_t) const { return nullptr; }
                     template<class F>
                     void execute(F&&) const {}
@@ -96,7 +96,7 @@ namespace boost {
                     }
         };
 
-#if defined(BOOST_ASIO_NO_TS_EXECUTORS)
+#if defined(ASIO_NO_TS_EXECUTORS)
         BOOST_STATIC_ASSERT(net::execution::is_executor<simple_executor>::value);
 #endif
 
@@ -126,7 +126,7 @@ namespace boost {
                 void
                 test(F const& f)
             {
-#if !defined(BOOST_ASIO_NO_DEPRECATED)
+#if !defined(ASIO_NO_DEPRECATED)
                 {
                     bool hook_invoked = false;
                     bool lambda_invoked = false;
@@ -161,7 +161,7 @@ namespace boost {
                     asio_handler_is_continuation(&h);
                     REQUIRE(hook_invoked);
                 }
-#endif // !defined(BOOST_ASIO_NO_DEPRECATED)
+#endif // !defined(ASIO_NO_DEPRECATED)
             }
         };
 
@@ -206,38 +206,36 @@ namespace boost {
     } // beast
 } // boost
 
-namespace boost {
-    namespace asio {
+namespace asio {
 
-        template<class Allocator>
-        struct associated_allocator<
-            boost::beast::legacy_handler, Allocator>
-        {
-            using type = std::allocator<int>;
+	template<class Allocator>
+	struct associated_allocator<
+		boost::beast::legacy_handler, Allocator>
+	{
+		using type = std::allocator<int>;
 
-            static type get(
-                boost::beast::legacy_handler const&,
-                Allocator const& = Allocator()) noexcept
-            {
-                return type{};
-            }
-        };
+		static type get(
+			boost::beast::legacy_handler const&,
+			Allocator const& = Allocator()) noexcept
+		{
+			return type{};
+		}
+	};
 
-        template<class Executor>
-        struct associated_executor<
-            boost::beast::legacy_handler, Executor>
-        {
-            using type = boost::beast::simple_executor;
+	template<class Executor>
+	struct associated_executor<
+		boost::beast::legacy_handler, Executor>
+	{
+		using type = boost::beast::simple_executor;
 
-            static type get(
-                boost::beast::legacy_handler const&,
-                Executor const& = Executor()) noexcept
-            {
-                return type{};
-            }
-        };
+		static type get(
+			boost::beast::legacy_handler const&,
+			Executor const& = Executor()) noexcept
+		{
+			return type{};
+		}
+	};
 
-    } // asio
-} // boost
+} // asio
 
 #endif

@@ -17,8 +17,8 @@
 #include <boost/beast/core/flat_static_buffer.hpp>
 #include <boost/beast/core/stream_traits.hpp>
 #include <boost/beast/core/detail/bind_continuation.hpp>
-#include <boost/asio/coroutine.hpp>
-#include <boost/asio/post.hpp>
+#include <asio/coroutine.hpp>
+#include <asio/post.hpp>
 #include <memory>
 
 namespace boost {
@@ -37,7 +37,7 @@ template<class Handler>
 class stream<NextLayer, deflateSupported>::close_op
     : public beast::stable_async_base<
         Handler, beast::executor_type<stream>>
-    , public asio::coroutine
+    , public ::asio::coroutine
 {
     std::weak_ptr<impl_type> wp_;
     error_code ev_;
@@ -79,23 +79,23 @@ public:
             return this->complete(cont, ec);
         }
         auto& impl = *sp;
-        BOOST_ASIO_CORO_REENTER(*this)
+        ASIO_CORO_REENTER(*this)
         {
             // Acquire the write lock
             if(! impl.wr_block.try_lock(this))
             {
-                BOOST_ASIO_CORO_YIELD
+                ASIO_CORO_YIELD
                 {
-                    BOOST_ASIO_HANDLER_LOCATION((
+                    ASIO_HANDLER_LOCATION((
                         __FILE__, __LINE__,
                         "websocket::async_close"));
 
                     impl.op_close.emplace(std::move(*this));
                 }
                 impl.wr_block.lock(this);
-                BOOST_ASIO_CORO_YIELD
+                ASIO_CORO_YIELD
                 {
-                    BOOST_ASIO_HANDLER_LOCATION((
+                    ASIO_HANDLER_LOCATION((
                         __FILE__, __LINE__,
                         "websocket::async_close"));
 
@@ -114,9 +114,9 @@ public:
             impl.wr_close = true;
             impl.change_status(status::closing);
             impl.update_timer(this->get_executor());
-            BOOST_ASIO_CORO_YIELD
+            ASIO_CORO_YIELD
             {
-                BOOST_ASIO_HANDLER_LOCATION((
+                ASIO_HANDLER_LOCATION((
                     __FILE__, __LINE__,
                     "websocket::async_close"));
 
@@ -137,18 +137,18 @@ public:
             // Acquire the read lock
             if(! impl.rd_block.try_lock(this))
             {
-                BOOST_ASIO_CORO_YIELD
+                ASIO_CORO_YIELD
                 {
-                    BOOST_ASIO_HANDLER_LOCATION((
+                    ASIO_HANDLER_LOCATION((
                         __FILE__, __LINE__,
                         "websocket::async_close"));
 
                     impl.op_r_close.emplace(std::move(*this));
                 }
                 impl.rd_block.lock(this);
-                BOOST_ASIO_CORO_YIELD
+                ASIO_CORO_YIELD
                 {
-                    BOOST_ASIO_HANDLER_LOCATION((
+                    ASIO_HANDLER_LOCATION((
                         __FILE__, __LINE__,
                         "websocket::async_close"));
 
@@ -172,9 +172,9 @@ public:
                 {
                     if(ev_)
                         goto teardown;
-                    BOOST_ASIO_CORO_YIELD
+                    ASIO_CORO_YIELD
                     {
-                        BOOST_ASIO_HANDLER_LOCATION((
+                        ASIO_HANDLER_LOCATION((
                             __FILE__, __LINE__,
                             "websocket::async_close"));
 
@@ -218,9 +218,9 @@ public:
                 {
                     impl.rd_remain -= impl.rd_buf.size();
                     impl.rd_buf.consume(impl.rd_buf.size());
-                    BOOST_ASIO_CORO_YIELD
+                    ASIO_CORO_YIELD
                     {
-                        BOOST_ASIO_HANDLER_LOCATION((
+                        ASIO_HANDLER_LOCATION((
                             __FILE__, __LINE__,
                             "websocket::async_close"));
 
@@ -242,9 +242,9 @@ public:
             // Teardown
             BOOST_ASSERT(impl.wr_block.is_locked(this));
             using beast::websocket::async_teardown;
-            BOOST_ASIO_CORO_YIELD
+            ASIO_CORO_YIELD
             {
-                BOOST_ASIO_HANDLER_LOCATION((
+                ASIO_HANDLER_LOCATION((
                     __FILE__, __LINE__,
                     "websocket::async_close"));
 

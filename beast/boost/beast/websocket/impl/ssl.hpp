@@ -12,8 +12,8 @@
 
 #include <utility>
 #include <boost/beast/websocket/teardown.hpp>
-#include <boost/asio/compose.hpp>
-#include <boost/asio/coroutine.hpp>
+#include <asio/compose.hpp>
+#include <asio/coroutine.hpp>
 
 namespace boost {
 namespace beast {
@@ -37,7 +37,7 @@ template<class AsyncStream>
 void
 teardown(
     role_type role,
-    boost::asio::ssl::stream<AsyncStream>& stream,
+    net::ssl::stream<AsyncStream>& stream,
     error_code& ec)
 {
     stream.shutdown(ec);
@@ -50,10 +50,10 @@ namespace detail {
 
 template<class AsyncStream>
 struct ssl_shutdown_op
-    : boost::asio::coroutine
+    : ::asio::coroutine
 {
     ssl_shutdown_op(
-        boost::asio::ssl::stream<AsyncStream>& s,
+        net::ssl::stream<AsyncStream>& s,
         role_type role)
         : s_(s)
         , role_(role)
@@ -64,14 +64,14 @@ struct ssl_shutdown_op
     void
     operator()(Self& self, error_code ec = {}, std::size_t bytes_transferred = 0)
     {
-        BOOST_ASIO_CORO_REENTER(*this)
+        ASIO_CORO_REENTER(*this)
         {
-            BOOST_ASIO_CORO_YIELD
+            ASIO_CORO_YIELD
                 s_.async_shutdown(std::move(self));
             ec_ = ec;
 
             using boost::beast::websocket::async_teardown;
-            BOOST_ASIO_CORO_YIELD
+            ASIO_CORO_YIELD
                 async_teardown(role_, s_.next_layer(), std::move(self));
             if (!ec_)
                 ec_ = ec;
@@ -81,7 +81,7 @@ struct ssl_shutdown_op
     }
 
 private:
-    boost::asio::ssl::stream<AsyncStream>& s_;
+    net::ssl::stream<AsyncStream>& s_;
     role_type role_;
     error_code ec_;
 };
@@ -94,10 +94,10 @@ template<
 void
 async_teardown(
     role_type role,
-    boost::asio::ssl::stream<AsyncStream>& stream,
+    net::ssl::stream<AsyncStream>& stream,
     TeardownHandler&& handler)
 {
-    return boost::asio::async_compose<TeardownHandler, void(error_code)>(
+    return net::async_compose<TeardownHandler, void(error_code)>(
         detail::ssl_shutdown_op<AsyncStream>(stream, role),
         handler,
         stream);

@@ -14,13 +14,13 @@
 #include <boost/beast/core/bind_handler.hpp>
 #include <boost/beast/core/detail/async_base.hpp>
 #include <boost/beast/core/detail/work_guard.hpp>
-#include <boost/asio/associated_allocator.hpp>
-#include <boost/asio/associated_executor.hpp>
-#include <boost/asio/bind_executor.hpp>
-#include <boost/asio/handler_alloc_hook.hpp>
-#include <boost/asio/handler_continuation_hook.hpp>
-#include <boost/asio/handler_invoke_hook.hpp>
-#include <boost/asio/post.hpp>
+#include <asio/associated_allocator.hpp>
+#include <asio/associated_executor.hpp>
+#include <asio/bind_executor.hpp>
+#include <asio/handler_alloc_hook.hpp>
+#include <asio/handler_continuation_hook.hpp>
+#include <asio/handler_invoke_hook.hpp>
+#include <asio/post.hpp>
 #include <boost/core/empty_value.hpp>
 #include <memory>
 #include <utility>
@@ -80,7 +80,7 @@ namespace beast {
     typename net::async_result<ReadHandler, void(error_code, std::size_t)>::return_type
     async_read(AsyncReadStream& stream, net::mutable_buffer buffer, ReadHandler&& handler)
     {
-        using handler_type = BOOST_ASIO_HANDLER_TYPE(ReadHandler, void(error_code, std::size_t));
+        using handler_type = ASIO_HANDLER_TYPE(ReadHandler, void(error_code, std::size_t));
         using base_type = async_base<handler_type, typename AsyncReadStream::executor_type>;
 
         struct op : base_type
@@ -519,7 +519,7 @@ public:
             }
 
             // Including this file provides the keywords for macro-based coroutines
-            #include <boost/asio/yield.hpp>
+            #include <asio/yield.hpp>
 
             void operator()(error_code ec = {}, std::size_t = 0)
             {
@@ -556,7 +556,7 @@ public:
             }
 
             // Including this file undefines the macros for the coroutines
-            #include <boost/asio/unyield.hpp>
+            #include <asio/unyield.hpp>
         };
 
         net::async_completion<WriteHandler, void(error_code)> completion(handler);

@@ -14,8 +14,8 @@
 #include <boost/beast/core/async_base.hpp>
 #include <boost/beast/core/flat_static_buffer.hpp>
 #include <boost/beast/core/read_size.hpp>
-#include <boost/asio/basic_stream_socket.hpp>
-#include <boost/asio/coroutine.hpp>
+#include <asio/basic_stream_socket.hpp>
+#include <asio/coroutine.hpp>
 
 namespace boost {
 namespace beast {
@@ -37,7 +37,7 @@ template<
     class Condition,
     class Handler>
 class read_op
-    : public asio::coroutine
+    : public ::asio::coroutine
     , public async_base<
         Handler, beast::executor_type<Stream>>
 {
@@ -74,14 +74,14 @@ public:
         bool cont = true)
     {
         std::size_t max_prepare;
-        BOOST_ASIO_CORO_REENTER(*this)
+        ASIO_CORO_REENTER(*this)
         {
             for(;;)
             {
                 max_prepare = beast::read_size(b_, cond_(ec, total_, b_));
                 if(max_prepare == 0)
                     break;
-                BOOST_ASIO_CORO_YIELD
+                ASIO_CORO_YIELD
                 s_.async_read_some(
                     b_.prepare(max_prepare), std::move(*this));
                 b_.commit(bytes_transferred);
@@ -92,7 +92,7 @@ public:
                 // run this handler "as-if" using net::post
                 // to reduce template instantiations
                 ec_ = ec;
-                BOOST_ASIO_CORO_YIELD
+                ASIO_CORO_YIELD
                 s_.async_read_some(
                     b_.prepare(0), std::move(*this));
                 ec = ec_;

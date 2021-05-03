@@ -14,9 +14,9 @@
 #include <boost/beast/core/buffer_traits.hpp>
 #include <boost/beast/core/detail/service_base.hpp>
 #include <boost/beast/core/detail/is_invocable.hpp>
-#include <boost/asio/any_io_executor.hpp>
-#include <boost/asio/dispatch.hpp>
-#include <boost/asio/post.hpp>
+#include <asio/any_io_executor.hpp>
+#include <asio/dispatch.hpp>
+#include <asio/post.hpp>
 #include <mutex>
 #include <stdexcept>
 #include <vector>
@@ -41,11 +41,11 @@ class basic_stream<Executor>::read_op : public detail::stream_read_op_base
         Handler h_;
         std::weak_ptr<detail::stream_state> wp_;
         Buffers b_;
-#if defined(BOOST_ASIO_NO_TS_EXECUTORS)
+#if defined(ASIO_NO_TS_EXECUTORS)
         net::any_io_executor wg2_;
-#else // defined(BOOST_ASIO_NO_TS_EXECUTORS)
+#else // defined(ASIO_NO_TS_EXECUTORS)
         net::executor_work_guard<ex2_type> wg2_;
-#endif // defined(BOOST_ASIO_NO_TS_EXECUTORS)
+#endif // defined(ASIO_NO_TS_EXECUTORS)
 
         lambda(lambda&&) = default;
         lambda(lambda const&) = default;
@@ -58,15 +58,15 @@ class basic_stream<Executor>::read_op : public detail::stream_read_op_base
             : h_(std::forward<Handler_>(h))
             , wp_(s)
             , b_(b)
-#if defined(BOOST_ASIO_NO_TS_EXECUTORS)
+#if defined(ASIO_NO_TS_EXECUTORS)
             , wg2_(net::prefer(
                 net::get_associated_executor(
                   h_, s->exec),
                 net::execution::outstanding_work.tracked))
-#else // defined(BOOST_ASIO_NO_TS_EXECUTORS)
+#else // defined(ASIO_NO_TS_EXECUTORS)
             , wg2_(net::get_associated_executor(
                 h_, s->exec))
-#endif // defined(BOOST_ASIO_NO_TS_EXECUTORS)
+#endif // defined(ASIO_NO_TS_EXECUTORS)
         {
         }
 
@@ -102,22 +102,22 @@ class basic_stream<Executor>::read_op : public detail::stream_read_op_base
                 }
             }
 
-#if defined(BOOST_ASIO_NO_TS_EXECUTORS)
+#if defined(ASIO_NO_TS_EXECUTORS)
             net::dispatch(wg2_,
                 beast::bind_front_handler(std::move(h_),
                     ec, bytes_transferred));
             wg2_ = net::any_io_executor(); // probably unnecessary
-#else // defined(BOOST_ASIO_NO_TS_EXECUTORS)
+#else // defined(ASIO_NO_TS_EXECUTORS)
             net::dispatch(wg2_.get_executor(),
                 beast::bind_front_handler(std::move(h_),
                     ec, bytes_transferred));
             wg2_.reset();
-#endif // defined(BOOST_ASIO_NO_TS_EXECUTORS)
+#endif // defined(ASIO_NO_TS_EXECUTORS)
         }
     };
 
     lambda fn_;
-#if defined(BOOST_ASIO_USE_TS_EXECUTOR_AS_DEFAULT)
+#if defined(ASIO_USE_TS_EXECUTOR_AS_DEFAULT)
     net::executor_work_guard<net::any_io_executor> wg1_;
 #else
     net::any_io_executor wg1_;
@@ -130,7 +130,7 @@ public:
         std::shared_ptr<detail::stream_state> const& s,
         Buffers const& b)
         : fn_(std::forward<Handler_>(h), s, b)
-#if defined(BOOST_ASIO_USE_TS_EXECUTOR_AS_DEFAULT)
+#if defined(ASIO_USE_TS_EXECUTOR_AS_DEFAULT)
         , wg1_(s->exec)
 #else
         , wg1_(net::prefer(s->exec,
@@ -142,7 +142,7 @@ public:
     void
     operator()(error_code ec) override
     {
-#if defined(BOOST_ASIO_USE_TS_EXECUTOR_AS_DEFAULT)
+#if defined(ASIO_USE_TS_EXECUTOR_AS_DEFAULT)
         net::post(wg1_.get_executor(),
             beast::bind_front_handler(std::move(fn_), ec));
         wg1_.reset();
@@ -317,8 +317,8 @@ read_some(MutableBufferSequence const& buffers,
 
 template<class Executor>
 template<class MutableBufferSequence,
-    BOOST_ASIO_COMPLETION_TOKEN_FOR(void(error_code, std::size_t)) ReadHandler>
-BOOST_ASIO_INITFN_RESULT_TYPE(ReadHandler, void(error_code, std::size_t))
+    ASIO_COMPLETION_TOKEN_FOR(void(error_code, std::size_t)) ReadHandler>
+ASIO_INITFN_RESULT_TYPE(ReadHandler, void(error_code, std::size_t))
 basic_stream<Executor>::
 async_read_some(
     MutableBufferSequence const& buffers,
@@ -401,8 +401,8 @@ write_some(
 
 template<class Executor>
 template<class ConstBufferSequence,
-    BOOST_ASIO_COMPLETION_TOKEN_FOR(void(error_code, std::size_t)) WriteHandler>
-BOOST_ASIO_INITFN_RESULT_TYPE(WriteHandler, void(error_code, std::size_t))
+    ASIO_COMPLETION_TOKEN_FOR(void(error_code, std::size_t)) WriteHandler>
+ASIO_INITFN_RESULT_TYPE(WriteHandler, void(error_code, std::size_t))
 basic_stream<Executor>::
 async_write_some(
     ConstBufferSequence const& buffers,

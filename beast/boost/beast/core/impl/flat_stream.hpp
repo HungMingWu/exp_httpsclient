@@ -15,7 +15,7 @@
 #include <boost/beast/core/static_buffer.hpp>
 #include <boost/beast/core/stream_traits.hpp>
 #include <boost/beast/websocket/teardown.hpp>
-#include <boost/asio/buffer.hpp>
+#include <asio/buffer.hpp>
 #include <memory>
 
 namespace boost {
@@ -52,7 +52,7 @@ public:
                 s.buffer_.prepare(result.size),
                 b, result.size));
 
-            BOOST_ASIO_HANDLER_LOCATION((
+            ASIO_HANDLER_LOCATION((
                 __FILE__, __LINE__,
                 "flat_stream::async_write_some"));
 
@@ -64,7 +64,7 @@ public:
             s.buffer_.clear();
             s.buffer_.shrink_to_fit();
 
-            BOOST_ASIO_HANDLER_LOCATION((
+            ASIO_HANDLER_LOCATION((
                 __FILE__, __LINE__,
                 "flat_stream::async_write_some"));
 
@@ -76,7 +76,7 @@ public:
 
     void
     operator()(
-        boost::system::error_code ec,
+        std::error_code ec,
         std::size_t bytes_transferred)
     {
         this->complete_now(ec, bytes_transferred);
@@ -133,7 +133,7 @@ read_some(MutableBufferSequence const& buffers)
     error_code ec;
     auto n = read_some(buffers, ec);
     if(ec)
-        throw boost::system::system_error{ec};
+        throw std::system_error{ec};
     return n;
 }
 
@@ -184,7 +184,7 @@ write_some(ConstBufferSequence const& buffers)
     error_code ec;
     auto n = write_some(buffers, ec);
     if(ec)
-        throw boost::system::system_error{ec};
+        throw std::system_error{ec};
     return n;
 }
 

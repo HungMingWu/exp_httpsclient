@@ -80,7 +80,7 @@
 #    define __BYTE_ORDER __LITTLE_ENDIAN // Symbian is LE
 #  endif
 // Known limitations
-#  define BOOST_ASIO_DISABLE_SERIAL_PORT
+#  define ASIO_DISABLE_SERIAL_PORT
 #  define BOOST_DATE_TIME_NO_LOCALE
 #  define BOOST_NO_STD_WSTRING
 #  define BOOST_EXCEPTION_DISABLE

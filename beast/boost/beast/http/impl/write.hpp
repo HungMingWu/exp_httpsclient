@@ -17,9 +17,9 @@
 #include <boost/beast/core/make_printable.hpp>
 #include <boost/beast/core/stream_traits.hpp>
 #include <boost/beast/core/detail/is_invocable.hpp>
-#include <boost/asio/coroutine.hpp>
-#include <boost/asio/post.hpp>
-#include <boost/asio/write.hpp>
+#include <asio/coroutine.hpp>
+#include <asio/post.hpp>
+#include <asio/write.hpp>
 #include <ostream>
 #include <sstream>
 
@@ -58,7 +58,7 @@ class write_some_op
             error_code& ec,
             ConstBufferSequence const& buffers)
         {
-            BOOST_ASIO_HANDLER_LOCATION((
+            ASIO_HANDLER_LOCATION((
                 __FILE__, __LINE__,
                 "http::async_write_some"));
 
@@ -96,7 +96,7 @@ public:
             {
                 BOOST_ASSERT(! f.invoked);
 
-                BOOST_ASIO_HANDLER_LOCATION((
+                ASIO_HANDLER_LOCATION((
                     __FILE__, __LINE__,
                     "http::async_write_some"));
 
@@ -114,7 +114,7 @@ public:
             BOOST_ASSERT(sr_.is_done());
         }
 
-        BOOST_ASIO_HANDLER_LOCATION((
+        ASIO_HANDLER_LOCATION((
             __FILE__, __LINE__,
             "http::async_write_some"));
 
@@ -171,7 +171,7 @@ template<
 class write_op
     : public beast::async_base<
         Handler, beast::executor_type<Stream>>
-    , public asio::coroutine
+    , public ::asio::coroutine
 {
     Stream& s_;
     serializer<isRequest, Body, Fields>& sr_;
@@ -197,13 +197,13 @@ public:
         error_code ec = {},
         std::size_t bytes_transferred = 0)
     {
-        BOOST_ASIO_CORO_REENTER(*this)
+        ASIO_CORO_REENTER(*this)
         {
             if(Predicate{}(sr_))
             {
-                BOOST_ASIO_CORO_YIELD
+                ASIO_CORO_YIELD
                 {
-                    BOOST_ASIO_HANDLER_LOCATION((
+                    ASIO_HANDLER_LOCATION((
                         __FILE__, __LINE__,
                         "http::async_write"));
 
@@ -215,9 +215,9 @@ public:
             }
             for(;;)
             {
-                BOOST_ASIO_CORO_YIELD
+                ASIO_CORO_YIELD
                 {
-                    BOOST_ASIO_HANDLER_LOCATION((
+                    ASIO_HANDLER_LOCATION((
                         __FILE__, __LINE__,
                         "http::async_write"));
 
@@ -271,7 +271,7 @@ public:
     void
     operator()()
     {
-        BOOST_ASIO_HANDLER_LOCATION((
+        ASIO_HANDLER_LOCATION((
             __FILE__, __LINE__,
             "http::async_write(msg)"));
 

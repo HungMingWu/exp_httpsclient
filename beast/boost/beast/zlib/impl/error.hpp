@@ -38,15 +38,13 @@
 #ifndef BOOST_BEAST_ZLIB_IMPL_ERROR_HPP
 #define BOOST_BEAST_ZLIB_IMPL_ERROR_HPP
 
-namespace boost {
-namespace system {
+namespace std {
 template<>
 struct is_error_code_enum<::boost::beast::zlib::error>
 {
     static bool const value = true;
 };
-} // system
-} // boost
+} // std
 
 namespace boost {
 namespace beast {

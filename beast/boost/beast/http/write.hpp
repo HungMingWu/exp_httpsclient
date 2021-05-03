@@ -17,7 +17,7 @@
 #include <boost/beast/http/detail/chunk_encode.hpp>
 #include <boost/beast/core/error.hpp>
 #include <boost/beast/core/stream_traits.hpp>
-#include <boost/asio/async_result.hpp>
+#include <asio/async_result.hpp>
 #include <iosfwd>
 #include <limits>
 #include <memory>
