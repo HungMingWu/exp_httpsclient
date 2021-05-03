@@ -238,7 +238,7 @@ namespace boost {
         };
 
         template<class T>
-        struct is_mutable_dynamic_buffer<T, detail::void_t<decltype(
+        struct is_mutable_dynamic_buffer<T, std::void_t<decltype(
             std::declval<typename T::const_buffers_type&>() =
             std::declval<T const&>().data(),
             std::declval<typename T::const_buffers_type&>() =

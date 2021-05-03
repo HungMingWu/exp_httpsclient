@@ -11,7 +11,6 @@
 #define BOOST_BEAST_DETAIL_IS_INVOCABLE_HPP
 
 #include <asio/async_result.hpp>
-#include <boost/type_traits/make_void.hpp>
 #include <type_traits>
 #include <utility>
 
@@ -66,7 +65,7 @@ struct any_initiation
 
 template<class CompletionToken, class R, class...Args>
 struct is_completion_token_for<
-    CompletionToken, R(Args...), boost::void_t<decltype(
+    CompletionToken, R(Args...), std::void_t<decltype(
         ::asio::async_initiate<CompletionToken, R(Args...)>(
             any_initiation(), std::declval<CompletionToken&>())
         )>> : std::true_type

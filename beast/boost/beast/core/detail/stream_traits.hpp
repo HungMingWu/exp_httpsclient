@@ -12,7 +12,6 @@
 
 #include <boost/beast/core/error.hpp>
 #include <asio/buffer.hpp>
-#include <boost/type_traits/make_void.hpp>
 #include <type_traits>
 
 namespace boost {

@@ -12,38 +12,12 @@
 
 #include <asio/buffer.hpp>
 #include <boost/config/workaround.hpp>
-#include <boost/type_traits/make_void.hpp>
 #include <cstdint>
 #include <type_traits>
 
 namespace boost {
 namespace beast {
 namespace detail {
-#if BOOST_WORKAROUND(BOOST_MSVC, < 1910)
-
-template<class T>
-struct buffers_iterator_type_helper
-{
-    using type = decltype(
-        net::buffer_sequence_begin(
-            std::declval<T const&>()));
-};
-
-template<>
-struct buffers_iterator_type_helper<
-    net::const_buffer>
-{
-    using type = net::const_buffer const*;
-};
-
-template<>
-struct buffers_iterator_type_helper<
-    net::mutable_buffer>
-{
-    using type = net::mutable_buffer const*;
-};
-
-#endif
 
 struct buffer_bytes_impl
 {
