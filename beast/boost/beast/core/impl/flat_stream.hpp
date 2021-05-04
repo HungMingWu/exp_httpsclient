@@ -21,7 +21,7 @@
 namespace boost {
 namespace beast {
 
-template<class NextLayer>
+template <FlatStreamRequirement NextLayer>
 struct flat_stream<NextLayer>::ops
 {
 
@@ -111,7 +111,7 @@ struct run_write_op
 
 //------------------------------------------------------------------------------
 
-template<class NextLayer>
+template<FlatStreamRequirement NextLayer>
 template<class... Args>
 flat_stream<NextLayer>::
 flat_stream(Args&&... args)
@@ -119,14 +119,12 @@ flat_stream(Args&&... args)
 {
 }
 
-template<class NextLayer>
+template<FlatStreamRequirement NextLayer>
 template<class MutableBufferSequence>
 std::size_t
 flat_stream<NextLayer>::
 read_some(MutableBufferSequence const& buffers)
 {
-    static_assert(boost::beast::SyncReadStream<next_layer_type>,
-        "SyncReadStream type requirements not met");
     static_assert(net::is_mutable_buffer_sequence<
         MutableBufferSequence>::value,
         "MutableBufferSequence type requirements not met");
@@ -137,21 +135,19 @@ read_some(MutableBufferSequence const& buffers)
     return n;
 }
 
-template<class NextLayer>
+template<FlatStreamRequirement NextLayer>
 template<class MutableBufferSequence>
 std::size_t
 flat_stream<NextLayer>::
 read_some(MutableBufferSequence const& buffers, error_code& ec)
 {
-    static_assert(boost::beast::SyncReadStream<next_layer_type>,
-        "SyncReadStream type requirements not met");
     static_assert(net::is_mutable_buffer_sequence<
         MutableBufferSequence>::value,
         "MutableBufferSequence type requirements not met");
     return stream_.read_some(buffers, ec);
 }
 
-template<class NextLayer>
+template<FlatStreamRequirement NextLayer>
 template<
     class MutableBufferSequence,
     BOOST_BEAST_ASYNC_TPARAM2 ReadHandler>
@@ -161,8 +157,6 @@ async_read_some(
     MutableBufferSequence const& buffers,
     ReadHandler&& handler)
 {
-    static_assert(boost::beast::AsyncReadStream<next_layer_type>,
-        "AsyncReadStream type requirements not met");
     static_assert(net::is_mutable_buffer_sequence<
         MutableBufferSequence >::value,
         "MutableBufferSequence type requirements not met");
@@ -170,14 +164,12 @@ async_read_some(
         buffers, std::forward<ReadHandler>(handler));
 }
 
-template<class NextLayer>
+template<FlatStreamRequirement NextLayer>
 template<class ConstBufferSequence>
 std::size_t
 flat_stream<NextLayer>::
 write_some(ConstBufferSequence const& buffers)
 {
-    static_assert(boost::beast::SyncWriteStream<next_layer_type>,
-        "SyncWriteStream type requirements not met");
     static_assert(net::is_const_buffer_sequence<
         ConstBufferSequence>::value,
             "ConstBufferSequence type requirements not met");
@@ -188,7 +180,7 @@ write_some(ConstBufferSequence const& buffers)
     return n;
 }
 
-template<class NextLayer>
+template<FlatStreamRequirement NextLayer>
 template<class ConstBufferSequence>
 std::size_t
 flat_stream<NextLayer>::
@@ -203,14 +195,12 @@ stack_write_some(
     return stream_.write_some(b.data(), ec);
 }
 
-template<class NextLayer>
+template<FlatStreamRequirement NextLayer>
 template<class ConstBufferSequence>
 std::size_t
 flat_stream<NextLayer>::
 write_some(ConstBufferSequence const& buffers, error_code& ec)
 {
-    static_assert(boost::beast::SyncWriteStream<next_layer_type>,
-        "SyncWriteStream type requirements not met");
     static_assert(net::is_const_buffer_sequence<
         ConstBufferSequence>::value,
         "ConstBufferSequence type requirements not met");
@@ -232,7 +222,7 @@ write_some(ConstBufferSequence const& buffers, error_code& ec)
         boost::beast::buffers_prefix(result.size, buffers), ec);
 }
 
-template<class NextLayer>
+template<FlatStreamRequirement NextLayer>
 template<
     class ConstBufferSequence,
     BOOST_BEAST_ASYNC_TPARAM2 WriteHandler>
@@ -242,8 +232,6 @@ async_write_some(
     ConstBufferSequence const& buffers,
     WriteHandler&& handler)
 {
-    static_assert(boost::beast::AsyncWriteStream<next_layer_type>,
-        "AsyncWriteStream type requirements not met");
     static_assert(net::is_const_buffer_sequence<
         ConstBufferSequence>::value,
         "ConstBufferSequence type requirements not met");
@@ -256,7 +244,7 @@ async_write_some(
             buffers);
 }
 
-template<class NextLayer>
+template<FlatStreamRequirement NextLayer>
 void
 teardown(
     boost::beast::role_type role,
@@ -267,7 +255,7 @@ teardown(
     teardown(role, s.next_layer(), ec);
 }
 
-template<class NextLayer, class TeardownHandler>
+template<FlatStreamRequirement NextLayer, class TeardownHandler>
 void
 async_teardown(
     boost::beast::role_type role,

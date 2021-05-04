@@ -84,7 +84,13 @@ namespace beast {
         @li https://stackoverflow.com/questions/38198638/openssl-ssl-write-from-multiple-buffers-ssl-writev
         @li https://stackoverflow.com/questions/50026167/performance-drop-on-port-from-beast-1-0-0-b66-to-boost-1-67-0-beast
 */
-template<class NextLayer>
+
+template <typename T>
+concept FlatStreamRequirement = has_get_executor_v<T> &&
+                                SyncReadStream<T> && SyncWriteStream<T> &&
+                                AsyncReadStream<T> && AsyncWriteStream<T>;
+
+template <FlatStreamRequirement NextLayer>
 class flat_stream
 #if ! BOOST_BEAST_DOXYGEN
     : private detail::flat_stream_base
@@ -92,8 +98,6 @@ class flat_stream
 {
     NextLayer stream_;
     flat_buffer buffer_;
-
-    static_assert(has_get_executor_v<NextLayer>);
 
     struct ops;
 
