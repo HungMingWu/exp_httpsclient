@@ -227,27 +227,14 @@ namespace boost {
 
         //------------------------------------------------------------------------------
 
-        /** Metafunction to determine if a type meets the requirements of MutableDynamicBuffer_v0
-        */
-        /* @{ */
-        // VFALCO This trait needs tests
-        template<class T, class = void>
-        struct is_mutable_dynamic_buffer
-            : std::false_type
-        {
-        };
+        /** Metafunction to determine if a type meets the requirements of MutableDynamicBuffer_v0 */
+        template <typename T>
+        concept MutableDynamicBuffer = requires (T t) {
+            { t.data() } -> std::convertible_to<typename T::const_buffers_type>;
+            { t.data() } -> std::convertible_to<typename T::mutable_buffers_type>;
+            { t.cdata() } -> std::convertible_to<typename T::const_buffers_type>;
+        } && net::is_dynamic_buffer_v1<T>::value;
 
-        template<class T>
-        struct is_mutable_dynamic_buffer<T, std::void_t<decltype(
-            std::declval<typename T::const_buffers_type&>() =
-            std::declval<T const&>().data(),
-            std::declval<typename T::const_buffers_type&>() =
-            std::declval<T&>().cdata(),
-            std::declval<typename T::mutable_buffers_type&>() =
-            std::declval<T&>().data()
-            ) > > : net::is_dynamic_buffer_v1<T>
-        {
-        };
         /** @} */
 
         namespace detail {
@@ -271,86 +258,77 @@ namespace boost {
             }
 
             template<class MutableDynamicBuffer_v0>
-            void
-                test_mutable_dynamic_buffer(
-                    MutableDynamicBuffer_v0 const&,
-                    std::false_type)
+            void test_mutable_dynamic_buffer(MutableDynamicBuffer_v0 const& b0)
             {
-            }
+                if (MutableDynamicBuffer<MutableDynamicBuffer_v0>) {
+                    static_assert(
+                        net::is_mutable_buffer_sequence<typename
+                        MutableDynamicBuffer_v0::mutable_buffers_type>::value);
 
-            template<class MutableDynamicBuffer_v0>
-            void
-                test_mutable_dynamic_buffer(
-                    MutableDynamicBuffer_v0 const& b0,
-                    std::true_type)
-            {
-                static_assert(
-                    net::is_mutable_buffer_sequence<typename
-                    MutableDynamicBuffer_v0::mutable_buffers_type>::value);
+                    static_assert(
+                        std::is_convertible<
+                        typename MutableDynamicBuffer_v0::mutable_buffers_type,
+                        typename MutableDynamicBuffer_v0::const_buffers_type>::value);
 
-                static_assert(
-                    std::is_convertible<
-                    typename MutableDynamicBuffer_v0::mutable_buffers_type,
-                    typename MutableDynamicBuffer_v0::const_buffers_type>::value);
+                    string_view src = "Hello, world!";
+                    if (src.size() > b0.max_size())
+                        src = { src.data(), b0.max_size() };
 
-                string_view src = "Hello, world!";
-                if (src.size() > b0.max_size())
-                    src = { src.data(), b0.max_size() };
-
-                // modify readable bytes
-                {
-                    MutableDynamicBuffer_v0 b(b0);
-                    auto const mb = b.prepare(src.size());
-                    REQUIRE(buffer_bytes(mb) == src.size());
-                    buffers_fill(mb, '*');
-                    b.commit(src.size());
-                    REQUIRE(b.size() == src.size());
-                    REQUIRE(
-                        beast::buffers_to_string(b.data()) ==
-                        std::string(src.size(), '*'));
-                    REQUIRE(
-                        beast::buffers_to_string(b.cdata()) ==
-                        std::string(src.size(), '*'));
-                    auto const n = net::buffer_copy(
-                        b.data(), net::const_buffer(
-                            src.data(), src.size()));
-                    REQUIRE(n == src.size());
-                    REQUIRE(
-                        beast::buffers_to_string(b.data()) == src);
-                    REQUIRE(
-                        beast::buffers_to_string(b.cdata()) == src);
-                }
-
-                // mutable to const sequence conversion
-                {
-                    MutableDynamicBuffer_v0 b(b0);
-                    b.commit(net::buffer_copy(
-                        b.prepare(src.size()),
-                        net::const_buffer(src.data(), src.size())));
-                    auto mb = b.data();
-                    auto cb = static_cast<
-                        MutableDynamicBuffer_v0 const&>(b).data();
-                    auto cbc = b.cdata();
-                    REQUIRE(
-                        beast::buffers_to_string(b.data()) == src);
-                    REQUIRE(
-                        beast::buffers_to_string(b.cdata()) == src);
-                    beast::test_buffer_sequence(cb);
-                    beast::test_buffer_sequence(cbc);
-                    beast::test_buffer_sequence(mb);
+                    // modify readable bytes
                     {
-                        decltype(mb)  mb2(mb);
-                        mb = mb2;
-                        decltype(cb)  cb2(cb);
-                        cb = cb2;
-                        decltype(cbc) cbc2(cbc);
-                        cbc = cbc2;
+                        MutableDynamicBuffer_v0 b(b0);
+                        auto const mb = b.prepare(src.size());
+                        REQUIRE(buffer_bytes(mb) == src.size());
+                        buffers_fill(mb, '*');
+                        b.commit(src.size());
+                        REQUIRE(b.size() == src.size());
+                        REQUIRE(
+                            beast::buffers_to_string(b.data()) ==
+                            std::string(src.size(), '*'));
+                        REQUIRE(
+                            beast::buffers_to_string(b.cdata()) ==
+                            std::string(src.size(), '*'));
+                        auto const n = net::buffer_copy(
+                            b.data(), net::const_buffer(
+                                src.data(), src.size()));
+                        REQUIRE(n == src.size());
+                        REQUIRE(
+                            beast::buffers_to_string(b.data()) == src);
+                        REQUIRE(
+                            beast::buffers_to_string(b.cdata()) == src);
                     }
+
+                    // mutable to const sequence conversion
                     {
-                        decltype(cb)  cb2(mb);
-                        decltype(cbc) cbc2(mb);
-                        cb2 = mb;
-                        cbc2 = mb;
+                        MutableDynamicBuffer_v0 b(b0);
+                        b.commit(net::buffer_copy(
+                            b.prepare(src.size()),
+                            net::const_buffer(src.data(), src.size())));
+                        auto mb = b.data();
+                        auto cb = static_cast<
+                            MutableDynamicBuffer_v0 const&>(b).data();
+                        auto cbc = b.cdata();
+                        REQUIRE(
+                            beast::buffers_to_string(b.data()) == src);
+                        REQUIRE(
+                            beast::buffers_to_string(b.cdata()) == src);
+                        beast::test_buffer_sequence(cb);
+                        beast::test_buffer_sequence(cbc);
+                        beast::test_buffer_sequence(mb);
+                        {
+                            decltype(mb)  mb2(mb);
+                            mb = mb2;
+                            decltype(cb)  cb2(cb);
+                            cb = cb2;
+                            decltype(cbc) cbc2(cbc);
+                            cbc = cbc2;
+                        }
+                        {
+                            decltype(cb)  cb2(mb);
+                            decltype(cbc) cbc2(mb);
+                            cb2 = mb;
+                            cbc2 = mb;
+                        }
                     }
                 }
             }
@@ -359,21 +337,16 @@ namespace boost {
 
         /** Test an instance of a dynamic buffer or mutable dynamic buffer.
         */
-        template<class DynamicBuffer_v0>
-        void
-            test_dynamic_buffer(
-                DynamicBuffer_v0 const& b0)
+        void test_dynamic_buffer(const MutableDynamicBuffer auto & b0)
         {
-            static_assert(
-                net::is_dynamic_buffer_v1<DynamicBuffer_v0>::value);
-
+            using type = std::decay_t<decltype(b0)>;
             static_assert(
                 net::is_const_buffer_sequence<typename
-                DynamicBuffer_v0::const_buffers_type>::value);
+                type::const_buffers_type>::value);
 
             static_assert(
                 net::is_mutable_buffer_sequence<typename
-                DynamicBuffer_v0::mutable_buffers_type>::value);
+                type::mutable_buffers_type>::value);
 
             REQUIRE(b0.size() == 0);
             REQUIRE(buffer_bytes(b0.data()) == 0);
@@ -382,14 +355,14 @@ namespace boost {
             {
                 string_view src = "Hello, world!";
 
-                DynamicBuffer_v0 b1(b0);
+                auto b1(b0);
                 auto const mb = b1.prepare(src.size());
                 b1.commit(net::buffer_copy(mb,
                     net::const_buffer(src.data(), src.size())));
 
                 // copy constructor
                 {
-                    DynamicBuffer_v0 b2(b1);
+                    auto b2(b1);
                     REQUIRE(b2.size() == b1.size());
                     REQUIRE(
                         buffers_to_string(b1.data()) ==
@@ -397,7 +370,7 @@ namespace boost {
 
                     // https://github.com/boostorg/beast/issues/1621
                     b2.consume(1);
-                    DynamicBuffer_v0 b3(b2);
+                    auto b3(b2);
                     REQUIRE(b3.size() == b2.size());
                     REQUIRE(
                         buffers_to_string(b2.data()) ==
@@ -406,8 +379,8 @@ namespace boost {
 
                 // move constructor
                 {
-                    DynamicBuffer_v0 b2(b1);
-                    DynamicBuffer_v0 b3(std::move(b2));
+                    auto b2(b1);
+                    auto b3(std::move(b2));
                     REQUIRE(b3.size() == b1.size());
                     REQUIRE(
                         buffers_to_string(b3.data()) ==
@@ -416,7 +389,7 @@ namespace boost {
 
                 // copy assignment
                 {
-                    DynamicBuffer_v0 b2(b0);
+                    auto b2(b0);
                     b2 = b1;
                     REQUIRE(b2.size() == b1.size());
                     REQUIRE(
@@ -432,7 +405,7 @@ namespace boost {
 
                     // https://github.com/boostorg/beast/issues/1621
                     b2.consume(1);
-                    DynamicBuffer_v0 b3(b2);
+                    auto b3(b2);
                     REQUIRE(b3.size() == b2.size());
                     REQUIRE(
                         buffers_to_string(b2.data()) ==
@@ -442,8 +415,8 @@ namespace boost {
 
                 // move assignment
                 {
-                    DynamicBuffer_v0 b2(b1);
-                    DynamicBuffer_v0 b3(b0);
+                    auto b2(b1);
+                    auto b3(b0);
                     b3 = std::move(b2);
                     REQUIRE(b3.size() == b1.size());
                     REQUIRE(
@@ -460,8 +433,8 @@ namespace boost {
 
                 // swap
                 {
-                    DynamicBuffer_v0 b2(b1);
-                    DynamicBuffer_v0 b3(b0);
+                    auto b2(b1);
+                    auto b3(b0);
                     REQUIRE(b2.size() == b1.size());
                     REQUIRE(b3.size() == b0.size());
                     using std::swap;
@@ -476,7 +449,7 @@ namespace boost {
 
             // n == 0
             {
-                DynamicBuffer_v0 b(b0);
+                auto b(b0);
                 b.commit(1);
                 REQUIRE(b.size() == 0);
                 REQUIRE(buffer_bytes(b.prepare(0)) == 0);
@@ -496,7 +469,7 @@ namespace boost {
 
             // max_size
             {
-                DynamicBuffer_v0 b(b0);
+                auto b(b0);
                 bool checked = false;
                 if (b.max_size() + 1 > b.max_size())
                 {
@@ -535,7 +508,7 @@ namespace boost {
             // readable / writable buffer sequence tests
             {
                 make_new_src();
-                DynamicBuffer_v0 b(b0);
+                auto b(b0);
                 auto const& bc(b);
                 auto const mb = b.prepare(src.size());
                 REQUIRE(buffer_bytes(mb) == src.size());
@@ -560,7 +533,7 @@ namespace boost {
                             {
                                 make_new_src();
 
-                                DynamicBuffer_v0 b(b0);
+                                auto b(b0);
                                 auto const& bc(b);
                                 net::const_buffer cb(in.data(), in.size());
                                 while (cb.size() > 0)
@@ -589,8 +562,7 @@ namespace boost {
             }
 
             // MutableDynamicBuffer_v0 refinement
-            detail::test_mutable_dynamic_buffer(b0,
-                is_mutable_dynamic_buffer<DynamicBuffer_v0>{});
+            detail::test_mutable_dynamic_buffer(b0);
         }
 
     } // beast

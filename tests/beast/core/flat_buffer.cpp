@@ -6,8 +6,6 @@
 #include "test_allocator.hpp"
 using namespace boost::beast;
 
-static_assert(is_mutable_dynamic_buffer<flat_buffer>::value);
-
 TEST_CASE("flat_buffer testDynamicBuffer", "flat_buffer") {
     flat_buffer b(30);
     REQUIRE(b.max_size() == 30);

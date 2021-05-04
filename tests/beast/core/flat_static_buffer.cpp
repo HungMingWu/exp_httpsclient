@@ -5,8 +5,6 @@
 #include "test_buffer.hpp"
 using namespace boost::beast;
 
-static_assert(is_mutable_dynamic_buffer<flat_static_buffer<13>>::value);
-
 TEST_CASE("flat_static_buffer testDynamicBuffer", "flat_static_buffer") {
 	test_dynamic_buffer(flat_static_buffer<13>{});
 }

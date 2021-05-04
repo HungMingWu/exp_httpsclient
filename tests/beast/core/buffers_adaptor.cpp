@@ -5,9 +5,7 @@
 #include "test_buffer.hpp"
 using namespace boost::beast;
 namespace net = asio;
-static_assert(
-    is_mutable_dynamic_buffer<
-    buffers_adaptor<buffers_triple>>::value);
+static_assert(MutableDynamicBuffer<buffers_adaptor<buffers_triple>>);
 
 TEST_CASE("buffers_adaptor testDynamicBuffer", "buffers_adaptor") {
     char s[13];
