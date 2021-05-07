@@ -20,13 +20,10 @@
 #  pragma once
 #endif
 
-#include <boost/intrusive/detail/config_begin.hpp>
-#include <boost/intrusive/detail/workaround.hpp>
 #include <cstddef>
 
 #if defined(_MSC_VER)
    #define BOOST_INTRUSIVE_MSVC_ABI_PTR_TO_MEMBER
-   #include <boost/static_assert.hpp>
 #endif
 
 namespace boost {
@@ -34,7 +31,7 @@ namespace intrusive {
 namespace detail {
 
 template<class Parent, class Member>
-BOOST_INTRUSIVE_FORCEINLINE std::ptrdiff_t offset_from_pointer_to_member(const Member Parent::* ptr_to_member)
+inline std::ptrdiff_t offset_from_pointer_to_member(const Member Parent::* ptr_to_member)
 {
    //The implementation of a pointer to member is compiler dependent.
    #if defined(BOOST_INTRUSIVE_MSVC_ABI_PTR_TO_MEMBER)
@@ -49,7 +46,7 @@ BOOST_INTRUSIVE_FORCEINLINE std::ptrdiff_t offset_from_pointer_to_member(const M
    //MSVC ABI can use up to 3 int32 to represent pointer to member data
    //with virtual base classes, in those cases there is no simple to
    //obtain the address of the parent. So static assert to avoid runtime errors
-   BOOST_STATIC_ASSERT( sizeof(caster) == sizeof(int) );
+   static_assert( sizeof(caster) == sizeof(int) );
 
    caster.ptr_to_member = ptr_to_member;
    return std::ptrdiff_t(caster.offset);
@@ -89,7 +86,7 @@ BOOST_INTRUSIVE_FORCEINLINE std::ptrdiff_t offset_from_pointer_to_member(const M
 }
 
 template<class Parent, class Member>
-BOOST_INTRUSIVE_FORCEINLINE Parent *parent_from_member(Member *member, const Member Parent::* ptr_to_member)
+inline Parent *parent_from_member(Member *member, const Member Parent::* ptr_to_member)
 {
    return static_cast<Parent*>
       (
@@ -101,7 +98,7 @@ BOOST_INTRUSIVE_FORCEINLINE Parent *parent_from_member(Member *member, const Mem
 }
 
 template<class Parent, class Member>
-BOOST_INTRUSIVE_FORCEINLINE const Parent *parent_from_member(const Member *member, const Member Parent::* ptr_to_member)
+inline const Parent *parent_from_member(const Member *member, const Member Parent::* ptr_to_member)
 {
    return static_cast<const Parent*>
       (
@@ -115,7 +112,5 @@ BOOST_INTRUSIVE_FORCEINLINE const Parent *parent_from_member(const Member *membe
 }  //namespace detail {
 }  //namespace intrusive {
 }  //namespace boost {
-
-#include <boost/intrusive/detail/config_end.hpp>
 
 #endif   //#ifndef BOOST_INTRUSIVE_DETAIL_PARENT_FROM_MEMBER_HPP

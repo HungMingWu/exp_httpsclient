@@ -21,7 +21,6 @@
 #  pragma once
 #endif
 
-#include <boost/intrusive/detail/workaround.hpp>
 #include <boost/intrusive/pointer_traits.hpp>
 #include <boost/move/detail/to_raw_pointer.hpp>
 
@@ -30,38 +29,48 @@ namespace intrusive {
 namespace detail {
 
 // trivial header node holder
-template < typename NodeTraits >
+template <typename NodeTraits>
 struct default_header_holder : public NodeTraits::node
 {
-   typedef NodeTraits node_traits;
-   typedef typename node_traits::node node;
-   typedef typename node_traits::node_ptr node_ptr;
-   typedef typename node_traits::const_node_ptr const_node_ptr;
+   using node_traits = NodeTraits;
+   using node = typename node_traits::node;
+   using node_ptr = typename node_traits::node_ptr;
+   using const_node_ptr = typename node_traits::const_node_ptr;
 
-   default_header_holder() : node() {}
+   using node::node;
 
-   BOOST_INTRUSIVE_FORCEINLINE const_node_ptr get_node() const
-   { return pointer_traits< const_node_ptr >::pointer_to(*static_cast< const node* >(this)); }
+   inline const_node_ptr get_node() const
+   {
+	   return pointer_traits<const_node_ptr>::pointer_to(static_cast<const node&>(*this));
+   }
 
-   BOOST_INTRUSIVE_FORCEINLINE node_ptr get_node()
-   { return pointer_traits< node_ptr >::pointer_to(*static_cast< node* >(this)); }
+   inline node_ptr get_node()
+   {
+	   return pointer_traits<node_ptr>::pointer_to(static_cast<node&>(*this));
+   }
 
    // (unsafe) downcast used to implement container-from-iterator
-   BOOST_INTRUSIVE_FORCEINLINE static default_header_holder* get_holder(const node_ptr &p)
-   { return static_cast< default_header_holder* >(boost::movelib::to_raw_pointer(p)); }
+   inline static default_header_holder* get_holder(const node_ptr &p)
+   {
+	   return static_cast<default_header_holder*>(boost::movelib::to_raw_pointer(p));
+   }
 };
 
 // type function producing the header node holder
-template < typename ValueTraits, typename HeaderHolder >
+template <typename ValueTraits, typename HeaderHolder>
 struct get_header_holder_type
 {
-   typedef HeaderHolder type;
+	using type = HeaderHolder;
 };
-template < typename ValueTraits >
-struct get_header_holder_type< ValueTraits, void >
+
+template <typename ValueTraits>
+struct get_header_holder_type<ValueTraits, void>
 {
-   typedef default_header_holder< typename ValueTraits::node_traits > type;
+	using type = default_header_holder<typename ValueTraits::node_traits>;
 };
+
+template <typename ValueTraits, typename HeaderHolder>
+using get_header_holder_type_t = typename get_header_holder_type<ValueTraits, HeaderHolder>::type;
 
 } //namespace detail
 } //namespace intrusive

@@ -19,8 +19,6 @@
 #  pragma once
 #endif
 
-#include <boost/move/detail/workaround.hpp>
-
 namespace boost {
 namespace move_detail {
 

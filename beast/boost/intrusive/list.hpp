@@ -14,7 +14,6 @@
 #ifndef BOOST_INTRUSIVE_LIST_HPP
 #define BOOST_INTRUSIVE_LIST_HPP
 
-#include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/intrusive_fwd.hpp>
 #include <boost/intrusive/detail/assert.hpp>
 #include <boost/intrusive/list_hook.hpp>
@@ -30,16 +29,10 @@
 #include <boost/intrusive/detail/list_iterator.hpp>
 #include <boost/intrusive/detail/array_initializer.hpp>
 #include <boost/intrusive/detail/exception_disposer.hpp>
-#include <boost/intrusive/detail/equal_to_value.hpp>
 #include <boost/intrusive/detail/key_nodeptr_comp.hpp>
 #include <boost/intrusive/detail/simple_disposers.hpp>
 #include <boost/intrusive/detail/size_holder.hpp>
-#include <boost/intrusive/detail/algorithm.hpp>
 
-#include <boost/move/utility_core.hpp>
-#include <boost/static_assert.hpp>
-
-#include <boost/intrusive/detail/minimal_less_equal_header.hpp>//std::less
 #include <cstddef>   //std::size_t, etc.
 
 #if defined(BOOST_HAS_PRAGMA_ONCE)
@@ -52,7 +45,13 @@ namespace intrusive {
 /// @cond
 
 struct default_list_hook_applier
-{  template <class T> struct apply{ typedef typename T::default_list_hook type;  };  };
+{  
+    template <class T> 
+    struct apply
+    { 
+        using type = typename T::default_list_hook;
+    };
+};
 
 template<>
 struct is_default_hook_tag<default_list_hook_applier>
@@ -60,10 +59,9 @@ struct is_default_hook_tag<default_list_hook_applier>
 
 struct list_defaults
 {
-   typedef default_list_hook_applier proto_value_traits;
+   using proto_value_traits = default_list_hook_applier;
    static const bool constant_time_size = true;
-   typedef std::size_t size_type;
-   typedef void header_holder_type;
+   using header_holder_type = void;
 };
 
 /// @endcond
@@ -77,94 +75,88 @@ struct list_defaults
 //!
 //! The container supports the following options:
 //! \c base_hook<>/member_hook<>/value_traits<>,
-//! \c constant_time_size<> and \c size_type<>.
+//! \c constant_time_size<>.
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template <class ValueTraits, class SizeType, bool ConstantTimeSize, typename HeaderHolder>
+template <class ValueTraits, bool ConstantTimeSize, typename HeaderHolder>
 #endif
 class list_impl
 {
-   //Public typedefs
    public:
-   typedef ValueTraits                                               value_traits;
-   typedef typename value_traits::pointer                            pointer;
-   typedef typename value_traits::const_pointer                      const_pointer;
-   typedef typename pointer_traits<pointer>::element_type            value_type;
-   typedef typename pointer_traits<pointer>::reference               reference;
-   typedef typename pointer_traits<const_pointer>::reference         const_reference;
-   typedef typename pointer_traits<pointer>::difference_type         difference_type;
-   typedef SizeType                                                  size_type;
-   typedef list_iterator<value_traits, false>                        iterator;
-   typedef list_iterator<value_traits, true>                         const_iterator;
-   typedef boost::intrusive::reverse_iterator<iterator>              reverse_iterator;
-   typedef boost::intrusive::reverse_iterator<const_iterator>        const_reverse_iterator;
-   typedef typename value_traits::node_traits                        node_traits;
-   typedef typename node_traits::node                                node;
-   typedef typename node_traits::node_ptr                            node_ptr;
-   typedef typename node_traits::const_node_ptr                      const_node_ptr;
-   typedef circular_list_algorithms<node_traits>                     node_algorithms;
-   typedef typename detail::get_header_holder_type
-      < value_traits, HeaderHolder >::type                           header_holder_type;
+   using value_traits = ValueTraits;
+   using pointer = typename value_traits::pointer;
+   using const_pointer = typename value_traits::const_pointer;
+   using value_type = typename pointer_traits<pointer>::element_type;
+   using reference = typename pointer_traits<pointer>::reference;
+   using const_reference = typename pointer_traits<const_pointer>::reference;
+   using difference_type = typename pointer_traits<pointer>::difference_type;
+   using iterator = list_iterator<value_traits, false>;
+   using const_iterator = list_iterator<value_traits, true>;
+   using reverse_iterator = boost::intrusive::reverse_iterator<iterator>;
+   using const_reverse_iterator = boost::intrusive::reverse_iterator<const_iterator>;
+   using node_traits = typename value_traits::node_traits;
+   using node = typename node_traits::node;
+   using node_ptr = typename node_traits::node_ptr;
+   using const_node_ptr = typename node_traits::const_node_ptr;
+   using node_algorithms = circular_list_algorithms<node_traits>;
+   using header_holder_type = detail::get_header_holder_type_t<value_traits, HeaderHolder>;
 
-   static const bool constant_time_size = ConstantTimeSize;
-   static const bool stateful_value_traits = detail::is_stateful_value_traits<value_traits>::value;
-   static const bool has_container_from_iterator =
-        detail::is_same< header_holder_type, detail::default_header_holder< node_traits > >::value;
+   static constexpr bool constant_time_size = ConstantTimeSize;
+   static constexpr bool stateful_value_traits = detail::is_stateful_value_traits_v<value_traits>;
+   static constexpr bool has_container_from_iterator =
+        std::is_same< header_holder_type, detail::default_header_holder< node_traits > >::value;
 
    /// @cond
 
    private:
-   typedef detail::size_holder<constant_time_size, size_type>          size_traits;
+   using size_traits = detail::size_holder<constant_time_size>;
 
-   //noncopyable
-   BOOST_MOVABLE_BUT_NOT_COPYABLE(list_impl)
+   list_impl(const list_impl&) = delete;
+   list_impl& operator=(const list_impl&) = delete;
 
-   static const bool safemode_or_autounlink = is_safe_autounlink<value_traits::link_mode>::value;
+   static constexpr bool safemode_or_autounlink = is_safe_autounlink(value_traits::link_mode);
 
    //Constant-time size is incompatible with auto-unlink hooks!
-   BOOST_STATIC_ASSERT(!(constant_time_size &&
-                        ((int)value_traits::link_mode == (int)auto_unlink)
-                      ));
+   static_assert(!(constant_time_size &&
+                        value_traits::link_mode == link_mode_type::auto_unlink));
 
-   node_ptr get_root_node()
-   { return data_.root_plus_size_.m_header.get_node(); }
-
-   const_node_ptr get_root_node() const
-   { return data_.root_plus_size_.m_header.get_node(); }
-
-   struct root_plus_size : public size_traits
+   class root_plus_size : public size_traits
    {
-      header_holder_type m_header;
+   public:
+       header_holder_type m_header;
+       inline node_ptr get_node() { return m_header.get_node(); }
+       inline const_node_ptr get_node() const { return m_header.get_node(); }
+       inline void swap(root_plus_size& rhs)
+       {
+           node_algorithms::swap_nodes(get_node(), rhs.get_node());
+           size_traits::swap(rhs);
+       }
    };
 
-   struct data_t : public value_traits
+   class data_t : public value_traits
    {
-      typedef typename list_impl::value_traits value_traits;
-      explicit data_t(const value_traits &val_traits)
-         :  value_traits(val_traits)
-      {}
-
+   public:
       root_plus_size root_plus_size_;
+      explicit data_t(const value_traits& val_traits)
+           : value_traits(val_traits)
+      {}
+      inline node_ptr get_root_node() { return root_plus_size_.get_node(); }
+      inline const_node_ptr get_root_node() const { return root_plus_size_.get_node(); }
+      inline void set_size(std::size_t n) { root_plus_size_.set_size(n); }
+      inline std::size_t get_size() const { return root_plus_size_.get_size(); }
+      inline void increase(std::size_t n) { root_plus_size_.increase(n); }
+      inline void decrease(std::size_t n) { root_plus_size_.decrease(n); }
+      inline void increment() { root_plus_size_.increment(); }
+      inline void decrement() { root_plus_size_.decrement(); }
+      inline void swap(data_t& rhs) { root_plus_size_.swap(rhs.root_plus_size_); }
    } data_;
 
-   size_traits &priv_size_traits()
-   {  return data_.root_plus_size_;  }
-
-   const size_traits &priv_size_traits() const
-   {  return data_.root_plus_size_;  }
-
-   const value_traits &priv_value_traits() const
-   {  return data_;  }
-
-   value_traits &priv_value_traits()
-   {  return data_;  }
-
-   typedef typename boost::intrusive::value_traits_pointers
-      <ValueTraits>::const_value_traits_ptr const_value_traits_ptr;
+   using const_value_traits_ptr = typename boost::intrusive::value_traits_pointers
+      <ValueTraits>::const_value_traits_ptr;
 
    const_value_traits_ptr priv_value_traits_ptr() const
-   {  return pointer_traits<const_value_traits_ptr>::pointer_to(this->priv_value_traits());  }
+   {  return pointer_traits<const_value_traits_ptr>::pointer_to(data_);  }
 
    /// @endcond
 
@@ -179,8 +171,8 @@ class list_impl
    list_impl()
       :  data_(value_traits())
    {
-      this->priv_size_traits().set_size(size_type(0));
-      node_algorithms::init_header(this->get_root_node());
+      data_.set_size(0);
+      node_algorithms::init_header(data_.get_root_node());
    }
 
    //! <b>Effects</b>: constructs an empty list.
@@ -192,8 +184,8 @@ class list_impl
    explicit list_impl(const value_traits &v_traits)
       :  data_(v_traits)
    {
-      this->priv_size_traits().set_size(size_type(0));
-      node_algorithms::init_header(this->get_root_node());
+      data_.set_size(0);
+      node_algorithms::init_header(data_.get_root_node());
    }
 
    //! <b>Requires</b>: Dereferencing iterator must yield an lvalue of type value_type.
@@ -209,8 +201,8 @@ class list_impl
       :  data_(v_traits)
    {
       //nothrow, no need to rollback to release elements on exception
-      this->priv_size_traits().set_size(size_type(0));
-      node_algorithms::init_header(this->get_root_node());
+      data_.set_size(0);
+      node_algorithms::init_header(data_.get_root_node());
       //nothrow, no need to rollback to release elements on exception
       this->insert(this->cend(), b, e);
    }
@@ -224,18 +216,18 @@ class list_impl
    //! <b>Throws</b>: If value_traits::node_traits::node's
    //!   move constructor throws (this does not happen with predefined Boost.Intrusive hooks)
    //!   or the move constructor of value traits throws.
-   list_impl(BOOST_RV_REF(list_impl) x)
-      : data_(::boost::move(x.priv_value_traits()))
+   list_impl(list_impl &&x)
+      : data_(std::move(x.data_))
    {
-      this->priv_size_traits().set_size(size_type(0));
-      node_algorithms::init_header(this->get_root_node());
+      data_.set_size(0);
+      node_algorithms::init_header(data_.get_root_node());
       //nothrow, no need to rollback to release elements on exception
       this->swap(x);
    }
 
    //! <b>Effects</b>: Equivalent to swap
    //!
-   list_impl& operator=(BOOST_RV_REF(list_impl) x)
+   list_impl& operator=(list_impl &&x)
    {  this->swap(x); return *this;  }
 
    //! <b>Effects</b>: If it's not a safe-mode or an auto-unlink value_type
@@ -249,9 +241,9 @@ class list_impl
    //!   it's a safe-mode or auto-unlink value . Otherwise constant.
    ~list_impl()
    {
-      if(is_safe_autounlink<ValueTraits::link_mode>::value){
+      if constexpr (is_safe_autounlink(ValueTraits::link_mode)){
          this->clear();
-         node_algorithms::init(this->get_root_node());
+         node_algorithms::init(data_.get_root_node());
       }
    }
 
@@ -267,10 +259,10 @@ class list_impl
    //! <b>Note</b>: Does not affect the validity of iterators and references.
    void push_back(reference value)
    {
-      node_ptr to_insert = priv_value_traits().to_node_ptr(value);
+      node_ptr to_insert = data_.to_node_ptr(value);
       BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(!safemode_or_autounlink || node_algorithms::inited(to_insert));
-      node_algorithms::link_before(this->get_root_node(), to_insert);
-      this->priv_size_traits().increment();
+      node_algorithms::link_before(data_.get_root_node(), to_insert);
+      data_.increment();
    }
 
    //! <b>Requires</b>: value must be an lvalue.
@@ -285,10 +277,10 @@ class list_impl
    //! <b>Note</b>: Does not affect the validity of iterators and references.
    void push_front(reference value)
    {
-      node_ptr to_insert = priv_value_traits().to_node_ptr(value);
+      node_ptr to_insert = data_.to_node_ptr(value);
       BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(!safemode_or_autounlink || node_algorithms::inited(to_insert));
-      node_algorithms::link_before(node_traits::get_next(this->get_root_node()), to_insert);
-      this->priv_size_traits().increment();
+      node_algorithms::link_before(node_traits::get_next(data_.get_root_node()), to_insert);
+      data_.increment();
    }
 
    //! <b>Effects</b>: Erases the last element of the list.
@@ -316,12 +308,12 @@ class list_impl
    template<class Disposer>
    void pop_back_and_dispose(Disposer disposer)
    {
-      node_ptr to_erase = node_traits::get_previous(this->get_root_node());
+      node_ptr to_erase = node_traits::get_previous(data_.get_root_node());
       node_algorithms::unlink(to_erase);
-      this->priv_size_traits().decrement();
-      if(safemode_or_autounlink)
+      data_.decrement();
+      if constexpr (safemode_or_autounlink)
          node_algorithms::init(to_erase);
-      disposer(priv_value_traits().to_value_ptr(to_erase));
+      disposer(data_.to_value_ptr(to_erase));
    }
 
    //! <b>Effects</b>: Erases the first element of the list.
@@ -349,12 +341,12 @@ class list_impl
    template<class Disposer>
    void pop_front_and_dispose(Disposer disposer)
    {
-      node_ptr to_erase = node_traits::get_next(this->get_root_node());
+      node_ptr to_erase = node_traits::get_next(data_.get_root_node());
       node_algorithms::unlink(to_erase);
-      this->priv_size_traits().decrement();
-      if(safemode_or_autounlink)
+      data_.decrement();
+      if constexpr (safemode_or_autounlink)
          node_algorithms::init(to_erase);
-      disposer(priv_value_traits().to_value_ptr(to_erase));
+      disposer(data_.to_value_ptr(to_erase));
    }
 
    //! <b>Effects</b>: Returns a reference to the first element of the list.
@@ -363,7 +355,7 @@ class list_impl
    //!
    //! <b>Complexity</b>: Constant.
    reference front()
-   { return *priv_value_traits().to_value_ptr(node_traits::get_next(this->get_root_node())); }
+   { return *data_.to_value_ptr(node_traits::get_next(data_.get_root_node())); }
 
    //! <b>Effects</b>: Returns a const_reference to the first element of the list.
    //!
@@ -371,7 +363,7 @@ class list_impl
    //!
    //! <b>Complexity</b>: Constant.
    const_reference front() const
-   { return *priv_value_traits().to_value_ptr(node_traits::get_next(this->get_root_node())); }
+   { return *data_.to_value_ptr(node_traits::get_next(data_.get_root_node())); }
 
    //! <b>Effects</b>: Returns a reference to the last element of the list.
    //!
@@ -379,7 +371,7 @@ class list_impl
    //!
    //! <b>Complexity</b>: Constant.
    reference back()
-   { return *priv_value_traits().to_value_ptr(node_traits::get_previous(this->get_root_node())); }
+   { return *data_.to_value_ptr(node_traits::get_previous(data_.get_root_node())); }
 
    //! <b>Effects</b>: Returns a const_reference to the last element of the list.
    //!
@@ -387,7 +379,7 @@ class list_impl
    //!
    //! <b>Complexity</b>: Constant.
    const_reference back() const
-   { return *priv_value_traits().to_value_ptr(detail::uncast(node_traits::get_previous(this->get_root_node()))); }
+   { return *data_.to_value_ptr(detail::uncast(node_traits::get_previous(data_.get_root_node()))); }
 
    //! <b>Effects</b>: Returns an iterator to the first element contained in the list.
    //!
@@ -395,7 +387,7 @@ class list_impl
    //!
    //! <b>Complexity</b>: Constant.
    iterator begin()
-   { return iterator(node_traits::get_next(this->get_root_node()), this->priv_value_traits_ptr()); }
+   { return iterator(node_traits::get_next(data_.get_root_node()), this->priv_value_traits_ptr()); }
 
    //! <b>Effects</b>: Returns a const_iterator to the first element contained in the list.
    //!
@@ -411,7 +403,7 @@ class list_impl
    //!
    //! <b>Complexity</b>: Constant.
    const_iterator cbegin() const
-   { return const_iterator(node_traits::get_next(this->get_root_node()), this->priv_value_traits_ptr()); }
+   { return const_iterator(node_traits::get_next(data_.get_root_node()), this->priv_value_traits_ptr()); }
 
    //! <b>Effects</b>: Returns an iterator to the end of the list.
    //!
@@ -419,7 +411,7 @@ class list_impl
    //!
    //! <b>Complexity</b>: Constant.
    iterator end()
-   { return iterator(this->get_root_node(), this->priv_value_traits_ptr()); }
+   { return iterator(data_.get_root_node(), this->priv_value_traits_ptr()); }
 
    //! <b>Effects</b>: Returns a const_iterator to the end of the list.
    //!
@@ -435,7 +427,7 @@ class list_impl
    //!
    //! <b>Complexity</b>: Constant.
    const_iterator cend() const
-   { return const_iterator(detail::uncast(this->get_root_node()), this->priv_value_traits_ptr()); }
+   { return const_iterator(detail::uncast(data_.get_root_node()), this->priv_value_traits_ptr()); }
 
    //! <b>Effects</b>: Returns a reverse_iterator pointing to the beginning
    //! of the reversed list.
@@ -521,12 +513,12 @@ class list_impl
    //!   if constant-time size option is disabled. Constant time otherwise.
    //!
    //! <b>Note</b>: Does not affect the validity of iterators and references.
-   size_type size() const
+   std::size_t size() const
    {
-      if(constant_time_size)
-         return this->priv_size_traits().get_size();
+      if constexpr (constant_time_size)
+         return data_.get_size();
       else
-         return node_algorithms::count(this->get_root_node()) - 1;
+         return node_algorithms::count(data_.get_root_node()) - 1;
    }
 
    //! <b>Effects</b>: Returns true if the list contains no elements.
@@ -537,7 +529,7 @@ class list_impl
    //!
    //! <b>Note</b>: Does not affect the validity of iterators and references.
    bool empty() const
-   {  return node_algorithms::unique(this->get_root_node());   }
+   {  return node_algorithms::unique(data_.get_root_node());   }
 
    //! <b>Effects</b>: Swaps the elements of x and *this.
    //!
@@ -548,8 +540,7 @@ class list_impl
    //! <b>Note</b>: Does not affect the validity of iterators and references.
    void swap(list_impl& other)
    {
-      node_algorithms::swap_nodes(this->get_root_node(), other.get_root_node());
-      this->priv_size_traits().swap(other.priv_size_traits());
+      data_.swap(other.data_);
    }
 
    //! <b>Effects</b>: Moves backwards all the elements, so that the first
@@ -561,8 +552,8 @@ class list_impl
    //! <b>Complexity</b>: Linear to the number of shifts.
    //!
    //! <b>Note</b>: Does not affect the validity of iterators and references.
-   void shift_backwards(size_type n = 1)
-   {  node_algorithms::move_forward(this->get_root_node(), n);  }
+   void shift_backwards(std::size_t n = 1)
+   {  node_algorithms::move_forward(data_.get_root_node(), n);  }
 
    //! <b>Effects</b>: Moves forward all the elements, so that the second
    //!   element becomes the first, the third becomes the second...
@@ -573,8 +564,8 @@ class list_impl
    //! <b>Complexity</b>: Linear to the number of shifts.
    //!
    //! <b>Note</b>: Does not affect the validity of iterators and references.
-   void shift_forward(size_type n = 1)
-   {  node_algorithms::move_backwards(this->get_root_node(), n);  }
+   void shift_forward(std::size_t n = 1)
+   {  node_algorithms::move_backwards(data_.get_root_node(), n);  }
 
    //! <b>Effects</b>: Erases the element pointed by i of the list.
    //!   No destructors are called.
@@ -608,7 +599,7 @@ class list_impl
    //!   erased elements.
    iterator erase(const_iterator b, const_iterator e)
    {
-      if(safemode_or_autounlink || constant_time_size){
+      if constexpr (safemode_or_autounlink || constant_time_size){
          return this->erase_and_dispose(b, e, detail::null_disposer());
       }
       else{
@@ -633,15 +624,15 @@ class list_impl
    //!
    //! <b>Note</b>: Invalidates the iterators (but not the references) to the
    //!   erased elements.
-   iterator erase(const_iterator b, const_iterator e, size_type n)
+   iterator erase(const_iterator b, const_iterator e, std::size_t n)
    {
       BOOST_INTRUSIVE_INVARIANT_ASSERT(node_algorithms::distance(b.pointed_node(), e.pointed_node()) == n);
-      if(safemode_or_autounlink || constant_time_size){
+      if constexpr (safemode_or_autounlink || constant_time_size) {
          return this->erase_and_dispose(b, e, detail::null_disposer());
       }
-      else{
-         if(constant_time_size){
-            this->priv_size_traits().decrease(n);
+      else {
+         if constexpr (constant_time_size) {
+            data_.decrease(n);
          }
          node_algorithms::unlink(b.pointed_node(), e.pointed_node());
          return e.unconst();
@@ -668,10 +659,10 @@ class list_impl
       node_ptr to_erase(i.pointed_node());
       ++i;
       node_algorithms::unlink(to_erase);
-      this->priv_size_traits().decrement();
-      if(safemode_or_autounlink)
+      data_.decrement();
+      if constexpr (safemode_or_autounlink)
          node_algorithms::init(to_erase);
-      disposer(this->priv_value_traits().to_value_ptr(to_erase));
+      disposer(data_.to_value_ptr(to_erase));
       return i.unconst();
    }
 
@@ -703,10 +694,10 @@ class list_impl
       while(bp != ep){
          node_ptr to_erase(bp);
          bp = node_traits::get_next(bp);
-         if(safemode_or_autounlink)
+         if constexpr (safemode_or_autounlink)
             node_algorithms::init(to_erase);
-         disposer(priv_value_traits().to_value_ptr(to_erase));
-         this->priv_size_traits().decrement();
+         disposer(data_.to_value_ptr(to_erase));
+         data_.decrement();
       }
       return e.unconst();
    }
@@ -722,12 +713,12 @@ class list_impl
    //! <b>Note</b>: Invalidates the iterators (but not the references) to the erased elements.
    void clear()
    {
-      if(safemode_or_autounlink){
+      if constexpr (safemode_or_autounlink) {
          this->clear_and_dispose(detail::null_disposer());
       }
       else{
-         node_algorithms::init_header(this->get_root_node());
-         this->priv_size_traits().set_size(size_type(0));
+         node_algorithms::init_header(data_.get_root_node());
+         data_.set_size(0);
       }
    }
 
@@ -749,12 +740,12 @@ class list_impl
       while(it != itend){
          node_ptr to_erase(it.pointed_node());
          ++it;
-         if(safemode_or_autounlink)
+         if constexpr (safemode_or_autounlink)
             node_algorithms::init(to_erase);
-         disposer(priv_value_traits().to_value_ptr(to_erase));
+         disposer(data_.to_value_ptr(to_erase));
       }
-      node_algorithms::init_header(this->get_root_node());
-      this->priv_size_traits().set_size(0);
+      node_algorithms::init_header(data_.get_root_node());
+      data_.set_size(0);
    }
 
    //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
@@ -799,7 +790,7 @@ class list_impl
    //!
    //! <b>Throws</b>: If cloner throws. Basic guarantee.
    template <class Cloner, class Disposer>
-   void clone_from(BOOST_RV_REF(list_impl) src, Cloner cloner, Disposer disposer)
+   void clone_from(list_impl &&src, Cloner cloner, Disposer disposer)
    {
       this->clear_and_dispose(disposer);
       detail::exception_disposer<list_impl, Disposer>
@@ -824,10 +815,10 @@ class list_impl
    //! <b>Note</b>: Does not affect the validity of iterators and references.
    iterator insert(const_iterator p, reference value)
    {
-      node_ptr to_insert = this->priv_value_traits().to_node_ptr(value);
+      node_ptr to_insert = data_.to_node_ptr(value);
       BOOST_INTRUSIVE_SAFE_HOOK_DEFAULT_ASSERT(!safemode_or_autounlink || node_algorithms::inited(to_insert));
       node_algorithms::link_before(p.pointed_node(), to_insert);
-      this->priv_size_traits().increment();
+      data_.increment();
       return iterator(to_insert, this->priv_value_traits_ptr());
    }
 
@@ -910,10 +901,8 @@ class list_impl
       if(!x.empty()){
          node_algorithms::transfer
             (p.pointed_node(), x.begin().pointed_node(), x.end().pointed_node());
-         size_traits &thist = this->priv_size_traits();
-         size_traits &xt = x.priv_size_traits();
-         thist.increase(xt.get_size());
-         xt.set_size(size_type(0));
+         data_.increase(x.data_.get_size());
+         x.data_.set_size(0);
       }
    }
 
@@ -933,8 +922,8 @@ class list_impl
    void splice(const_iterator p, list_impl&x, const_iterator new_ele)
    {
       node_algorithms::transfer(p.pointed_node(), new_ele.pointed_node());
-      x.priv_size_traits().decrement();
-      this->priv_size_traits().increment();
+      x.data_.decrement();
+      this->data_.increment();
    }
 
    //! <b>Requires</b>: p must be a valid iterator of *this.
@@ -952,7 +941,7 @@ class list_impl
    //!   list. Iterators of this list and all the references are not invalidated.
    void splice(const_iterator p, list_impl&x, const_iterator f, const_iterator e)
    {
-      if(constant_time_size)
+      if constexpr (constant_time_size)
          this->splice(p, x, f, e, node_algorithms::distance(f.pointed_node(), e.pointed_node()));
       else
          this->splice(p, x, f, e, 1);//intrusive::iterator_distance is a dummy value
@@ -971,16 +960,14 @@ class list_impl
    //!
    //! <b>Note</b>: Iterators of values obtained from list x now point to elements of this
    //!   list. Iterators of this list and all the references are not invalidated.
-   void splice(const_iterator p, list_impl&x, const_iterator f, const_iterator e, size_type n)
+   void splice(const_iterator p, list_impl&x, const_iterator f, const_iterator e, std::size_t n)
    {
-      if(n){
-         if(constant_time_size){
+      if (n) {
+         if constexpr (constant_time_size) {
             BOOST_INTRUSIVE_INVARIANT_ASSERT(n == node_algorithms::distance(f.pointed_node(), e.pointed_node()));
             node_algorithms::transfer(p.pointed_node(), f.pointed_node(), e.pointed_node());
-            size_traits &thist = this->priv_size_traits();
-            size_traits &xt = x.priv_size_traits();
-            thist.increase(n);
-            xt.decrease(n);
+            data_.increase(n);
+            x.data_.decrease(n);
          }
          else{
             node_algorithms::transfer(p.pointed_node(), f.pointed_node(), e.pointed_node());
@@ -1020,10 +1007,10 @@ class list_impl
    template<class Predicate>
    void sort(Predicate p)
    {
-      if(node_traits::get_next(this->get_root_node())
-         != node_traits::get_previous(this->get_root_node())){
-         list_impl carry(this->priv_value_traits());
-         detail::array_initializer<list_impl, 64> counter(this->priv_value_traits());
+      if (node_traits::get_next(data_.get_root_node())
+         != node_traits::get_previous(data_.get_root_node())) {
+         list_impl carry(data_);
+         detail::array_initializer<list_impl, 64> counter(data_);
          int fill = 0;
          while(!this->empty()){
             carry.splice(carry.cbegin(), *this, this->cbegin());
@@ -1086,7 +1073,7 @@ class list_impl
             break;
          }
          else{
-            size_type n(0);
+            std::size_t n(0);
             do{
                ++ix; ++n;
             } while(ix != ex && p(*ix, *b));
@@ -1103,7 +1090,7 @@ class list_impl
    //!
    //! <b>Note</b>: Iterators and references are not invalidated
    void reverse()
-   {  node_algorithms::reverse(this->get_root_node());   }
+   {  node_algorithms::reverse(data_.get_root_node());   }
 
    //! <b>Effects</b>: Removes all the elements that compare equal to value.
    //!   No destructors are called.
@@ -1115,7 +1102,7 @@ class list_impl
    //! <b>Note</b>: The relative order of elements that are not removed is unchanged,
    //!   and iterators to elements that are not removed remain valid.
    void remove(const_reference value)
-   {  this->remove_if(detail::equal_to_value<const_reference>(value));  }
+   {  this->remove_if(std::reference_wrapper<const_reference>(value));  }
 
    //! <b>Requires</b>: Disposer::operator()(pointer) shouldn't throw.
    //!
@@ -1130,7 +1117,7 @@ class list_impl
    //!   and iterators to elements that are not removed remain valid.
    template<class Disposer>
    void remove_and_dispose(const_reference value, Disposer disposer)
-   {  this->remove_and_dispose_if(detail::equal_to_value<const_reference>(value), disposer);  }
+   {  this->remove_and_dispose_if(std::reference_wrapper<const_reference>(value), disposer);  }
 
    //! <b>Effects</b>: Removes all the elements for which a specified
    //!   predicate is satisfied. No destructors are called.
@@ -1144,10 +1131,9 @@ class list_impl
    template<class Pred>
    void remove_if(Pred pred)
    {
-      const node_ptr root_node = this->get_root_node();
-      typename node_algorithms::stable_partition_info info;
-      node_algorithms::stable_partition
-         (node_traits::get_next(root_node), root_node, detail::key_nodeptr_comp<Pred, value_traits>(pred, &this->priv_value_traits()), info);
+      const node_ptr root_node = data_.get_root_node();
+      auto info = node_algorithms::stable_partition
+         (node_traits::get_next(root_node), root_node, detail::key_nodeptr_comp<Pred, value_traits>(pred, &data_));
       //Invariants preserved by stable_partition so erase can be safely called
       //The first element might have changed so calculate it again
       this->erase( const_iterator(node_traits::get_next(root_node), this->priv_value_traits_ptr())
@@ -1170,10 +1156,9 @@ class list_impl
    template<class Pred, class Disposer>
    void remove_and_dispose_if(Pred pred, Disposer disposer)
    {
-      const node_ptr root_node = this->get_root_node();
-      typename node_algorithms::stable_partition_info info;
-      node_algorithms::stable_partition
-         (node_traits::get_next(root_node), root_node, detail::key_nodeptr_comp<Pred, value_traits>(pred, &this->priv_value_traits()), info);
+      const node_ptr root_node = data_.get_root_node();
+      auto info = node_algorithms::stable_partition
+         (node_traits::get_next(root_node), root_node, detail::key_nodeptr_comp<Pred, value_traits>(pred, &data_));
       //Invariants preserved by stable_partition so erase can be safely called
       //The first element might have changed so calculate it again
       this->erase_and_dispose( const_iterator(node_traits::get_next(root_node), this->priv_value_traits_ptr())
@@ -1269,7 +1254,7 @@ class list_impl
    //!   is stateless.
    static iterator s_iterator_to(reference value)
    {
-      BOOST_STATIC_ASSERT((!stateful_value_traits));
+      static_assert(!stateful_value_traits);
       BOOST_INTRUSIVE_INVARIANT_ASSERT(!node_algorithms::inited(value_traits::to_node_ptr(value)));
       return iterator(value_traits::to_node_ptr(value), const_value_traits_ptr());
    }
@@ -1287,7 +1272,7 @@ class list_impl
    //!   is stateless.
    static const_iterator s_iterator_to(const_reference value)
    {
-      BOOST_STATIC_ASSERT((!stateful_value_traits));
+      static_assert(!stateful_value_traits);
       reference r =*detail::uncast(pointer_traits<const_pointer>::pointer_to(value));
       BOOST_INTRUSIVE_INVARIANT_ASSERT(!node_algorithms::inited(value_traits::to_node_ptr(r)));
       return const_iterator(value_traits::to_node_ptr(r), const_value_traits_ptr());
@@ -1304,8 +1289,8 @@ class list_impl
    //! <b>Note</b>: Iterators and references are not invalidated.
    iterator iterator_to(reference value)
    {
-      BOOST_INTRUSIVE_INVARIANT_ASSERT(!node_algorithms::inited(this->priv_value_traits().to_node_ptr(value)));
-      return iterator(this->priv_value_traits().to_node_ptr(value), this->priv_value_traits_ptr());
+      BOOST_INTRUSIVE_INVARIANT_ASSERT(!node_algorithms::inited(data_.to_node_ptr(value)));
+      return iterator(data_.to_node_ptr(value), this->priv_value_traits_ptr());
    }
 
    //! <b>Requires</b>: value must be a const reference to a value inserted in a list.
@@ -1320,8 +1305,8 @@ class list_impl
    const_iterator iterator_to(const_reference value) const
    {
       reference r = *detail::uncast(pointer_traits<const_pointer>::pointer_to(value));
-      BOOST_INTRUSIVE_INVARIANT_ASSERT(!node_algorithms::inited(this->priv_value_traits().to_node_ptr(r)));
-      return const_iterator(this->priv_value_traits().to_node_ptr(r), this->priv_value_traits_ptr());
+      BOOST_INTRUSIVE_INVARIANT_ASSERT(!node_algorithms::inited(data_.to_node_ptr(r)));
+      return const_iterator(data_.to_node_ptr(r), this->priv_value_traits_ptr());
    }
 
    //! <b>Effects</b>: Asserts the integrity of the container.
@@ -1332,7 +1317,7 @@ class list_impl
    //!   Experimental function, interface might change in future versions.
    void check() const
    {
-      const_node_ptr header_ptr = get_root_node();
+      const_node_ptr header_ptr = data_.get_root_node();
       // header's next and prev are never null
       BOOST_INTRUSIVE_INVARIANT_ASSERT(node_traits::get_next(header_ptr));
       BOOST_INTRUSIVE_INVARIANT_ASSERT(node_traits::get_previous(header_ptr));
@@ -1341,8 +1326,8 @@ class list_impl
          == (node_traits::get_previous(header_ptr) == header_ptr));
       if (node_traits::get_next(header_ptr) == header_ptr)
       {
-         if (constant_time_size)
-            BOOST_INTRUSIVE_INVARIANT_ASSERT(this->priv_size_traits().get_size() == 0);
+         if constexpr (constant_time_size)
+            BOOST_INTRUSIVE_INVARIANT_ASSERT(data_.get_size() == 0);
          return;
       }
       size_t node_count = 0;
@@ -1356,23 +1341,23 @@ class list_impl
          if (p == header_ptr) break;
          ++node_count;
       }
-      if (constant_time_size)
-         BOOST_INTRUSIVE_INVARIANT_ASSERT(this->priv_size_traits().get_size() == node_count);
+      if constexpr (constant_time_size)
+         BOOST_INTRUSIVE_INVARIANT_ASSERT(data_.get_size() == node_count);
    }
 
    friend bool operator==(const list_impl &x, const list_impl &y)
    {
-      if(constant_time_size && x.size() != y.size()){
+      if (constant_time_size && x.size() != y.size()) {
          return false;
       }
-      return ::boost::intrusive::algo_equal(x.cbegin(), x.cend(), y.cbegin(), y.cend());
+      return std::equal(x.cbegin(), x.cend(), y.cbegin(), y.cend());
    }
 
    friend bool operator!=(const list_impl &x, const list_impl &y)
    {  return !(x == y); }
 
    friend bool operator<(const list_impl &x, const list_impl &y)
-   {  return ::boost::intrusive::algo_lexicographical_compare(x.begin(), x.end(), y.begin(), y.end());  }
+   {  return std::lexicographical_compare(x.begin(), x.end(), y.begin(), y.end());  }
 
    friend bool operator>(const list_impl &x, const list_impl &y)
    {  return y < x;  }
@@ -1391,7 +1376,7 @@ class list_impl
    private:
    static list_impl &priv_container_from_end_iterator(const const_iterator &end_iterator)
    {
-      BOOST_STATIC_ASSERT((has_container_from_iterator));
+      static_assert(has_container_from_iterator);
       node_ptr p = end_iterator.pointed_node();
       header_holder_type* h = header_holder_type::get_holder(p);
       root_plus_size* r = detail::parent_from_member
@@ -1407,102 +1392,74 @@ class list_impl
 
 //! Helper metafunction to define a \c list that yields to the same type when the
 //! same options (either explicitly or implicitly) are used.
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) || defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template<class T, class ...Options>
-#else
-template<class T, class O1 = void, class O2 = void, class O3 = void, class O4 = void>
-#endif
 struct make_list
 {
    /// @cond
    typedef typename pack_options
       < list_defaults,
-         #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-         O1, O2, O3, O4
-         #else
          Options...
-         #endif
       >::type packed_options;
 
-   typedef typename detail::get_value_traits
-      <T, typename packed_options::proto_value_traits>::type value_traits;
-   typedef list_impl
+   using value_traits = detail::get_value_traits_t<T, typename packed_options::proto_value_traits>;
+   using type = list_impl
       <
          value_traits,
-         typename packed_options::size_type,
          packed_options::constant_time_size,
          typename packed_options::header_holder_type
-      > implementation_defined;
+      >;
    /// @endcond
-   typedef implementation_defined type;
 };
 
 
 #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
-#if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-template<class T, class O1, class O2, class O3, class O4>
-#else
 template<class T, class ...Options>
-#endif
 class list
    :  public make_list<T,
-      #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-      O1, O2, O3, O4
-      #else
       Options...
-      #endif
    >::type
 {
-   typedef typename make_list
-      <T,
-      #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-      O1, O2, O3, O4
-      #else
-      Options...
-      #endif
-      >::type      Base;
+   using Base = typename make_list<T, Options...>::type;
    //Assert if passed value traits are compatible with the type
-   BOOST_STATIC_ASSERT((detail::is_same<typename Base::value_traits::value_type, T>::value));
-   BOOST_MOVABLE_BUT_NOT_COPYABLE(list)
+   static_assert(std::is_same_v<typename Base::value_traits::value_type, T>);
 
    public:
-   typedef typename Base::value_traits          value_traits;
-   typedef typename Base::iterator              iterator;
-   typedef typename Base::const_iterator        const_iterator;
+   using value_traits = typename Base::value_traits;
+   using iterator = typename Base::iterator;
+   using const_iterator = typename Base::const_iterator;
 
-   BOOST_INTRUSIVE_FORCEINLINE list()
+   inline list()
       :  Base()
    {}
 
-   BOOST_INTRUSIVE_FORCEINLINE explicit list(const value_traits &v_traits)
+   inline explicit list(const value_traits &v_traits)
       :  Base(v_traits)
    {}
 
    template<class Iterator>
-   BOOST_INTRUSIVE_FORCEINLINE list(Iterator b, Iterator e, const value_traits &v_traits = value_traits())
+   inline list(Iterator b, Iterator e, const value_traits &v_traits = value_traits())
       :  Base(b, e, v_traits)
    {}
+   list(const list&) = delete;
+   list& operator=(const list&) = delete;
+   inline list(list&& x) : Base(std::move(x)) {}
 
-   BOOST_INTRUSIVE_FORCEINLINE list(BOOST_RV_REF(list) x)
-      :  Base(BOOST_MOVE_BASE(Base, x))
-   {}
-
-   BOOST_INTRUSIVE_FORCEINLINE list& operator=(BOOST_RV_REF(list) x)
-   {  return static_cast<list &>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
+   inline list& operator=(list&& x)
+   {  return static_cast<list &>(this->Base::operator=(std::move(x)));  }
 
    template <class Cloner, class Disposer>
-   BOOST_INTRUSIVE_FORCEINLINE void clone_from(const list &src, Cloner cloner, Disposer disposer)
+   inline void clone_from(const list &src, Cloner cloner, Disposer disposer)
    {  Base::clone_from(src, cloner, disposer);  }
 
    template <class Cloner, class Disposer>
-   BOOST_INTRUSIVE_FORCEINLINE void clone_from(BOOST_RV_REF(list) src, Cloner cloner, Disposer disposer)
-   {  Base::clone_from(BOOST_MOVE_BASE(Base, src), cloner, disposer);  }
+   inline void clone_from(list&& src, Cloner cloner, Disposer disposer)
+   {  Base::clone_from(std::forward<list>(src), cloner, disposer);  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static list &container_from_end_iterator(iterator end_iterator)
+   inline static list &container_from_end_iterator(iterator end_iterator)
    {  return static_cast<list &>(Base::container_from_end_iterator(end_iterator));   }
 
-   BOOST_INTRUSIVE_FORCEINLINE static const list &container_from_end_iterator(const_iterator end_iterator)
+   inline static const list &container_from_end_iterator(const_iterator end_iterator)
    {  return static_cast<const list &>(Base::container_from_end_iterator(end_iterator));   }
 };
 
@@ -1510,7 +1467,5 @@ class list
 
 } //namespace intrusive
 } //namespace boost
-
-#include <boost/intrusive/detail/config_end.hpp>
 
 #endif //BOOST_INTRUSIVE_LIST_HPP

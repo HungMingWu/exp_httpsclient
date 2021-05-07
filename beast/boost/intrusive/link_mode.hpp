@@ -22,7 +22,7 @@ namespace intrusive {
 
 //!This enumeration defines the type of value_traits that can be defined
 //!for Boost.Intrusive containers
-enum link_mode_type{
+enum class link_mode_type {
    //!If this linking policy is specified in a value_traits class
    //!as the link_mode, containers
    //!configured with such value_traits won't set the hooks
@@ -45,17 +45,11 @@ enum link_mode_type{
    auto_unlink
 };
 
-#ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
-
-template <link_mode_type link_mode>
-struct is_safe_autounlink
+constexpr bool is_safe_autounlink(link_mode_type link_mode)
 {
-   static const bool value =
-      (int)link_mode == (int)auto_unlink   ||
-      (int)link_mode == (int)safe_link;
+   return link_mode == link_mode_type::auto_unlink ||
+          link_mode == link_mode_type::safe_link;
 };
-
-#endif   //BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
 } //namespace intrusive
 } //namespace boost

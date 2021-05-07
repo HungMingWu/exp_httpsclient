@@ -21,7 +21,6 @@
 #  pragma once
 #endif
 
-#include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/detail/iterator.hpp>
 #include <boost/intrusive/detail/mpl.hpp>
 
@@ -54,9 +53,8 @@ class reverse_iterator
    {}
 
    template<class OtherIt>
-   reverse_iterator( const reverse_iterator<OtherIt>& r
-                   , typename boost::intrusive::detail::enable_if_convertible<OtherIt, It>::type* =0
-                   )
+   reverse_iterator( const reverse_iterator<OtherIt>& r)
+   requires (std::is_convertible_v<OtherIt, It>)
       : m_current(r.base())
    {}
 
@@ -64,8 +62,8 @@ class reverse_iterator
    {  m_current = r.base();   return *this;  }
 
    template<class OtherIt>
-   typename boost::intrusive::detail::enable_if_convertible<OtherIt, It, reverse_iterator &>::type
-         operator=( const reverse_iterator<OtherIt>& r)
+   reverse_iterator operator=( const reverse_iterator<OtherIt>& r)
+   requires (std::is_convertible_v<OtherIt, It>)
    {  m_current = r.base();   return *this;  }
 
    It base() const
@@ -159,7 +157,5 @@ class reverse_iterator
 
 } //namespace intrusive {
 } //namespace boost {
-
-#include <boost/intrusive/detail/config_end.hpp>
 
 #endif //BOOST_INTRUSIVE_DETAIL_REVERSE_ITERATOR_HPP

@@ -168,10 +168,10 @@ private:
     struct element
         : public boost::intrusive::list_base_hook<
             boost::intrusive::link_mode<
-                boost::intrusive::normal_link>>
+                boost::intrusive::link_mode_type::normal_link>>
         , public boost::intrusive::set_base_hook<
             boost::intrusive::link_mode<
-                boost::intrusive::normal_link>>
+                boost::intrusive::link_mode_type::normal_link>>
         , public value_type
     {
         element(field name,

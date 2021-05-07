@@ -22,18 +22,17 @@
 #endif
 
 #include <boost/move/detail/config_begin.hpp>
-#include <boost/move/detail/workaround.hpp>
 #include <boost/move/detail/pointer_element.hpp>
 
 namespace boost {
 namespace movelib {
 
 template <class T>
-BOOST_MOVE_FORCEINLINE T* to_raw_pointer(T* p)
+inline T* to_raw_pointer(T* p)
 {  return p; }
 
 template <class Pointer>
-BOOST_MOVE_FORCEINLINE typename boost::movelib::pointer_element<Pointer>::type*
+inline boost::movelib::pointer_element_t<Pointer>*
 to_raw_pointer(const Pointer &p)
 {  return ::boost::movelib::to_raw_pointer(p.operator->());  }
 

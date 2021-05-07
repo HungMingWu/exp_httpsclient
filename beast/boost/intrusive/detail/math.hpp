@@ -223,14 +223,7 @@ inline float fast_log2 (float val)
    return val + static_cast<float>(log_2);
 }
 
-inline bool is_pow2(std::size_t x)
-{  return (x & (x-1)) == 0;  }
-
-template<std::size_t N>
-struct static_is_pow2
-{
-   static const bool value = (N & (N-1)) == 0;
-};
+constexpr bool is_pow2(std::size_t x) { return (x & (x-1)) == 0; }
 
 inline std::size_t ceil_log2 (std::size_t x)
 {
@@ -247,39 +240,28 @@ inline std::size_t previous_or_equal_pow2(std::size_t x)
    return std::size_t(1u) << floor_log2(x);
 }
 
-template<class SizeType, std::size_t N>
-struct numbits_eq
+template <typename SizeType>
+constexpr std::size_t get_size_value()
 {
-   static const bool value = sizeof(SizeType)*CHAR_BIT == N;
-};
+    constexpr std::size_t value = sizeof(SizeType) * CHAR_BIT;
+    if constexpr (value == 64) return 0xb504f333f9de6484ull;
+    else if constexpr (value == 32) return 0xb504f334;
+}
 
-template<class SizeType, class Enabler = void >
-struct sqrt2_pow_max;
-
-template <class SizeType>
-struct sqrt2_pow_max<SizeType, typename voider<typename enable_if< numbits_eq<SizeType, 32> >::type>::type>
+template <typename SizeType>
+constexpr std::size_t get_pow_value()
 {
-   static const SizeType value = 0xb504f334;
-   static const std::size_t pow   = 31;
-};
-
-#ifndef BOOST_NO_INT64_T
-
-template <class SizeType>
-struct sqrt2_pow_max<SizeType, typename voider<typename enable_if< numbits_eq<SizeType, 64> >::type>::type>
-{
-   static const SizeType value = 0xb504f333f9de6484ull;
-   static const std::size_t pow   = 63;
-};
-
-#endif   //BOOST_NO_INT64_T
+    constexpr std::size_t value = sizeof(SizeType) * CHAR_BIT;
+    if constexpr (value == 64) return 63;
+    else if constexpr (value == 32) return 31;
+}
 
 // Returns floor(pow(sqrt(2), x * 2 + 1)).
 // Defined for X from 0 up to the number of bits in size_t minus 1.
-inline std::size_t sqrt2_pow_2xplus1 (std::size_t x)
+constexpr std::size_t sqrt2_pow_2xplus1 (std::size_t x)
 {
-   const std::size_t value = (std::size_t)sqrt2_pow_max<std::size_t>::value;
-   const std::size_t pow   = (std::size_t)sqrt2_pow_max<std::size_t>::pow;
+   constexpr std::size_t value = get_size_value<std::size_t>();
+   constexpr std::size_t pow   = get_pow_value<std::size_t>();
    return (value >> (pow - x)) + 1;
 }
 

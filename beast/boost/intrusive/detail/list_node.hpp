@@ -22,7 +22,6 @@
 #  pragma once
 #endif
 
-#include <boost/intrusive/detail/workaround.hpp>
 #include <boost/intrusive/pointer_rebind.hpp>
 
 namespace boost {
@@ -35,7 +34,7 @@ namespace intrusive {
 template<class VoidPointer>
 struct list_node
 {
-   typedef typename pointer_rebind<VoidPointer, list_node>::type  node_ptr;
+   using node_ptr = pointer_rebind_t<VoidPointer, list_node>;
    node_ptr next_;
    node_ptr prev_;
 };
@@ -43,26 +42,26 @@ struct list_node
 template<class VoidPointer>
 struct list_node_traits
 {
-   typedef list_node<VoidPointer>      node;
-   typedef typename node::node_ptr     node_ptr;
-   typedef typename pointer_rebind<VoidPointer, const node>::type   const_node_ptr;
+   using node = list_node<VoidPointer>;
+   using node_ptr = typename node::node_ptr;
+   using const_node_ptr = pointer_rebind_t<VoidPointer, const node>;
 
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_previous(const const_node_ptr & n)
+   inline static node_ptr get_previous(const const_node_ptr & n)
    {  return n->prev_;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_previous(const node_ptr & n)
+   inline static node_ptr get_previous(const node_ptr & n)
    {  return n->prev_;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static void set_previous(node_ptr n, node_ptr prev)
+   inline static void set_previous(node_ptr n, node_ptr prev)
    {  n->prev_ = prev;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_next(const const_node_ptr & n)
+   inline static node_ptr get_next(const const_node_ptr & n)
    {  return n->next_;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr get_next(const node_ptr & n)
+   inline static node_ptr get_next(const node_ptr & n)
    {  return n->next_;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE static void set_next(node_ptr n, node_ptr next)
+   inline static void set_next(node_ptr n, node_ptr next)
    {  n->next_ = next;  }
 };
 

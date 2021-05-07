@@ -21,67 +21,59 @@
 #  pragma once
 #endif
 
-#include <boost/intrusive/detail/workaround.hpp>
-
 namespace boost {
 namespace intrusive {
 namespace detail {
 
-template<bool ConstantSize, class SizeType, class Tag = void>
+template <bool ConstantSize, class Tag = void>
 struct size_holder
 {
-   static const bool constant_time_size = ConstantSize;
-   typedef SizeType  size_type;
-
-   BOOST_INTRUSIVE_FORCEINLINE SizeType get_size() const
+   inline std::size_t get_size() const
    {  return size_;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE void set_size(SizeType size)
+   inline void set_size(std::size_t size)
    {  size_ = size; }
 
-   BOOST_INTRUSIVE_FORCEINLINE void decrement()
+   inline void decrement()
    {  --size_; }
 
-   BOOST_INTRUSIVE_FORCEINLINE void increment()
+   inline void increment()
    {  ++size_; }
 
-   BOOST_INTRUSIVE_FORCEINLINE void increase(SizeType n)
+   inline void increase(std::size_t n)
    {  size_ += n; }
 
-   BOOST_INTRUSIVE_FORCEINLINE void decrease(SizeType n)
+   inline void decrease(std::size_t n)
    {  size_ -= n; }
 
-   BOOST_INTRUSIVE_FORCEINLINE void swap(size_holder &other)
-   {  SizeType tmp(size_); size_ = other.size_; other.size_ = tmp; }
+   inline void swap(size_holder &other)
+   {  std::size_t tmp(size_); size_ = other.size_; other.size_ = tmp; }
 
-   SizeType size_;
+   std::size_t size_ = { 0 };
 };
 
-template<class SizeType, class Tag>
-struct size_holder<false, SizeType, Tag>
+template <class Tag>
+struct size_holder<false, Tag>
 {
-   static const bool constant_time_size = false;
-   typedef SizeType  size_type;
-
-   BOOST_INTRUSIVE_FORCEINLINE size_type get_size() const
+   inline std::size_t get_size() const
    {  return 0;  }
 
-   BOOST_INTRUSIVE_FORCEINLINE void set_size(size_type)
+   inline void set_size(std::size_t)
    {}
 
-   BOOST_INTRUSIVE_FORCEINLINE void decrement()
+   inline void decrement()
    {}
 
-   BOOST_INTRUSIVE_FORCEINLINE void increment()
+   inline void increment()
    {}
 
-   BOOST_INTRUSIVE_FORCEINLINE void increase(SizeType)
+   inline void increase(std::size_t)
    {}
 
-   BOOST_INTRUSIVE_FORCEINLINE void decrease(SizeType)
+   inline void decrease(std::size_t)
    {}
 
-   BOOST_INTRUSIVE_FORCEINLINE void swap(size_holder){}
+   inline void swap(size_holder){}
 };
 
 }  //namespace detail{

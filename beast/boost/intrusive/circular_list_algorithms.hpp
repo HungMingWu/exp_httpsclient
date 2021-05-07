@@ -14,7 +14,6 @@
 #ifndef BOOST_INTRUSIVE_CIRCULAR_LIST_ALGORITHMS_HPP
 #define BOOST_INTRUSIVE_CIRCULAR_LIST_ALGORITHMS_HPP
 
-#include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/intrusive_fwd.hpp>
 #include <boost/intrusive/detail/algo_type.hpp>
 #include <boost/core/no_exceptions_support.hpp>
@@ -56,10 +55,10 @@ template<class NodeTraits>
 class circular_list_algorithms
 {
    public:
-   typedef typename NodeTraits::node            node;
-   typedef typename NodeTraits::node_ptr        node_ptr;
-   typedef typename NodeTraits::const_node_ptr  const_node_ptr;
-   typedef NodeTraits                           node_traits;
+   using node = typename NodeTraits::node;
+   using node_ptr = typename NodeTraits::node_ptr;
+   using const_node_ptr = typename NodeTraits::const_node_ptr;
+   using node_traits = NodeTraits;
 
    //! <b>Effects</b>: Constructs an non-used list element, so that
    //! inited(this_node) == true
@@ -67,7 +66,7 @@ class circular_list_algorithms
    //! <b>Complexity</b>: Constant
    //!
    //! <b>Throws</b>: Nothing.
-   BOOST_INTRUSIVE_FORCEINLINE static void init(node_ptr this_node)
+   inline static void init(node_ptr this_node)
    {
       const node_ptr null_node = node_ptr();
       NodeTraits::set_next(this_node, null_node);
@@ -80,7 +79,7 @@ class circular_list_algorithms
    //! <b>Complexity</b>: Constant
    //!
    //! <b>Throws</b>: Nothing.
-   BOOST_INTRUSIVE_FORCEINLINE static bool inited(const const_node_ptr &this_node)
+   inline static bool inited(const const_node_ptr &this_node)
    {  return !NodeTraits::get_next(this_node); }
 
    //! <b>Effects</b>: Constructs an empty list, making this_node the only
@@ -91,7 +90,7 @@ class circular_list_algorithms
    //! <b>Complexity</b>: Constant
    //!
    //! <b>Throws</b>: Nothing.
-   BOOST_INTRUSIVE_FORCEINLINE static void init_header(node_ptr this_node)
+   inline static void init_header(node_ptr this_node)
    {
       NodeTraits::set_next(this_node, this_node);
       NodeTraits::set_previous(this_node, this_node);
@@ -106,7 +105,7 @@ class circular_list_algorithms
    //! <b>Complexity</b>: Constant
    //!
    //! <b>Throws</b>: Nothing.
-   BOOST_INTRUSIVE_FORCEINLINE static bool unique(const const_node_ptr &this_node)
+   inline static bool unique(const const_node_ptr &this_node)
    {
       node_ptr next = NodeTraits::get_next(this_node);
       return !next || next == this_node;
@@ -138,7 +137,7 @@ class circular_list_algorithms
    //! <b>Complexity</b>: Constant
    //!
    //! <b>Throws</b>: Nothing.
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr unlink(node_ptr this_node)
+   inline static node_ptr unlink(node_ptr this_node)
    {
       node_ptr next(NodeTraits::get_next(this_node));
       node_ptr prev(NodeTraits::get_previous(this_node));
@@ -154,7 +153,7 @@ class circular_list_algorithms
    //! <b>Complexity</b>: Constant
    //!
    //! <b>Throws</b>: Nothing.
-   BOOST_INTRUSIVE_FORCEINLINE static void unlink(node_ptr b, node_ptr e)
+   inline static void unlink(node_ptr b, node_ptr e)
    {
       if (b != e) {
          node_ptr prevb(NodeTraits::get_previous(b));
@@ -170,7 +169,7 @@ class circular_list_algorithms
    //! <b>Complexity</b>: Constant
    //!
    //! <b>Throws</b>: Nothing.
-   BOOST_INTRUSIVE_FORCEINLINE static void link_before(node_ptr nxt_node, node_ptr this_node)
+   inline static void link_before(node_ptr nxt_node, node_ptr this_node)
    {
       node_ptr prev(NodeTraits::get_previous(nxt_node));
       NodeTraits::set_previous(this_node, prev);
@@ -189,7 +188,7 @@ class circular_list_algorithms
    //! <b>Complexity</b>: Constant
    //!
    //! <b>Throws</b>: Nothing.
-   BOOST_INTRUSIVE_FORCEINLINE static void link_after(node_ptr prev_node, node_ptr this_node)
+   inline static void link_after(node_ptr prev_node, node_ptr this_node)
    {
       node_ptr next(NodeTraits::get_next(prev_node));
       NodeTraits::set_previous(this_node, prev_node);
@@ -378,7 +377,7 @@ class circular_list_algorithms
    };
 
    template<class Pred>
-   static void stable_partition(node_ptr beg, node_ptr end, Pred pred, stable_partition_info &info)
+   static stable_partition_info stable_partition(node_ptr beg, node_ptr end, Pred pred)
    {
       node_ptr bcur = node_traits::get_previous(beg);
       node_ptr cur  = beg;
@@ -397,7 +396,7 @@ class circular_list_algorithms
             new_f = cur;
             bcur = cur;
             cur  = node_traits::get_next(cur);
-            BOOST_TRY{
+            try {
                //Main loop
                while(cur != end){
                   if(pred(cur)){ //Might throw
@@ -418,31 +417,28 @@ class circular_list_algorithms
                   }
                }
             }
-            BOOST_CATCH(...){
+            catch (...){
                node_traits::set_next    (last_to_remove, new_f);
                node_traits::set_previous(new_f, last_to_remove);
-               BOOST_RETHROW;
+               throw;
             }
-            BOOST_CATCH_END
             node_traits::set_next(last_to_remove, new_f);
             node_traits::set_previous(new_f, last_to_remove);
             break;
          }
       }
-      info.num_1st_partition = num1;
-      info.num_2nd_partition = num2;
-      info.beg_2st_partition = new_f;
+      return { num1, num2, new_f };
    }
 
    private:
-   BOOST_INTRUSIVE_FORCEINLINE static void swap_prev(node_ptr this_node, node_ptr other_node)
+   inline static void swap_prev(node_ptr this_node, node_ptr other_node)
    {
       node_ptr temp(NodeTraits::get_previous(this_node));
       NodeTraits::set_previous(this_node, NodeTraits::get_previous(other_node));
       NodeTraits::set_previous(other_node, temp);
    }
 
-   BOOST_INTRUSIVE_FORCEINLINE static void swap_next(node_ptr this_node, node_ptr other_node)
+   inline static void swap_next(node_ptr this_node, node_ptr other_node)
    {
       node_ptr temp(NodeTraits::get_next(this_node));
       NodeTraits::set_next(this_node, NodeTraits::get_next(other_node));
@@ -462,7 +458,5 @@ struct get_algo<CircularListAlgorithms, NodeTraits>
 
 } //namespace intrusive
 } //namespace boost
-
-#include <boost/intrusive/detail/config_end.hpp>
 
 #endif //BOOST_INTRUSIVE_CIRCULAR_LIST_ALGORITHMS_HPP

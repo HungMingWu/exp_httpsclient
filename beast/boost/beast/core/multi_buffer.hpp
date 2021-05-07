@@ -79,7 +79,7 @@ class basic_multi_buffer
     class element
         : public boost::intrusive::list_base_hook<
             boost::intrusive::link_mode<
-                boost::intrusive::normal_link>>
+                boost::intrusive::link_mode_type::normal_link>>
     {
         using size_type = typename
             std::allocator_traits<Allocator>::size_type;

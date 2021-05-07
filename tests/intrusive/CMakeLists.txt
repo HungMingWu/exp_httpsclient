@@ -1,0 +1,45 @@
+add_executable(intrusive_tests  
+   any_test.cpp
+   avl_multiset_test.cpp
+   avl_set_test.cpp
+   bs_multiset_test.cpp
+   bs_set_test.cpp
+   container_size_test.cpp
+   custom_bucket_traits_test.cpp
+   default_hook_test.cpp
+   function_hook_test.cpp
+   list_test.cpp
+   main.cpp
+   make_functions_test.cpp
+   multiset_test.cpp
+   null_iterator_test.cpp
+   pack_options_test.cpp
+   parent_from_member_test.cpp
+   pointer_traits_test.cpp
+   recursive_test.cpp
+   scary_iterators_test.cpp
+   set_test.cpp
+   sg_multiset_test.cpp
+   sg_set_test.cpp
+   slist_test.cpp
+   splay_multiset_test.cpp
+   splay_set_test.cpp
+   stateful_value_traits_test.cpp
+   treap_multiset_test.cpp
+   treap_set_test.cpp
+   unordered_multiset_test.cpp
+   unordered_set_test.cpp
+   virtual_base_test.cpp
+   voidptr_key_test.cpp
+)
+
+target_link_libraries(intrusive_tests
+PRIVATE
+	beast
+)
+
+target_include_directories(intrusive_tests
+PRIVATE
+	inc/
+)
+

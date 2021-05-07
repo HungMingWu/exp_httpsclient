@@ -21,61 +21,75 @@
 #  pragma once
 #endif
 
-#if defined(_MSC_VER) && (_MSC_VER <= 1310)
+namespace boost::intrusive::detail {
 
-#include <boost/intrusive/detail/mpl.hpp>
+template <typename T, typename value_type, typename node_ptr>
+concept have_to_node_ptr_v = std::is_same_v<
+    decltype(std::declval<T>().to_node_ptr(std::declval<value_type&>())), node_ptr>;
 
-namespace boost {
-namespace intrusive {
-namespace detail {
+template <typename T, typename value_type, typename node_ptr>
+concept have_stateless_to_node_ptr_v =
+    std::is_same_v<decltype(T::to_node_ptr(std::declval<value_type&>())), node_ptr>;
 
-template<class ValueTraits>
+template <typename T, typename value_type, typename node_ptr>
+concept have_stateful_to_node_ptr_v = have_to_node_ptr_v<T, value_type, node_ptr>
+    && !have_stateless_to_node_ptr_v<T, value_type, node_ptr>;
+
+template <typename T, typename value_type, typename const_node_ptr>
+concept have_const_to_node_ptr_v = std::is_same_v<
+    decltype(std::declval<T>().to_node_ptr(std::declval<const value_type&>())), const_node_ptr>;
+
+template <typename T, typename value_type, typename const_node_ptr>
+concept have_stateless_const_to_const_node_ptr_v =
+std::is_same_v<decltype(T::to_node_ptr(std::declval<const value_type&>())), const_node_ptr>;
+
+template <typename T, typename value_type, typename const_node_ptr>
+concept have_stateful_const_to_node_ptr_v = have_const_to_node_ptr_v<T, value_type, const_node_ptr>
+    && !have_stateless_const_to_const_node_ptr_v<T, value_type, const_node_ptr>;
+
+template <typename T, typename node_ptr, typename pointer>
+concept have_to_value_ptr_v = std::is_same_v<
+    decltype(std::declval<T>().to_value_ptr(std::declval<node_ptr>())), pointer>;
+
+template <typename T, typename node_ptr, typename pointer>
+concept have_stateless_to_value_ptr_v =
+    std::is_same_v<decltype(T::to_value_ptr(std::declval<node_ptr>())), pointer>;
+
+template <typename T, typename node_ptr, typename pointer>
+concept have_stateful_to_value_ptr_v = have_to_value_ptr_v<T, node_ptr, pointer>
+    && !have_stateless_to_value_ptr_v<T, node_ptr, pointer>;
+
+template <typename T, typename const_node_ptr, typename const_pointer>
+concept have_const_to_value_ptr_v = std::is_same_v<
+    decltype(std::declval<T>().to_value_ptr(std::declval<const_node_ptr>())), const_pointer>;
+
+template <typename T, typename const_node_ptr, typename const_pointer>
+concept have_stateless_const_to_value_ptr_v =
+    std::is_same_v<decltype(T::to_value_ptr(std::declval<const_node_ptr>())), const_pointer>;
+
+template <typename T, typename const_node_ptr, typename const_pointer>
+concept have_stateful_const_to_value_ptr_v = have_const_to_value_ptr_v<T, const_node_ptr, const_pointer>
+    && !have_stateless_const_to_value_ptr_v<T, const_node_ptr, const_pointer>;
+
+template <typename value_traits>
 struct is_stateful_value_traits
 {
-   static const bool value = !detail::is_empty<ValueTraits>::value;
+   using node_ptr = typename value_traits::node_ptr;
+   using pointer = typename value_traits::pointer;
+   using value_type = typename value_traits::value_type;
+   using const_node_ptr = typename value_traits::const_node_ptr;
+   using const_pointer = typename value_traits::const_pointer;
+
+   static constexpr bool value =
+       have_stateful_to_node_ptr_v<value_traits, value_type, node_ptr> ||
+       have_stateful_to_value_ptr_v<value_traits, node_ptr, pointer> ||
+       have_stateful_const_to_node_ptr_v<value_traits, value_type, const_node_ptr> ||
+       have_stateful_const_to_value_ptr_v<value_traits, const_node_ptr, const_pointer>;
 };
 
-}}}
+template <typename value_traits>
+concept is_stateful_value_traits_v = is_stateful_value_traits<value_traits>::value;
 
-#else
-
-#include <boost/intrusive/detail/function_detector.hpp>
-
-BOOST_INTRUSIVE_CREATE_FUNCTION_DETECTOR(to_node_ptr, boost_intrusive)
-BOOST_INTRUSIVE_CREATE_FUNCTION_DETECTOR(to_value_ptr, boost_intrusive)
-
-namespace boost {
-namespace intrusive {
-namespace detail {
-
-template<class ValueTraits>
-struct is_stateful_value_traits
-{
-   typedef typename ValueTraits::node_ptr       node_ptr;
-   typedef typename ValueTraits::pointer        pointer;
-   typedef typename ValueTraits::value_type     value_type;
-   typedef typename ValueTraits::const_node_ptr const_node_ptr;
-   typedef typename ValueTraits::const_pointer  const_pointer;
-
-   typedef ValueTraits value_traits;
-
-   static const bool value =
-      (boost::intrusive::function_detector::NonStaticFunction ==
-         (BOOST_INTRUSIVE_DETECT_FUNCTION(ValueTraits, boost_intrusive, node_ptr, to_node_ptr, (value_type&) )))
-      ||
-      (boost::intrusive::function_detector::NonStaticFunction ==
-         (BOOST_INTRUSIVE_DETECT_FUNCTION(ValueTraits, boost_intrusive, pointer, to_value_ptr, (node_ptr) )))
-      ||
-      (boost::intrusive::function_detector::NonStaticFunction ==
-         (BOOST_INTRUSIVE_DETECT_FUNCTION(ValueTraits, boost_intrusive, const_node_ptr, to_node_ptr, (const value_type&) )))
-      ||
-      (boost::intrusive::function_detector::NonStaticFunction ==
-         (BOOST_INTRUSIVE_DETECT_FUNCTION(ValueTraits, boost_intrusive, const_pointer, to_value_ptr, (const_node_ptr) )))
-      ;
-};
-
-}}}
-
-#endif
+} // boost::intrusive::detail
 
 #endif   //@ifndef BOOST_INTRUSIVE_DETAIL_IS_STATEFUL_VALUE_TRAITS_HPP

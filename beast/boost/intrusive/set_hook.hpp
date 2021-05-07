@@ -14,7 +14,6 @@
 #ifndef BOOST_INTRUSIVE_SET_HOOK_HPP
 #define BOOST_INTRUSIVE_SET_HOOK_HPP
 
-#include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/intrusive_fwd.hpp>
 
 #include <boost/intrusive/detail/rbtree_node.hpp>
@@ -31,33 +30,27 @@ namespace intrusive {
 
 //! Helper metafunction to define a \c set_base_hook that yields to the same
 //! type when the same options (either explicitly or implicitly) are used.
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) || defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-template<class ...Options>
-#else
-template<class O1 = void, class O2 = void, class O3 = void, class O4 = void>
-#endif
+template <typename ...Options>
 struct make_set_base_hook
 {
    /// @cond
    typedef typename pack_options
       < hook_defaults,
-      #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-      O1, O2, O3, O4
-      #else
       Options...
-      #endif
       >::type packed_options;
 
-   typedef generic_hook
+   using type = generic_hook
    < RbTreeAlgorithms
    , rbtree_node_traits<typename packed_options::void_pointer, packed_options::optimize_size>
    , typename packed_options::tag
    , packed_options::link_mode
    , RbTreeBaseHookId
-   > implementation_defined;
+   >;
    /// @endcond
-   typedef implementation_defined type;
 };
+
+template <typename ...Options>
+using make_set_base_hook_t = typename make_set_base_hook<Options...>::type;
 
 //! Derive a class from set_base_hook in order to store objects in
 //! in a set/multiset. set_base_hook holds the data necessary to maintain
@@ -79,18 +72,10 @@ struct make_set_base_hook
 //!
 //! \c optimize_size<> will tell the hook to optimize the hook for size instead
 //! of speed.
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) || defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template<class ...Options>
-#else
-template<class O1, class O2, class O3, class O4>
-#endif
 class set_base_hook
    :  public make_set_base_hook<
-      #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-      O1, O2, O3, O4
-      #else
       Options...
-      #endif
       >::type
 {
    #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
@@ -163,21 +148,13 @@ class set_base_hook
 
 //! Helper metafunction to define a \c set_member_hook that yields to the same
 //! type when the same options (either explicitly or implicitly) are used.
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) || defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template<class ...Options>
-#else
-template<class O1 = void, class O2 = void, class O3 = void, class O4 = void>
-#endif
 struct make_set_member_hook
 {
    /// @cond
    typedef typename pack_options
       < hook_defaults,
-      #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-      O1, O2, O3, O4
-      #else
       Options...
-      #endif
       >::type packed_options;
 
    typedef generic_hook
@@ -206,18 +183,10 @@ struct make_set_member_hook
 //!
 //! \c optimize_size<> will tell the hook to optimize the hook for size instead
 //! of speed.
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) || defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template<class ...Options>
-#else
-template<class O1, class O2, class O3, class O4>
-#endif
 class set_member_hook
    :  public make_set_member_hook<
-      #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-      O1, O2, O3, O4
-      #else
       Options...
-      #endif
       >::type
 {
    #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
@@ -290,7 +259,5 @@ class set_member_hook
 
 } //namespace intrusive
 } //namespace boost
-
-#include <boost/intrusive/detail/config_end.hpp>
 
 #endif //BOOST_INTRUSIVE_SET_HOOK_HPP

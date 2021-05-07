@@ -30,23 +30,22 @@ namespace boost {
 namespace intrusive {
 namespace detail {
 
-template < class KeyTypeKeyCompare
-         , class ValueTraits
-         , class KeyOfValue
-         >
+template <typename P1, typename const_node_ptr, typename node_ptr>
+concept is_same_or_nodeptr_convertible =
+    (std::is_same_v<P1, const_node_ptr> || std::is_same_v<P1, node_ptr>) ||
+    std::is_convertible_v<P1, const_node_ptr>;
+
+template <class KeyTypeKeyCompare, class ValueTraits, class KeyOfValue>
 struct key_nodeptr_comp_types
 {
-   typedef ValueTraits                                   value_traits;
-   typedef typename value_traits::value_type             value_type;
-   typedef typename value_traits::node_ptr               node_ptr;
-   typedef typename value_traits::const_node_ptr         const_node_ptr;
-   typedef typename detail::if_c
-            < detail::is_same<KeyOfValue, void>::value
-            , detail::identity<value_type>
-            , KeyOfValue
-            >::type                                      key_of_value;
-   typedef tree_value_compare
-      <typename ValueTraits::pointer, KeyTypeKeyCompare, key_of_value>      base_t;
+   using value_traits = ValueTraits;
+   using value_type = typename value_traits::value_type;
+   using node_ptr = typename value_traits::node_ptr;
+   using const_node_ptr = typename value_traits::const_node_ptr;
+   using key_of_value = std::conditional_t<std::is_same_v<KeyOfValue, void>,
+                                           detail::identity<value_type>,
+                                           KeyOfValue>;
+   using base_t = tree_value_compare<typename ValueTraits::pointer, KeyTypeKeyCompare, key_of_value>;
 };
 
 //This function object transforms a key comparison type to
@@ -55,65 +54,47 @@ template < class KeyTypeKeyCompare
          , class ValueTraits
          , class KeyOfValue = void
          >
-struct key_nodeptr_comp
-   //Use public inheritance to avoid MSVC bugs with closures
-   :  public key_nodeptr_comp_types<KeyTypeKeyCompare, ValueTraits, KeyOfValue>::base_t
-{
-private:
-   struct sfinae_type;
-
+struct key_nodeptr_comp {
 public:
-   typedef key_nodeptr_comp_types<KeyTypeKeyCompare, ValueTraits, KeyOfValue> types_t;
-   typedef typename types_t::value_traits          value_traits;
-   typedef typename types_t::value_type            value_type;
-   typedef typename types_t::node_ptr              node_ptr;
-   typedef typename types_t::const_node_ptr        const_node_ptr;
-   typedef typename types_t::base_t                base_t;
-   typedef typename types_t::key_of_value          key_of_value;
+   using types_t = key_nodeptr_comp_types<KeyTypeKeyCompare, ValueTraits, KeyOfValue>;
+   using value_traits = typename types_t::value_traits;
+   using value_type = typename types_t::value_type;
+   using node_ptr = typename types_t::node_ptr;
+   using const_node_ptr = typename types_t::const_node_ptr;
+   using base_t = typename types_t::base_t;
+   using key_of_value = typename types_t::key_of_value;
+   [[no_unique_address]] base_t functor;
 
-   template <class P1>
-   struct is_same_or_nodeptr_convertible
-   {
-      static const bool same_type = is_same<P1,const_node_ptr>::value || is_same<P1,node_ptr>::value;
-      static const bool value = same_type || is_convertible<P1, const_node_ptr>::value;
-   };
+   inline const base_t& base() const
+   {  return functor; }
 
-   BOOST_INTRUSIVE_FORCEINLINE base_t base() const
-   {  return static_cast<const base_t&>(*this); }
-
-   BOOST_INTRUSIVE_FORCEINLINE key_nodeptr_comp(KeyTypeKeyCompare kcomp, const ValueTraits *traits)
-      :  base_t(kcomp), traits_(traits)
+   inline key_nodeptr_comp(KeyTypeKeyCompare kcomp, const ValueTraits *traits)
+      :  functor(kcomp), traits_(traits)
    {}
 
    //pred(pnode)
    template<class T1>
-   BOOST_INTRUSIVE_FORCEINLINE bool operator()(const T1 &t1, typename enable_if_c< is_same_or_nodeptr_convertible<T1>::value, sfinae_type* >::type = 0) const
-   {  return base().get()(key_of_value()(*traits_->to_value_ptr(t1)));  }
+   inline bool operator()(const T1 &t1) const
+   requires (is_same_or_nodeptr_convertible<T1, const_node_ptr, node_ptr>)
+   {  return functor(key_of_value()(*traits_->to_value_ptr(t1)));  }
 
    //operator() 2 arg
-   //pred(pnode, pnode)
    template<class T1, class T2>
-   BOOST_INTRUSIVE_FORCEINLINE bool operator()
-      (const T1 &t1, const T2 &t2, typename enable_if_c< is_same_or_nodeptr_convertible<T1>::value && is_same_or_nodeptr_convertible<T2>::value, sfinae_type* >::type = 0) const
-   {  return base()(*traits_->to_value_ptr(t1), *traits_->to_value_ptr(t2));  }
-
-   //pred(pnode, key)
-   template<class T1, class T2>
-   BOOST_INTRUSIVE_FORCEINLINE bool operator()
-      (const T1 &t1, const T2 &t2, typename enable_if_c< is_same_or_nodeptr_convertible<T1>::value && !is_same_or_nodeptr_convertible<T2>::value, sfinae_type* >::type = 0) const
-   {  return base()(*traits_->to_value_ptr(t1), t2);  }
-
-   //pred(key, pnode)
-   template<class T1, class T2>
-   BOOST_INTRUSIVE_FORCEINLINE bool operator()
-      (const T1 &t1, const T2 &t2, typename enable_if_c< !is_same_or_nodeptr_convertible<T1>::value && is_same_or_nodeptr_convertible<T2>::value, sfinae_type* >::type = 0) const
-   {  return base()(t1, *traits_->to_value_ptr(t2));  }
-
-   //pred(key, key)
-   template<class T1, class T2>
-   BOOST_INTRUSIVE_FORCEINLINE bool operator()
-      (const T1 &t1, const T2 &t2, typename enable_if_c< !is_same_or_nodeptr_convertible<T1>::value && !is_same_or_nodeptr_convertible<T2>::value, sfinae_type* >::type = 0) const
-   {  return base()(t1, t2);  }
+   inline bool operator()(const T1 &t1, const T2 &t2) const
+   {
+       if constexpr (is_same_or_nodeptr_convertible<T1, const_node_ptr, node_ptr>) {
+         if constexpr (is_same_or_nodeptr_convertible<T2, const_node_ptr, node_ptr>)
+           return functor(*traits_->to_value_ptr(t1), *traits_->to_value_ptr(t2)); // pred(pnode, pnode)
+         else
+           return functor(*traits_->to_value_ptr(t1), t2); // pred(pnode, key)
+       }
+       else {
+         if constexpr (is_same_or_nodeptr_convertible<T2, const_node_ptr, node_ptr>)
+           return functor(t1, *traits_->to_value_ptr(t2)); // pred(key, pnode)
+         else
+           return functor(t1, t2); // pred(key, key)
+       }
+   }
 
    const ValueTraits *const traits_;
 };

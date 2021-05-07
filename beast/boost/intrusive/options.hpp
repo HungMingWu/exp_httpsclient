@@ -13,7 +13,6 @@
 #ifndef BOOST_INTRUSIVE_OPTIONS_HPP
 #define BOOST_INTRUSIVE_OPTIONS_HPP
 
-#include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/intrusive_fwd.hpp>
 #include <boost/intrusive/link_mode.hpp>
 #include <boost/intrusive/pack_options.hpp>
@@ -52,10 +51,6 @@ BOOST_INTRUSIVE_OPTION_CONSTANT(constant_time_size, bool, Enabled, constant_time
 //!This option setter specifies a container header holder type
 BOOST_INTRUSIVE_OPTION_TYPE(header_holder_type, HeaderHolder, HeaderHolder, header_holder_type)
 
-//!This option setter specifies the type that
-//!the container will use to store its size.
-BOOST_INTRUSIVE_OPTION_TYPE(size_type, SizeType, SizeType, size_type)
-
 //!This option setter specifies the strict weak ordering
 //!comparison functor for the value type
 BOOST_INTRUSIVE_OPTION_TYPE(compare, Compare, Compare, compare)
@@ -77,20 +72,6 @@ BOOST_INTRUSIVE_OPTION_TYPE(key_of_value, KeyOfValue, KeyOfValue, key_of_value)
 //!a member with signature `type [const&] operator()(const value_type &) const`
 //!that will return the priority from a value_type of a treap container
 BOOST_INTRUSIVE_OPTION_TYPE(priority_of_value, PrioOfValue, PrioOfValue, priority_of_value)
-
-//!This option setter for scapegoat containers specifies if
-//!the intrusive scapegoat container should use a non-variable
-//!alpha value that does not need floating-point operations.
-//!
-//!If activated, the fixed alpha value is 1/sqrt(2). This
-//!option also saves some space in the container since
-//!the alpha value and some additional data does not need
-//!to be stored in the container.
-//!
-//!If the user only needs an alpha value near 1/sqrt(2), this
-//!option also improves performance since avoids logarithm
-//!and division operations when rebalancing the tree.
-BOOST_INTRUSIVE_OPTION_CONSTANT(floating_point, bool, Enabled, floating_point)
 
 //!This option setter specifies the equality
 //!functor for the value type
@@ -246,7 +227,7 @@ BOOST_INTRUSIVE_OPTION_CONSTANT(incremental, bool, Enabled, incremental)
 struct hook_defaults
 {
    typedef void* void_pointer;
-   static const link_mode_type link_mode = safe_link;
+   static constexpr link_mode_type link_mode = link_mode_type::safe_link;
    typedef dft_tag tag;
    static const bool optimize_size = false;
    static const bool store_hash = false;
@@ -258,7 +239,5 @@ struct hook_defaults
 
 }  //namespace intrusive {
 }  //namespace boost {
-
-#include <boost/intrusive/detail/config_end.hpp>
 
 #endif   //#ifndef BOOST_INTRUSIVE_OPTIONS_HPP

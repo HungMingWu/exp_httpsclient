@@ -41,11 +41,18 @@ enum algo_types
    AnyAlgorithm
 };
 
-template<algo_types AlgoType, class NodeTraits>
+template <algo_types AlgoType, class NodeTraits>
 struct get_algo;
+
+template <algo_types AlgoType, class NodeTraits>
+using get_algo_t = typename get_algo<AlgoType, NodeTraits>::type;
 
 template<algo_types AlgoType, class ValueTraits, class NodePtrCompare, class ExtraChecker>
 struct get_node_checker;
+
+template <algo_types AlgoType, class ValueTraits, class NodePtrCompare, class ExtraChecker>
+using get_node_checker_t =
+	typename get_node_checker<AlgoType, ValueTraits, NodePtrCompare, ExtraChecker>::type;
 
 } //namespace intrusive
 } //namespace boost

@@ -21,7 +21,6 @@
 #  pragma once
 #endif
 
-#include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/pointer_traits.hpp>
 #include <boost/intrusive/detail/mpl.hpp>
 
@@ -33,7 +32,7 @@ template<class ConstNodePtr>
 struct uncast_types
 {
    typedef typename pointer_traits<ConstNodePtr>::element_type element_type;
-   typedef typename remove_const<element_type>::type           non_const_type;
+   typedef typename std::remove_const<element_type>::type      non_const_type;
    typedef typename pointer_traits<ConstNodePtr>::
       template rebind_pointer<non_const_type>::type            non_const_pointer;
    typedef pointer_traits<non_const_pointer>                   non_const_traits;
@@ -49,7 +48,5 @@ static typename uncast_types<ConstNodePtr>::non_const_pointer
 } //namespace detail {
 } //namespace intrusive
 } //namespace boost
-
-#include <boost/intrusive/detail/config_end.hpp>
 
 #endif //BOOST_INTRUSIVE_DETAIL_UTILITIES_HPP

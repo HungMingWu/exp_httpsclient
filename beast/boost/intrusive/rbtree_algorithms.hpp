@@ -23,7 +23,6 @@
 #ifndef BOOST_INTRUSIVE_RBTREE_ALGORITHMS_HPP
 #define BOOST_INTRUSIVE_RBTREE_ALGORITHMS_HPP
 
-#include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/intrusive_fwd.hpp>
 
 #include <cstddef>
@@ -44,19 +43,17 @@ namespace intrusive {
 
 template<class NodeTraits, class F>
 struct rbtree_node_cloner
-   //Use public inheritance to avoid MSVC bugs with closures
-   :  public detail::ebo_functor_holder<F>
 {
    typedef typename NodeTraits::node_ptr  node_ptr;
-   typedef detail::ebo_functor_holder<F>  base_t;
+   [[no_unique_address]] F                      functor;
 
    explicit rbtree_node_cloner(F f)
-      :  base_t(f)
+      :  functor(f)
    {}
 
-   BOOST_INTRUSIVE_FORCEINLINE node_ptr operator()(node_ptr p)
+   inline node_ptr operator()(node_ptr p)
    {
-      node_ptr n = base_t::get()(p);
+      node_ptr n = functor(p);
       NodeTraits::set_color(n, NodeTraits::get_color(p));
       return n;
    }
@@ -77,17 +74,23 @@ struct rbtree_node_checker
    struct return_type
          : public base_checker_t::return_type
    {
-      return_type() : black_count_(0) {}
-      std::size_t black_count_;
+      return_type() = default;
+      return_type(const const_node_ptr& p,
+          const return_type& check_return_left, const return_type& check_return_right, const std::size_t l_black_count)
+          : base_checker_t::return_type(p, check_return_left, check_return_right)
+      {
+          black_count_ = l_black_count +
+              static_cast<std::size_t>(node_traits::get_color(p) == node_traits::black());
+      }
+      std::size_t black_count_{ 0 };
    };
 
    rbtree_node_checker(const NodePtrCompare& comp, ExtraChecker extra_checker)
       : base_checker_t(comp, extra_checker)
    {}
 
-   void operator () (const const_node_ptr& p,
-                     const return_type& check_return_left, const return_type& check_return_right,
-                     return_type& check_return)
+   return_type operator () (const const_node_ptr& p,
+                     const return_type& check_return_left, const return_type& check_return_right)
    {
 
       if (node_traits::get_color(p) == node_traits::red()){
@@ -102,9 +105,7 @@ struct rbtree_node_checker
       //Every path to p contains the same number of black nodes
       const std::size_t l_black_count = check_return_left.black_count_;
       BOOST_INTRUSIVE_INVARIANT_ASSERT(l_black_count == check_return_right.black_count_);
-      check_return.black_count_ = l_black_count +
-         static_cast<std::size_t>(node_traits::get_color(p) == node_traits::black());
-      base_checker_t::operator()(p, check_return_left, check_return_right, check_return);
+      return return_type(p, check_return_left, check_return_right, l_black_count);
    }
 };
 
@@ -273,7 +274,7 @@ class rbtree_algorithms
    #endif   //#ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
    //! @copydoc ::boost::intrusive::bstree_algorithms::init_header(node_ptr)
-   BOOST_INTRUSIVE_FORCEINLINE static void init_header(node_ptr header)
+   inline static void init_header(node_ptr header)
    {
       bstree_algo::init_header(header);
       NodeTraits::set_color(header, NodeTraits::red());
@@ -616,7 +617,5 @@ struct get_node_checker<RbTreeAlgorithms, ValueTraits, NodePtrCompare, ExtraChec
 
 } //namespace intrusive
 } //namespace boost
-
-#include <boost/intrusive/detail/config_end.hpp>
 
 #endif //BOOST_INTRUSIVE_RBTREE_ALGORITHMS_HPP

@@ -21,7 +21,6 @@
 #  pragma once
 #endif
 
-#include <boost/intrusive/detail/workaround.hpp>
 #include <boost/intrusive/pointer_traits.hpp>
 #include <boost/intrusive/detail/parent_from_member.hpp>
 #include <boost/intrusive/link_mode.hpp>
@@ -36,26 +35,24 @@ template<class T, class NodePtr, class Tag, unsigned int Type>
 struct bhtraits_base
 {
    public:
-   typedef NodePtr                                                   node_ptr;
-   typedef typename pointer_traits<node_ptr>::element_type           node;
-   typedef node_holder<node, Tag, Type>                              node_holder_type;
-   typedef T                                                         value_type;
-   typedef typename pointer_traits<node_ptr>::
-      template rebind_pointer<const node>::type                      const_node_ptr;
-   typedef typename pointer_traits<node_ptr>::
-      template rebind_pointer<T>::type                               pointer;
-   typedef typename pointer_traits<node_ptr>::
-      template rebind_pointer<const T>::type                         const_pointer;
-   //typedef typename pointer_traits<pointer>::reference               reference;
-   //typedef typename pointer_traits<const_pointer>::reference         const_reference;
-   typedef T &                                                       reference;
-   typedef const T &                                                 const_reference;
-   typedef node_holder_type &                                        node_holder_reference;
-   typedef const node_holder_type &                                  const_node_holder_reference;
-   typedef node&                                                     node_reference;
-   typedef const node &                                              const_node_reference;
+   using node_ptr = NodePtr;
+   using node = typename pointer_traits<node_ptr>::element_type;
+   using node_holder_type = node_holder<node, Tag, Type>;
+   using value_type = T;
+   using const_node_ptr = typename pointer_traits<node_ptr>::
+       template rebind_pointer<const node>::type;
+   using pointer = typename pointer_traits<node_ptr>::
+       template rebind_pointer<T>::type;
+   using const_pointer = typename pointer_traits<node_ptr>::
+       template rebind_pointer<const T>::type;
+   using reference = T&;
+   using const_reference = const T&;
+   using node_holder_reference = node_holder_type&;
+   using const_node_holder_reference = const node_holder_type&;
+   using node_reference = node&;
+   using const_node_reference = const node&;
 
-   BOOST_INTRUSIVE_FORCEINLINE static pointer to_value_ptr(const node_ptr & n)
+   inline static pointer to_value_ptr(const node_ptr & n)
    {
       pointer p = pointer_traits<pointer>::pointer_to
          (static_cast<reference>(static_cast<node_holder_reference>(*n)));
@@ -63,7 +60,7 @@ struct bhtraits_base
       return p;
    }
 
-   BOOST_INTRUSIVE_FORCEINLINE static const_pointer to_value_ptr(const const_node_ptr & n)
+   inline static const_pointer to_value_ptr(const const_node_ptr & n)
    {
       const_pointer p = pointer_traits<const_pointer>::pointer_to
          (static_cast<const_reference>(static_cast<const_node_holder_reference>(*n)));
@@ -71,7 +68,7 @@ struct bhtraits_base
       return p;
    }
 
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr to_node_ptr(reference value)
+   inline static node_ptr to_node_ptr(reference value)
    {
       node_ptr p = pointer_traits<node_ptr>::pointer_to
          (static_cast<node_reference>(static_cast<node_holder_reference>(value)));
@@ -79,7 +76,7 @@ struct bhtraits_base
       return p;
    }
 
-   BOOST_INTRUSIVE_FORCEINLINE static const_node_ptr to_node_ptr(const_reference value)
+   inline static const_node_ptr to_node_ptr(const_reference value)
    {
       const_node_ptr p = pointer_traits<const_node_ptr>::pointer_to
          (static_cast<const_node_reference>(static_cast<const_node_holder_reference>(value)));
@@ -93,7 +90,7 @@ struct bhtraits
    : public bhtraits_base<T, typename NodeTraits::node_ptr, Tag, Type>
 {
    static const link_mode_type link_mode = LinkMode;
-   typedef NodeTraits node_traits;
+   using node_traits = NodeTraits;
 };
 
 
@@ -101,45 +98,45 @@ template<class T, class Hook, Hook T::* P>
 struct mhtraits
 {
    public:
-   typedef Hook                                                      hook_type;
-   typedef typename hook_type::hooktags::node_traits                 node_traits;
-   typedef typename node_traits::node                                node;
-   typedef T                                                         value_type;
-   typedef typename node_traits::node_ptr                            node_ptr;
-   typedef typename node_traits::const_node_ptr                      const_node_ptr;
-   typedef typename pointer_traits<node_ptr>::
-      template rebind_pointer<T>::type                               pointer;
-   typedef typename pointer_traits<node_ptr>::
-      template rebind_pointer<const T>::type                         const_pointer;
-   typedef T &                                                       reference;
-   typedef const T &                                                 const_reference;
-   typedef node&                                                     node_reference;
-   typedef const node &                                              const_node_reference;
-   typedef hook_type&                                                hook_reference;
-   typedef const hook_type &                                         const_hook_reference;
+   using hook_type = Hook;
+   using node_traits = typename hook_type::hooktags::node_traits;
+   using node = typename node_traits::node;
+   using value_type = T;
+   using node_ptr = typename node_traits::node_ptr;
+   using const_node_ptr = typename node_traits::const_node_ptr;
+   using pointer = typename pointer_traits<node_ptr>::
+       template rebind_pointer<T>::type;
+   using const_pointer = typename pointer_traits<node_ptr>::
+       template rebind_pointer<const T>::type;
+   using reference = T&;
+   using const_reference = const T&;
+   using node_reference = node&;
+   using const_node_reference = const node&;
+   using hook_reference = hook_type&;
+   using const_hook_reference = const hook_type&;
 
    static const link_mode_type link_mode = Hook::hooktags::link_mode;
 
-   BOOST_INTRUSIVE_FORCEINLINE static node_ptr to_node_ptr(reference value)
+   inline static node_ptr to_node_ptr(reference value)
    {
       return pointer_traits<node_ptr>::pointer_to
          (static_cast<node_reference>(static_cast<hook_reference>(value.*P)));
    }
 
-   BOOST_INTRUSIVE_FORCEINLINE static const_node_ptr to_node_ptr(const_reference value)
+   inline static const_node_ptr to_node_ptr(const_reference value)
    {
       return pointer_traits<const_node_ptr>::pointer_to
          (static_cast<const_node_reference>(static_cast<const_hook_reference>(value.*P)));
    }
 
-   BOOST_INTRUSIVE_FORCEINLINE static pointer to_value_ptr(const node_ptr & n)
+   inline static pointer to_value_ptr(const node_ptr & n)
    {
       return pointer_traits<pointer>::pointer_to
          (*detail::parent_from_member<T, Hook>
             (static_cast<Hook*>(boost::movelib::to_raw_pointer(n)), P));
    }
 
-   BOOST_INTRUSIVE_FORCEINLINE static const_pointer to_value_ptr(const const_node_ptr & n)
+   inline static const_pointer to_value_ptr(const const_node_ptr & n)
    {
       return pointer_traits<const_pointer>::pointer_to
          (*detail::parent_from_member<T, Hook>
@@ -152,20 +149,20 @@ template<class Functor>
 struct fhtraits
 {
    public:
-   typedef typename Functor::hook_type                               hook_type;
-   typedef typename Functor::hook_ptr                                hook_ptr;
-   typedef typename Functor::const_hook_ptr                          const_hook_ptr;
-   typedef typename hook_type::hooktags::node_traits                 node_traits;
-   typedef typename node_traits::node                                node;
-   typedef typename Functor::value_type                              value_type;
-   typedef typename node_traits::node_ptr                            node_ptr;
-   typedef typename node_traits::const_node_ptr                      const_node_ptr;
-   typedef typename pointer_traits<node_ptr>::
-      template rebind_pointer<value_type>::type                      pointer;
-   typedef typename pointer_traits<node_ptr>::
-      template rebind_pointer<const value_type>::type                const_pointer;
-   typedef value_type &                                              reference;
-   typedef const value_type &                                        const_reference;
+   using hook_type = typename Functor::hook_type;
+   using hook_ptr = typename Functor::hook_ptr;
+   using const_hook_ptr = typename Functor::const_hook_ptr;
+   using node_traits = typename hook_type::hooktags::node_traits;
+   using node = typename node_traits::node;
+   using value_type = typename Functor::value_type;
+   using node_ptr = typename node_traits::node_ptr;
+   using const_node_ptr = typename node_traits::const_node_ptr;
+   using pointer = typename pointer_traits<node_ptr>::
+       template rebind_pointer<value_type>::type;
+   using const_pointer = typename pointer_traits<node_ptr>::
+       template rebind_pointer<const value_type>::type;
+   using reference = value_type&;
+   using const_reference = const value_type&;
    static const link_mode_type link_mode = hook_type::hooktags::link_mode;
 
    static node_ptr to_node_ptr(reference value)

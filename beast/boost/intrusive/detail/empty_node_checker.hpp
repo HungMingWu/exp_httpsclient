@@ -32,9 +32,10 @@ struct empty_node_checker
    typedef typename value_traits::node_traits      node_traits;
    typedef typename node_traits::const_node_ptr    const_node_ptr;
 
-   struct return_type {};
-
-   void operator () (const const_node_ptr&, const return_type&, const return_type&, return_type&) {}
+   struct return_type {
+	   return_type() = default;
+	   explicit return_type(const const_node_ptr&, const return_type&, const return_type&) {}
+   };
 };
 
 }  //namespace detail{

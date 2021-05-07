@@ -14,7 +14,6 @@
 #ifndef BOOST_INTRUSIVE_LIST_HOOK_HPP
 #define BOOST_INTRUSIVE_LIST_HOOK_HPP
 
-#include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/intrusive_fwd.hpp>
 
 #include <boost/intrusive/detail/list_node.hpp>
@@ -32,33 +31,25 @@ namespace intrusive {
 
 //! Helper metafunction to define a \c \c list_base_hook that yields to the same
 //! type when the same options (either explicitly or implicitly) are used.
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) || defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-template<class ...Options>
-#else
-template<class O1 = void, class O2 = void, class O3 = void>
-#endif
+template <typename ...Options>
 struct make_list_base_hook
 {
    /// @cond
    typedef typename pack_options
       < hook_defaults,
-      #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-      O1, O2, O3
-      #else
       Options...
-      #endif
       >::type packed_options;
 
-   typedef generic_hook
-   < CircularListAlgorithms
-   , list_node_traits<typename packed_options::void_pointer>
-   , typename packed_options::tag
-   , packed_options::link_mode
-   , ListBaseHookId
-   > implementation_defined;
+   using type = generic_hook<CircularListAlgorithms,
+                             list_node_traits<typename packed_options::void_pointer>,
+                             typename packed_options::tag,
+                             packed_options::link_mode,
+                             ListBaseHookId>;
    /// @endcond
-   typedef implementation_defined type;
 };
+
+template <typename ...Options>
+using make_list_base_hook_t = typename make_list_base_hook<Options...>::type;
 
 //! Derive a class from this hook in order to store objects of that class
 //! in an list.
@@ -76,19 +67,9 @@ struct make_list_base_hook
 //!
 //! \c void_pointer<> is the pointer type that will be used internally in the hook
 //! and the container configured to use this hook.
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) || defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template<class ...Options>
-#else
-template<class O1, class O2, class O3>
-#endif
 class list_base_hook
-   :  public make_list_base_hook
-      #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-      <O1, O2, O3>
-      #else
-      <Options...>
-      #endif
-      ::type
+   :  public make_list_base_hook_t<Options...>
 {
    #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
    public:
@@ -160,32 +141,17 @@ class list_base_hook
 
 //! Helper metafunction to define a \c \c list_member_hook that yields to the same
 //! type when the same options (either explicitly or implicitly) are used.
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) || defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template<class ...Options>
-#else
-template<class O1 = void, class O2 = void, class O3 = void>
-#endif
 struct make_list_member_hook
 {
    /// @cond
-   typedef typename pack_options
-      < hook_defaults,
-      #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-      O1, O2, O3
-      #else
-      Options...
-      #endif
-      >::type packed_options;
-
-   typedef generic_hook
-   < CircularListAlgorithms
-   , list_node_traits<typename packed_options::void_pointer>
-   , member_tag
-   , packed_options::link_mode
-   , NoBaseHookId
-   > implementation_defined;
+   using packed_options = typename pack_options<hook_defaults, Options...>::type;
+   using type = generic_hook<CircularListAlgorithms,
+                             list_node_traits<typename packed_options::void_pointer>,
+                             member_tag,
+                             packed_options::link_mode,
+                             NoBaseHookId>;
    /// @endcond
-   typedef implementation_defined type;
 };
 
 //! Store this hook in a class to be inserted
@@ -199,18 +165,10 @@ struct make_list_member_hook
 //!
 //! \c void_pointer<> is the pointer type that will be used internally in the hook
 //! and the container configured to use this hook.
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) || defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template<class ...Options>
-#else
-template<class O1, class O2, class O3>
-#endif
 class list_member_hook
    :  public make_list_member_hook
-      #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-      <O1, O2, O3>
-      #else
       <Options...>
-      #endif
       ::type
 {
    #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
@@ -283,7 +241,5 @@ class list_member_hook
 
 } //namespace intrusive
 } //namespace boost
-
-#include <boost/intrusive/detail/config_end.hpp>
 
 #endif //BOOST_INTRUSIVE_LIST_HOOK_HPP

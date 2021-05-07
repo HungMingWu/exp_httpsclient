@@ -12,11 +12,8 @@
 #ifndef BOOST_INTRUSIVE_RBTREE_HPP
 #define BOOST_INTRUSIVE_RBTREE_HPP
 
-#include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/intrusive_fwd.hpp>
 #include <cstddef>
-#include <boost/intrusive/detail/minimal_less_equal_header.hpp>
-#include <boost/intrusive/detail/minimal_pair_header.hpp>   //std::pair
 
 #include <boost/intrusive/set_hook.hpp>
 #include <boost/intrusive/detail/rbtree_node.hpp>
@@ -27,9 +24,6 @@
 #include <boost/intrusive/detail/get_value_traits.hpp>
 #include <boost/intrusive/rbtree_algorithms.hpp>
 #include <boost/intrusive/link_mode.hpp>
-
-#include <boost/move/utility_core.hpp>
-#include <boost/static_assert.hpp>
 
 #if defined(BOOST_HAS_PRAGMA_ONCE)
 #  pragma once
@@ -66,22 +60,22 @@ struct rbtree_defaults
 //!
 //! The container supports the following options:
 //! \c base_hook<>/member_hook<>/value_traits<>,
-//! \c constant_time_size<>, \c size_type<> and
+//! \c constant_time_size<>, and
 //! \c compare<>.
 #if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED)
 template<class T, class ...Options>
 #else
-template<class ValueTraits, class VoidOrKeyOfValue, class VoidOrKeyComp, class SizeType, bool ConstantTimeSize, typename HeaderHolder>
+template<class ValueTraits, class VoidOrKeyOfValue, class VoidOrKeyComp, bool ConstantTimeSize, typename HeaderHolder>
 #endif
 class rbtree_impl
    /// @cond
-   :  public bstree_impl<ValueTraits, VoidOrKeyOfValue, VoidOrKeyComp, SizeType, ConstantTimeSize, RbTreeAlgorithms, HeaderHolder>
+   :  public bstree_impl<ValueTraits, VoidOrKeyOfValue, VoidOrKeyComp, ConstantTimeSize, RbTreeAlgorithms, HeaderHolder>
    /// @endcond
 {
    public:
    typedef ValueTraits                                               value_traits;
    /// @cond
-   typedef bstree_impl< ValueTraits, VoidOrKeyOfValue, VoidOrKeyComp, SizeType
+   typedef bstree_impl< ValueTraits, VoidOrKeyOfValue, VoidOrKeyComp
                       , ConstantTimeSize, RbTreeAlgorithms
                       , HeaderHolder>                                tree_type;
    typedef tree_type                                                 implementation_defined;
@@ -95,7 +89,6 @@ class rbtree_impl
    typedef typename implementation_defined::reference                reference;
    typedef typename implementation_defined::const_reference          const_reference;
    typedef typename implementation_defined::difference_type          difference_type;
-   typedef typename implementation_defined::size_type                size_type;
    typedef typename implementation_defined::value_compare            value_compare;
    typedef typename implementation_defined::key_compare              key_compare;
    typedef typename implementation_defined::iterator                 iterator;
@@ -109,44 +102,17 @@ class rbtree_impl
    typedef typename implementation_defined::node_algorithms          node_algorithms;
 
    static const bool constant_time_size = implementation_defined::constant_time_size;
-   /// @cond
-   private:
-
-   //noncopyable
-   BOOST_MOVABLE_BUT_NOT_COPYABLE(rbtree_impl)
-
-   /// @endcond
-
    public:
 
    typedef typename implementation_defined::insert_commit_data insert_commit_data;
 
-   //! @copydoc ::boost::intrusive::bstree::bstree()
-   rbtree_impl()
-      :  tree_type()
-   {}
+   using tree_type::tree_type;
 
-   //! @copydoc ::boost::intrusive::bstree::bstree(const key_compare &,const value_traits &)
-   explicit rbtree_impl( const key_compare &cmp, const value_traits &v_traits = value_traits())
-      :  tree_type(cmp, v_traits)
-   {}
-
-   //! @copydoc ::boost::intrusive::bstree::bstree(bool,Iterator,Iterator,const key_compare &,const value_traits &)
-   template<class Iterator>
-   rbtree_impl( bool unique, Iterator b, Iterator e
-              , const key_compare &cmp     = key_compare()
-              , const value_traits &v_traits = value_traits())
-      : tree_type(unique, b, e, cmp, v_traits)
-   {}
-
-   //! @copydoc ::boost::intrusive::bstree::bstree(bstree &&)
-   rbtree_impl(BOOST_RV_REF(rbtree_impl) x)
-      :  tree_type(BOOST_MOVE_BASE(tree_type, x))
-   {}
-
+   rbtree_impl(const rbtree_impl&) = delete;
+   rbtree_impl& operator=(const rbtree_impl&) = delete;
    //! @copydoc ::boost::intrusive::bstree::operator=(bstree &&)
-   rbtree_impl& operator=(BOOST_RV_REF(rbtree_impl) x)
-   {  return static_cast<rbtree_impl&>(tree_type::operator=(BOOST_MOVE_BASE(tree_type, x))); }
+   rbtree_impl& operator=(rbtree_impl&& x)
+   {  return static_cast<rbtree_impl&>(tree_type::operator=(std::move(x))); }
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
    //! @copydoc ::boost::intrusive::bstree::~bstree()
@@ -219,7 +185,7 @@ class rbtree_impl
    bool empty() const;
 
    //! @copydoc ::boost::intrusive::bstree::size()const
-   size_type size() const;
+   std::size_t size() const;
 
    //! @copydoc ::boost::intrusive::bstree::swap
    void swap(rbtree_impl& other);
@@ -236,8 +202,8 @@ class rbtree_impl
 
    //! @copydoc ::boost::intrusive::bstree::clone_from(bstree&&,Cloner,Disposer)
    template <class Cloner, class Disposer>
-   void clone_from(BOOST_RV_REF(rbtree_impl) src, Cloner cloner, Disposer disposer)
-   {  tree_type::clone_from(BOOST_MOVE_BASE(tree_type, src), cloner, disposer);  }
+   void clone_from(rbtree_impl&& src, Cloner cloner, Disposer disposer)
+   {  tree_type::clone_from(std::forward<rbtree_impl>(src), cloner, disposer);  }
 
    #ifdef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
@@ -303,11 +269,11 @@ class rbtree_impl
    iterator erase(const_iterator b, const_iterator e);
 
    //! @copydoc ::boost::intrusive::bstree::erase(const key_type &key)
-   size_type erase(const key_type &key);
+   std::size_t erase(const key_type &key);
 
    //! @copydoc ::boost::intrusive::bstree::erase(const KeyType&,KeyTypeKeyCompare)
    template<class KeyType, class KeyTypeKeyCompare>
-   size_type erase(const KeyType& key, KeyTypeKeyCompare comp);
+   std::size_t erase(const KeyType& key, KeyTypeKeyCompare comp);
 
    //! @copydoc ::boost::intrusive::bstree::erase_and_dispose(const_iterator,Disposer)
    template<class Disposer>
@@ -319,11 +285,11 @@ class rbtree_impl
 
    //! @copydoc ::boost::intrusive::bstree::erase_and_dispose(const key_type &, Disposer)
    template<class Disposer>
-   size_type erase_and_dispose(const key_type &key, Disposer disposer);
+   std::size_t erase_and_dispose(const key_type &key, Disposer disposer);
 
    //! @copydoc ::boost::intrusive::bstree::erase_and_dispose(const KeyType&,KeyTypeKeyCompare,Disposer)
    template<class KeyType, class KeyTypeKeyCompare, class Disposer>
-   size_type erase_and_dispose(const KeyType& key, KeyTypeKeyCompare comp, Disposer disposer);
+   std::size_t erase_and_dispose(const KeyType& key, KeyTypeKeyCompare comp, Disposer disposer);
 
    //! @copydoc ::boost::intrusive::bstree::clear
    void clear();
@@ -333,11 +299,11 @@ class rbtree_impl
    void clear_and_dispose(Disposer disposer);
 
    //! @copydoc ::boost::intrusive::bstree::count(const key_type &)const
-   size_type count(const key_type &key) const;
+   std::size_t count(const key_type &key) const;
 
    //! @copydoc ::boost::intrusive::bstree::count(const KeyType&,KeyTypeKeyCompare)const
    template<class KeyType, class KeyTypeKeyCompare>
-   size_type count(const KeyType& key, KeyTypeKeyCompare comp) const;
+   std::size_t count(const KeyType& key, KeyTypeKeyCompare comp) const;
 
    //! @copydoc ::boost::intrusive::bstree::lower_bound(const key_type &)
    iterator lower_bound(const key_type &key);
@@ -466,33 +432,21 @@ class rbtree_impl
 
 //! Helper metafunction to define a \c rbtree that yields to the same type when the
 //! same options (either explicitly or implicitly) are used.
-#if defined(BOOST_INTRUSIVE_DOXYGEN_INVOKED) || defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
 template<class T, class ...Options>
-#else
-template<class T, class O1 = void, class O2 = void
-                , class O3 = void, class O4 = void
-                , class O5 = void, class O6 = void>
-#endif
 struct make_rbtree
 {
    /// @cond
    typedef typename pack_options
       < rbtree_defaults,
-      #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-      O1, O2, O3, O4, O5, O6
-      #else
       Options...
-      #endif
       >::type packed_options;
 
-   typedef typename detail::get_value_traits
-      <T, typename packed_options::proto_value_traits>::type value_traits;
+   using value_traits = detail::get_value_traits_t<T, typename packed_options::proto_value_traits>;
 
    typedef rbtree_impl
          < value_traits
          , typename packed_options::key_of_value
          , typename packed_options::compare
-         , typename packed_options::size_type
          , packed_options::constant_time_size
          , typename packed_options::header_holder_type
          > implementation_defined;
@@ -503,29 +457,16 @@ struct make_rbtree
 
 #ifndef BOOST_INTRUSIVE_DOXYGEN_INVOKED
 
-#if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-template<class T, class O1, class O2, class O3, class O4, class O5, class O6>
-#else
 template<class T, class ...Options>
-#endif
 class rbtree
    :  public make_rbtree<T,
-      #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-      O1, O2, O3, O4, O5, O6
-      #else
       Options...
-      #endif
       >::type
 {
    typedef typename make_rbtree
       <T,
-      #if !defined(BOOST_INTRUSIVE_VARIADIC_TEMPLATES)
-      O1, O2, O3, O4, O5, O6
-      #else
       Options...
-      #endif
       >::type   Base;
-   BOOST_MOVABLE_BUT_NOT_COPYABLE(rbtree)
 
    public:
    typedef typename Base::key_compare        key_compare;
@@ -536,48 +477,28 @@ class rbtree
    typedef typename Base::const_reverse_iterator     const_reverse_iterator;
 
    //Assert if passed value traits are compatible with the type
-   BOOST_STATIC_ASSERT((detail::is_same<typename value_traits::value_type, T>::value));
+   static_assert((std::is_same<typename value_traits::value_type, T>::value));
 
-   BOOST_INTRUSIVE_FORCEINLINE rbtree()
-      :  Base()
-   {}
-
-   BOOST_INTRUSIVE_FORCEINLINE explicit rbtree( const key_compare &cmp, const value_traits &v_traits = value_traits())
-      :  Base(cmp, v_traits)
-   {}
-
-   template<class Iterator>
-   BOOST_INTRUSIVE_FORCEINLINE rbtree( bool unique, Iterator b, Iterator e
-         , const key_compare &cmp = key_compare()
-         , const value_traits &v_traits = value_traits())
-      :  Base(unique, b, e, cmp, v_traits)
-   {}
-
-   BOOST_INTRUSIVE_FORCEINLINE rbtree(BOOST_RV_REF(rbtree) x)
-      :  Base(BOOST_MOVE_BASE(Base, x))
-   {}
-
-   BOOST_INTRUSIVE_FORCEINLINE rbtree& operator=(BOOST_RV_REF(rbtree) x)
-   {  return static_cast<rbtree &>(this->Base::operator=(BOOST_MOVE_BASE(Base, x)));  }
+   using Base::Base;
+   rbtree(const rbtree&) = delete;
+   rbtree& operator=(const rbtree&) = delete;
+   inline rbtree& operator=(rbtree&& x)
+   {  return static_cast<rbtree &>(this->Base::operator=(std::move(x)));  }
 
    template <class Cloner, class Disposer>
-   BOOST_INTRUSIVE_FORCEINLINE void clone_from(const rbtree &src, Cloner cloner, Disposer disposer)
-   {  Base::clone_from(src, cloner, disposer);  }
+   inline void clone_from(rbtree&& src, Cloner cloner, Disposer disposer)
+   {  Base::clone_from(std::forward<rbtree>(src), cloner, disposer);  }
 
-   template <class Cloner, class Disposer>
-   BOOST_INTRUSIVE_FORCEINLINE void clone_from(BOOST_RV_REF(rbtree) src, Cloner cloner, Disposer disposer)
-   {  Base::clone_from(BOOST_MOVE_BASE(Base, src), cloner, disposer);  }
-
-   BOOST_INTRUSIVE_FORCEINLINE static rbtree &container_from_end_iterator(iterator end_iterator)
+   inline static rbtree &container_from_end_iterator(iterator end_iterator)
    {  return static_cast<rbtree &>(Base::container_from_end_iterator(end_iterator));   }
 
-   BOOST_INTRUSIVE_FORCEINLINE static const rbtree &container_from_end_iterator(const_iterator end_iterator)
+   inline static const rbtree &container_from_end_iterator(const_iterator end_iterator)
    {  return static_cast<const rbtree &>(Base::container_from_end_iterator(end_iterator));   }
 
-   BOOST_INTRUSIVE_FORCEINLINE static rbtree &container_from_iterator(iterator it)
+   inline static rbtree &container_from_iterator(iterator it)
    {  return static_cast<rbtree &>(Base::container_from_iterator(it));   }
 
-   BOOST_INTRUSIVE_FORCEINLINE static const rbtree &container_from_iterator(const_iterator it)
+   inline static const rbtree &container_from_iterator(const_iterator it)
    {  return static_cast<const rbtree &>(Base::container_from_iterator(it));   }
 };
 
@@ -585,7 +506,5 @@ class rbtree
 
 } //namespace intrusive
 } //namespace boost
-
-#include <boost/intrusive/detail/config_end.hpp>
 
 #endif //BOOST_INTRUSIVE_RBTREE_HPP

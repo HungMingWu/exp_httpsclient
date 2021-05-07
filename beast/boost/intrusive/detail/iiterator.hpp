@@ -21,7 +21,6 @@
 #  pragma once
 #endif
 
-#include <boost/intrusive/detail/workaround.hpp>
 #include <boost/intrusive/detail/iterator.hpp>
 #include <boost/intrusive/pointer_traits.hpp>
 #include <boost/intrusive/detail/mpl.hpp>
@@ -33,66 +32,55 @@ namespace intrusive {
 template<class ValueTraits>
 struct value_traits_pointers
 {
-   typedef BOOST_INTRUSIVE_OBTAIN_TYPE_WITH_DEFAULT
-      (boost::intrusive::detail::
-      , ValueTraits, value_traits_ptr
-      , typename boost::intrusive::pointer_traits<typename ValueTraits::node_traits::node_ptr>::template
-         rebind_pointer<ValueTraits>::type)   value_traits_ptr;
+   using value_traits_ptr = detail::default_action_t<ValueTraits,
+       detail::type_value_traits_ptr_t,
+       typename boost::intrusive::pointer_traits<typename ValueTraits::node_traits::node_ptr>::template
+       rebind_pointer<ValueTraits>::type>;
 
-   typedef typename boost::intrusive::pointer_traits<value_traits_ptr>::template
-      rebind_pointer<ValueTraits const>::type const_value_traits_ptr;
+   using const_value_traits_ptr = typename boost::intrusive::pointer_traits<value_traits_ptr>::template
+      rebind_pointer<ValueTraits const>::type;
 };
 
 template<class ValueTraits, bool IsConst, class Category>
 struct iiterator
 {
-   typedef ValueTraits                                         value_traits;
-   typedef typename value_traits::node_traits                  node_traits;
-   typedef typename node_traits::node                          node;
-   typedef typename node_traits::node_ptr                      node_ptr;
-   typedef ::boost::intrusive::pointer_traits<node_ptr>        nodepointer_traits_t;
-   typedef typename nodepointer_traits_t::template
-      rebind_pointer<void>::type                               void_pointer;
-   typedef typename ValueTraits::value_type                    value_type;
-   typedef typename ValueTraits::pointer                       nonconst_pointer;
-   typedef typename ValueTraits::const_pointer                 yesconst_pointer;
-   typedef typename ::boost::intrusive::pointer_traits
-      <nonconst_pointer>::reference                            nonconst_reference;
-   typedef typename ::boost::intrusive::pointer_traits
-      <yesconst_pointer>::reference                            yesconst_reference;
-   typedef typename nodepointer_traits_t::difference_type      difference_type;
-   typedef typename detail::if_c
-      <IsConst, yesconst_pointer, nonconst_pointer>::type      pointer;
-   typedef typename detail::if_c
-      <IsConst, yesconst_reference, nonconst_reference>::type  reference;
-   typedef iterator
-         < Category
-         , value_type
-         , difference_type
-         , pointer
-         , reference
-         > iterator_type;
-   typedef typename value_traits_pointers
-      <ValueTraits>::value_traits_ptr                          value_traits_ptr;
-   typedef typename value_traits_pointers
-      <ValueTraits>::const_value_traits_ptr                    const_value_traits_ptr;
-   static const bool stateful_value_traits =
-      detail::is_stateful_value_traits<value_traits>::value;
+   using value_traits = ValueTraits;
+   using node_traits = typename value_traits::node_traits;
+   using node = typename node_traits::node;
+   using node_ptr = typename node_traits::node_ptr;
+   using nodepointer_traits_t = ::boost::intrusive::pointer_traits<node_ptr>;
+   using void_pointer = typename nodepointer_traits_t::template rebind_pointer<void>::type;
+   using value_type = typename ValueTraits::value_type;
+   using nonconst_pointer = typename ValueTraits::pointer;
+   using yesconst_pointer = typename ValueTraits::const_pointer;
+   using nonconst_reference = typename ::boost::intrusive::pointer_traits<nonconst_pointer>::reference;
+   using yesconst_reference = typename ::boost::intrusive::pointer_traits<yesconst_pointer>::reference;
+   using difference_type = typename nodepointer_traits_t::difference_type;
+   using pointer = std::conditional_t<IsConst, yesconst_pointer, nonconst_pointer>;
+   using reference = std::conditional_t<IsConst, yesconst_reference, nonconst_reference>;
+   using iterator_type = iterator<Category,
+                                  value_type,
+                                  difference_type,
+                                  pointer,
+                                  reference>;
+   using value_traits_ptr = typename value_traits_pointers<ValueTraits>::value_traits_ptr;
+   using const_value_traits_ptr = typename value_traits_pointers<ValueTraits>::const_value_traits_ptr;
+   static constexpr bool stateful_value_traits = detail::is_stateful_value_traits_v<value_traits>;
 };
 
 template<class NodePtr, class StoredPointer, bool StatefulValueTraits = true>
 struct iiterator_members
 {
 
-   BOOST_INTRUSIVE_FORCEINLINE iiterator_members()
+   inline iiterator_members()
       : nodeptr_()//Value initialization to achieve "null iterators" (N3644)
    {}
 
-   BOOST_INTRUSIVE_FORCEINLINE iiterator_members(const NodePtr &n_ptr, const StoredPointer &data)
+   inline iiterator_members(const NodePtr &n_ptr, const StoredPointer &data)
       :  nodeptr_(n_ptr), ptr_(data)
    {}
 
-   BOOST_INTRUSIVE_FORCEINLINE StoredPointer get_ptr() const
+   inline StoredPointer get_ptr() const
    {  return ptr_;  }
 
    NodePtr nodeptr_;
@@ -102,15 +90,15 @@ struct iiterator_members
 template<class NodePtr, class StoredPointer>
 struct iiterator_members<NodePtr, StoredPointer, false>
 {
-   BOOST_INTRUSIVE_FORCEINLINE iiterator_members()
+   inline iiterator_members()
       : nodeptr_()//Value initialization to achieve "null iterators" (N3644)
    {}
 
-   BOOST_INTRUSIVE_FORCEINLINE iiterator_members(const NodePtr &n_ptr, const StoredPointer &)
+   inline iiterator_members(const NodePtr &n_ptr, const StoredPointer &)
       : nodeptr_(n_ptr)
    {}
 
-   BOOST_INTRUSIVE_FORCEINLINE StoredPointer get_ptr() const
+   inline StoredPointer get_ptr() const
    {  return StoredPointer();  }
 
    NodePtr nodeptr_;

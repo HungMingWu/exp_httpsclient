@@ -21,7 +21,6 @@
 #  pragma once
 #endif
 
-#include <boost/intrusive/detail/config_begin.hpp>
 #include <boost/intrusive/detail/mpl.hpp>
 #include <boost/intrusive/detail/hook_traits.hpp>
 
@@ -36,25 +35,27 @@ struct is_default_hook_tag
 
 namespace detail{
 
-template <class T, class BaseHook>
+template <typename T, typename BaseHook>
 struct concrete_hook_base_value_traits
 {
-   typedef typename BaseHook::hooktags tags;
-   typedef bhtraits
-      < T
-      , typename tags::node_traits
-      , tags::link_mode
-      , typename tags::tag
-      , tags::type> type;
+   using tags = typename BaseHook::hooktags;
+   using type = bhtraits<T, 
+                         typename tags::node_traits,
+                         tags::link_mode,
+                         typename tags::tag,
+                         tags::type>;
 };
 
-template <class BaseHook>
+template <typename BaseHook>
 struct concrete_hook_base_value_traits<void, BaseHook>
 {
-   typedef typename BaseHook::hooktags type;
+   using type = typename BaseHook::hooktags;
 };
 
-template <class T, class AnyToSomeHook_ProtoValueTraits>
+template <typename T, typename BaseHook>
+using concrete_hook_base_value_traits_t = typename concrete_hook_base_value_traits<T, BaseHook>::type;
+
+template <typename T, typename AnyToSomeHook_ProtoValueTraits>
 struct any_hook_base_value_traits
 {
    //AnyToSomeHook value_traits derive from a generic_hook
@@ -64,150 +65,161 @@ struct any_hook_base_value_traits
    //from AnyToSomeHook_ProtoValueTraits and the rest of
    //elements from the hooktags member of the generic_hook
 
-   typedef typename AnyToSomeHook_ProtoValueTraits::basic_hook_t     basic_hook_t;
-   typedef typename pointer_rebind
-      < typename basic_hook_t::hooktags::node_traits::node_ptr
-      , void>::type                                                  void_pointer;
-   typedef typename AnyToSomeHook_ProtoValueTraits::template
-      node_traits_from_voidptr<void_pointer>::type                   node_traits;
+   using basic_hook_t = typename AnyToSomeHook_ProtoValueTraits::basic_hook_t;
+   using void_pointer = pointer_rebind_t<typename basic_hook_t::hooktags::node_traits::node_ptr, void>;
+   using node_traits = typename AnyToSomeHook_ProtoValueTraits::template
+                       node_traits_from_voidptr<void_pointer>::type;
 
-   typedef bhtraits
-      < T
-      , node_traits
-      , basic_hook_t::hooktags::link_mode
-      , typename basic_hook_t::hooktags::tag
-      , basic_hook_t::hooktags::type
-      > type;
+   using type = bhtraits<T,
+                         node_traits,
+                         basic_hook_t::hooktags::link_mode,
+                         typename basic_hook_t::hooktags::tag,
+                         basic_hook_t::hooktags::type>;
 };
 
-template <class AnyToSomeHook_ProtoValueTraits>
+template <typename AnyToSomeHook_ProtoValueTraits>
 struct any_hook_base_value_traits<void, AnyToSomeHook_ProtoValueTraits>
 {
-   typedef typename AnyToSomeHook_ProtoValueTraits::basic_hook_t     basic_hook_t;
-   typedef typename pointer_rebind
-      < typename basic_hook_t::hooktags::node_traits::node_ptr
-      , void>::type                                                  void_pointer;
+   using basic_hook_t = typename AnyToSomeHook_ProtoValueTraits::basic_hook_t;
+   using void_pointer = pointer_rebind_t<typename basic_hook_t::hooktags::node_traits::node_ptr, void>;
 
    struct type
    {
-      typedef typename AnyToSomeHook_ProtoValueTraits::template
-         node_traits_from_voidptr<void_pointer>::type                node_traits;
+       using node_traits = typename AnyToSomeHook_ProtoValueTraits::template
+                           node_traits_from_voidptr<void_pointer>::type;
    };
 };
 
-template<class MemberHook>
-struct get_member_value_traits
-{
-   typedef typename MemberHook::member_value_traits type;
-};
+template <typename T, typename AnyToSomeHook_ProtoValueTraits>
+using any_hook_base_value_traits_t = typename any_hook_base_value_traits<T, AnyToSomeHook_ProtoValueTraits>::type;
 
-BOOST_INTRUSIVE_INTERNAL_STATIC_BOOL_IS_TRUE(internal_any_hook, is_any_hook)
-BOOST_INTRUSIVE_INTERNAL_STATIC_BOOL_IS_TRUE(internal_base_hook, hooktags::is_base_hook)
+template <typename MemberHook>
+using get_member_value_traits_t = typename MemberHook::member_value_traits;
 
-template <class T>
-struct internal_member_value_traits
-{
-   template <class U> static yes_type test(...);
-   template <class U> static no_type test(typename U::member_value_traits* = 0);
-   static const bool value = sizeof(test<T>(0)) == sizeof(no_type);
-};
+template <typename T>
+concept internal_base_hook = std::is_convertible_v<decltype(T::hooktags::is_base_hook), bool> && T::hooktags::is_base_hook;
+
+template <typename T>
+concept internal_any_hook = std::is_convertible_v<decltype(T::is_any_hook), bool> && T::is_any_hook;
+
+template <typename T>
+using member_value_traits_t = typename T::member_value_traits;
 
 template<class SupposedValueTraits, class T, bool = is_default_hook_tag<SupposedValueTraits>::value>
 struct supposed_value_traits;
 
-template<class T, class BaseHook, bool = internal_any_hook_bool_is_true<BaseHook>::value>
+template<class T, class BaseHook, bool = internal_any_hook<BaseHook>>
 struct get_base_value_traits;
 
-template<class SupposedValueTraits, class T, bool = internal_base_hook_bool_is_true<SupposedValueTraits>::value>
-struct supposed_base_value_traits;
+template<class SupposedValueTraits, class T, bool value>
+struct supposed_base_value_traits1;
 
-template<class SupposedValueTraits, bool = internal_member_value_traits<SupposedValueTraits>::value>
+template <class SupposedValueTraits, class T, bool value = internal_base_hook<SupposedValueTraits>>
+using supposed_base_value_traits_t = typename supposed_base_value_traits1<SupposedValueTraits, T, value>::type;
+
+template<class SupposedValueTraits, bool = check_action<member_value_traits_t, SupposedValueTraits>>
 struct supposed_member_value_traits;
 
-template<class SupposedValueTraits, bool = internal_any_hook_bool_is_true<SupposedValueTraits>::value>
+template <typename SupposedValueTraits>
+using supposed_member_value_traits_t = typename supposed_member_value_traits<SupposedValueTraits>::type;
+
+template<class SupposedValueTraits, bool = internal_any_hook<SupposedValueTraits>>
 struct any_or_concrete_value_traits;
 
 //Base any hook
-template<class T, class BaseHook>
+template <typename T, typename BaseHook>
 struct get_base_value_traits<T, BaseHook, true>
-   : any_hook_base_value_traits<T, BaseHook>
-{};
+{
+    using type = any_hook_base_value_traits_t<T, BaseHook>;
+};
 
 //Non-any base hook
-template<class T, class BaseHook>
+template <typename T, typename BaseHook>
 struct get_base_value_traits<T, BaseHook, false>
-   : concrete_hook_base_value_traits<T, BaseHook>
-{};
+{
+    using type = concrete_hook_base_value_traits_t<T, BaseHook>;
+};
+
+template <typename T, typename BaseHook>
+using get_base_value_traits_t = typename get_base_value_traits<T, BaseHook>::type;
 
 //...It's a default hook
-template<class SupposedValueTraits, class T>
+template <typename SupposedValueTraits, typename T>
 struct supposed_value_traits<SupposedValueTraits, T, true>
-{  typedef typename SupposedValueTraits::template apply<T>::type type;  };
+{  
+    using type = typename SupposedValueTraits::template apply<T>::type;
+};
 
 //...Not  a default hook
-template<class SupposedValueTraits, class T>
+template <typename SupposedValueTraits, typename T>
 struct supposed_value_traits<SupposedValueTraits, T, false>
-{  typedef SupposedValueTraits type;   };
+{ 
+    using type = SupposedValueTraits;
+};
+
+template <typename SupposedValueTraits, typename T>
+using supposed_value_traits_t = typename supposed_value_traits<SupposedValueTraits, T>::type;
 
 //...It's a base hook
 template<class BaseHook, class T>
-struct supposed_base_value_traits<BaseHook, T, true>
-   : get_base_value_traits<T, BaseHook>
-{};
+struct supposed_base_value_traits1<BaseHook, T, true>
+{
+    using type = get_base_value_traits_t<T, BaseHook>;
+};
 
 //...Not a base hook, try if it's a member or value_traits
 template<class SupposedValueTraits, class T>
-struct supposed_base_value_traits<SupposedValueTraits, T, false>
-   : supposed_member_value_traits<SupposedValueTraits>
-{};
+struct supposed_base_value_traits1<SupposedValueTraits, T, false>
+{
+    using type = typename supposed_member_value_traits<SupposedValueTraits>::type;
+};
 
 //...It's a member hook
 template<class MemberHook>
 struct supposed_member_value_traits<MemberHook, true>
-   : get_member_value_traits<MemberHook>
-{};
+{
+    using type = get_member_value_traits_t<MemberHook>;
+};
 
 //...Not a member hook
 template<class SupposedValueTraits>
 struct supposed_member_value_traits<SupposedValueTraits, false>
-   : any_or_concrete_value_traits<SupposedValueTraits>
-{};
+{
+    using type = typename any_or_concrete_value_traits<SupposedValueTraits>::type;
+};
 
 template<class AnyToSomeHook_ProtoValueTraits>
 struct any_or_concrete_value_traits<AnyToSomeHook_ProtoValueTraits, true>
 {
    //A hook node (non-base, e.g.: member or other value traits
-   typedef typename AnyToSomeHook_ProtoValueTraits::basic_hook_t        basic_hook_t;
-   typedef typename pointer_rebind
-      <typename basic_hook_t::node_ptr, void>::type                     void_pointer;
-   typedef typename AnyToSomeHook_ProtoValueTraits::template
-      node_traits_from_voidptr<void_pointer>::type                      any_node_traits;
+   using basic_hook_t = typename AnyToSomeHook_ProtoValueTraits::basic_hook_t;
+   using void_pointer = pointer_rebind_t<typename basic_hook_t::node_ptr, void>;
+   using any_node_traits = typename AnyToSomeHook_ProtoValueTraits::template
+       node_traits_from_voidptr<void_pointer>::type;
 
    struct type : basic_hook_t
    {
-      typedef any_node_traits node_traits;
+      using node_traits = any_node_traits;
    };
 };
 
 template<class SupposedValueTraits>
 struct any_or_concrete_value_traits<SupposedValueTraits, false>
 {
-   typedef SupposedValueTraits type;
+   using type = SupposedValueTraits;
 };
 
 ////////////////////////////////////////
 //  get_value_traits / get_node_traits
 ////////////////////////////////////////
 
-template<class T, class SupposedValueTraits>
-struct get_value_traits
-   : supposed_base_value_traits<typename supposed_value_traits<SupposedValueTraits, T>::type, T>
-{};
+template <typename T, typename SupposedValueTraits>
+using get_value_traits_t = supposed_base_value_traits_t<supposed_value_traits_t<SupposedValueTraits, T>, T>;
 
 template<class SupposedValueTraits>
 struct get_node_traits
 {
-   typedef typename get_value_traits<void, SupposedValueTraits>::type::node_traits type;
+   using type = typename get_value_traits_t<void, SupposedValueTraits>::node_traits;
 };
 
 }  //namespace detail{
@@ -216,7 +228,5 @@ struct get_node_traits
 
 }  //namespace intrusive {
 }  //namespace boost {
-
-#include <boost/intrusive/detail/config_end.hpp>
 
 #endif   //#ifndef BOOST_INTRUSIVE_DETAIL_GET_VALUE_TRAITS_HPP

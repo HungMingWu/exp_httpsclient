@@ -23,10 +23,8 @@
 
 #include <boost/config.hpp>
 #include <boost/core/no_exceptions_support.hpp>
-#include <boost/move/detail/placement_new.hpp>
 
-namespace boost {
-namespace intrusive {
+namespace boost::intrusive {
 namespace detail {
 
 //This is not standard, but should work with all compilers
@@ -56,7 +54,7 @@ class array_initializer
       std::size_t i = 0;
       BOOST_TRY{
          for(; i != N; ++i){
-            ::new(init_buf, boost_move_new_t()) T(init);
+            ::new(init_buf) T(init);
             init_buf += sizeof(T);
          }
       }
@@ -90,7 +88,6 @@ class array_initializer
 };
 
 }  //namespace detail{
-}  //namespace intrusive{
-}  //namespace boost{
+}  //namespace boost::intrusive
 
 #endif //BOOST_INTRUSIVE_DETAIL_ARRAY_INITIALIZER_HPP
